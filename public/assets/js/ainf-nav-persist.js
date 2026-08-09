@@ -83,8 +83,12 @@
   }
 
   function sync() {
-    if (document.body && document.body.classList.contains("ainf-projects-skin")) {
-      // /projects pages use the floating AINF nav — skip Framer nav edits
+    if (
+      (document.body && document.body.classList.contains("ainf-projects-skin")) ||
+      document.documentElement.classList.contains("ainf-shared-nav") ||
+      document.getElementById("ainf-global-nav")
+    ) {
+      // Shared AINF pill owns the navbar on these pages
       return;
     }
     fixLabels(document);

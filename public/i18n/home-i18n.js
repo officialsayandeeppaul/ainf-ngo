@@ -475,6 +475,20 @@
   }
 
   function mountSwitchers() {
+    // Prefer shared AINF pill navbar (identical on all pages)
+    if (window.__ainfEnsureSiteNav) {
+      try {
+        window.__ainfEnsureSiteNav();
+      } catch (_) {}
+    }
+    var sharedRight = document.querySelector("#ainf-global-nav .ainf-right, #ainf-global-nav [data-ainf-nav-right]");
+    if (sharedRight && !document.getElementById(SWITCHER_ID)) {
+      var sharedSwitcher = createSwitcherShell("desktop");
+      var cta = sharedRight.querySelector(".ainf-cta");
+      if (cta) sharedRight.insertBefore(sharedSwitcher, cta);
+      else sharedRight.appendChild(sharedSwitcher);
+    }
+
     var navBlocks = Array.prototype.slice.call(
       document.querySelectorAll('[data-framer-name="Nav"]')
     );
@@ -483,7 +497,8 @@
       navBlocks[0] ||
       document.querySelector('[data-framer-name="Navigation"]');
 
-    if (desktopNav && !document.getElementById(SWITCHER_ID)) {
+    // Only mount into Framer nav if shared pill is not present
+    if (!document.getElementById("ainf-global-nav") && desktopNav && !document.getElementById(SWITCHER_ID)) {
       var desktop = createSwitcherShell("desktop");
       var donateWrap = Array.prototype.slice.call(desktopNav.children).find(function (child) {
         return !!child.querySelector('a[data-framer-name="Desktop"][href*="donate"]');

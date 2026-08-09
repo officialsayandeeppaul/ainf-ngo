@@ -1,0 +1,189 @@
+/* Shared AINF floating pill navbar — identical on every page */
+@font-face{font-family:Onest;font-style:normal;font-weight:400;font-display:swap;src:url("/assets/fonts/0b532b340381e255.woff2") format("woff2")}
+@font-face{font-family:Onest;font-style:normal;font-weight:700;font-display:swap;src:url("/assets/fonts/98a11855328341d1.woff2") format("woff2")}
+
+#ainf-global-nav{
+  position:fixed!important;
+  top:18px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  z-index:2147483000!important;
+  width:min(1080px,calc(100% - 28px))!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding:8px 10px 8px 16px!important;
+  background:#fff!important;
+  border-radius:999px!important;
+  box-shadow:0 8px 32px rgba(0,0,0,.10)!important;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  height:auto!important;
+  overflow:visible!important;
+}
+#ainf-global-nav a{
+  text-decoration:none!important;
+  color:#222!important;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+}
+#ainf-global-nav .ainf-brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  font-weight:700!important;
+  font-size:17px!important;
+  letter-spacing:-.02em!important;
+  color:#222!important;
+  line-height:1!important;
+}
+#ainf-global-nav .ainf-brand img{
+  width:28px!important;
+  height:28px!important;
+  border-radius:50%!important;
+  object-fit:contain!important;
+  display:block!important;
+  flex:0 0 auto!important;
+}
+#ainf-global-nav .ainf-brand span{display:inline-block!important}
+#ainf-global-nav .ainf-links{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:20px!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+}
+#ainf-global-nav .ainf-links a{
+  font-size:14px!important;
+  font-weight:500!important;
+  color:#222!important;
+  white-space:nowrap!important;
+  line-height:1.2!important;
+}
+#ainf-global-nav .ainf-links a:hover{color:#39a46b!important}
+#ainf-global-nav .ainf-links a[aria-current="page"]{
+  color:#39a46b!important;
+  font-weight:600!important;
+}
+#ainf-global-nav .ainf-right{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex:0 0 auto!important;
+}
+#ainf-global-nav .ainf-cta{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  background:#39a46b!important;
+  color:#fff!important;
+  padding:10px 16px!important;
+  border-radius:999px!important;
+  font-size:13px!important;
+  font-weight:600!important;
+  white-space:nowrap!important;
+  line-height:1!important;
+}
+#ainf-global-nav .ainf-cta:hover{filter:brightness(1.05)}
+#ainf-global-nav .ainf-dot{
+  width:6px!important;
+  height:6px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  display:inline-block!important;
+  flex:0 0 auto!important;
+}
+
+/* Slot for language switcher from home-i18n.js */
+#ainf-global-nav #ainf-lang-switcher,
+#ainf-global-nav [data-ainf-lang-nav]{
+  position:relative!important;
+  flex:0 0 auto!important;
+}
+
+@media(max-width:900px){
+  #ainf-global-nav{padding:8px 8px 8px 12px!important;gap:8px!important}
+  #ainf-global-nav .ainf-links{display:none!important}
+}
+
+/* When shared nav is active, hide EVERY template navbar */
+html.ainf-shared-nav [data-framer-name="Nav"],
+html.ainf-shared-nav [data-framer-name="Navigation"],
+html.ainf-shared-nav [data-framer-name="Navbar"],
+html.ainf-shared-nav [data-framer-name="Nav Items"],
+html.ainf-shared-nav [data-framer-name="Nav Links"],
+html.ainf-shared-nav [data-framer-name="Top"],
+html.ainf-shared-nav [data-framer-name="Header"],
+html.ainf-shared-nav [data-framer-name="Banner"],
+html.ainf-shared-nav header[data-framer-name="Desktop"],
+html.ainf-shared-nav nav[data-framer-name="Navigation"],
+body.ainf-shared-nav [data-framer-name="Nav"],
+body.ainf-shared-nav [data-framer-name="Navigation"],
+body.ainf-shared-nav [data-framer-name="Navbar"],
+body.ainf-shared-nav [data-framer-name="Nav Items"],
+body.ainf-shared-nav [data-framer-name="Nav Links"],
+body.ainf-shared-nav [data-framer-name="Top"],
+body.ainf-shared-nav [data-framer-name="Header"],
+body.ainf-shared-nav [data-framer-name="Banner"],
+body.ainf-shared-nav header[data-framer-name="Desktop"],
+body.ainf-shared-nav nav[data-framer-name="Navigation"]{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
+  position:fixed!important;
+  left:-100vw!important;
+  top:-100vh!important;
+  width:0!important;
+  height:0!important;
+  overflow:hidden!important;
+  max-height:0!important;
+  z-index:-1!important;
+}
+html.ainf-shared-nav [data-framer-name="Nav"] *,
+html.ainf-shared-nav [data-framer-name="Navigation"] *,
+html.ainf-shared-nav [data-framer-name="Top"] *,
+html.ainf-shared-nav header[data-framer-name="Desktop"] *,
+body.ainf-shared-nav [data-framer-name="Nav"] *,
+body.ainf-shared-nav [data-framer-name="Navigation"] *,
+body.ainf-shared-nav [data-framer-name="Top"] *,
+body.ainf-shared-nav header[data-framer-name="Desktop"] *{
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
+}
+
+/* Projects page theme tokens (layout stays) */
+html.ainf-projects-skin,
+body.ainf-projects-skin{
+  --ainf-green:#39a46b;
+  --token-e3f77d53-9b12-48ea-9c29-327ba647a7e2:#39a46b;
+  --token-aa09f766-4b4c-44d5-8207-66ca250b5f75:#39a46b;
+  --token-508c7d2b-295a-4a6d-b378-0e6a8233ced0:#39a46b66;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+}
+body.ainf-projects-skin{
+  background:#f6faf0!important;
+  padding-top:88px!important;
+}
+body.ainf-projects-skin,
+body.ainf-projects-skin *:not(script):not(style){
+  --framer-font-family:Onest,Inter,system-ui,sans-serif!important;
+}
+body.ainf-projects-skin h1,
+body.ainf-projects-skin h2,
+body.ainf-projects-skin h3,
+body.ainf-projects-skin h4,
+body.ainf-projects-skin p,
+body.ainf-projects-skin a,
+body.ainf-projects-skin span,
+body.ainf-projects-skin button,
+body.ainf-projects-skin li{
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+}
