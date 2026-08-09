@@ -10,3 +10,12 @@ scripts/_*.png
 scripts/_inspect-*.py
 scripts/_verify-*.py
 app/route.ts.hopper-backup
+
+axinn-theme-framer-website-optimized/
+*.zip
+scripts/_home.html
+scripts/_home.gz
+scripts/_hdrs.txt
+scripts/_lh-*.json
+scripts/_lighthouse-home.json
+
