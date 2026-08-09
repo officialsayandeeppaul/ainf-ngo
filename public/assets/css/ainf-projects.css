@@ -1,0 +1,71 @@
+/* AINF skin for /projects pages — keep Oxira layout, AINF brand */
+@font-face{font-family:Onest;font-style:normal;font-weight:400;font-display:swap;src:url("/assets/fonts/0b532b340381e255.woff2") format("woff2")}
+@font-face{font-family:Onest;font-style:normal;font-weight:700;font-display:swap;src:url("/assets/fonts/98a11855328341d1.woff2") format("woff2")}
+
+#ainf-global-nav{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:99999;
+  width:min(1100px,calc(100% - 24px));
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 14px 10px 18px;background:#fff;border-radius:999px;
+  box-shadow:0 10px 40px rgba(0,0,0,.12);
+  font-family:Onest,Inter,system-ui,sans-serif;
+}
+#ainf-global-nav a{text-decoration:none;color:#222}
+#ainf-global-nav .ainf-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px;letter-spacing:-.02em;color:#222}
+#ainf-global-nav .ainf-brand img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+#ainf-global-nav .ainf-brand small{font-size:10px;font-weight:600;color:#999;margin-left:2px}
+#ainf-global-nav .ainf-links{display:flex;align-items:center;gap:22px;flex:1;justify-content:center}
+#ainf-global-nav .ainf-links a{font-size:14px;font-weight:500;color:#222;white-space:nowrap}
+#ainf-global-nav .ainf-links a:hover{color:#39a46b}
+#ainf-global-nav .ainf-links a[aria-current="page"]{color:#39a46b;font-weight:600}
+#ainf-global-nav .ainf-right{display:flex;align-items:center;gap:12px}
+#ainf-global-nav .ainf-cta{
+  display:inline-flex;align-items:center;gap:8px;background:#39a46b;color:#fff!important;
+  padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap
+}
+#ainf-global-nav .ainf-cta:hover{filter:brightness(1.05)}
+#ainf-global-nav .ainf-dot{width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block}
+@media(max-width:900px){
+  #ainf-global-nav{padding:8px 10px 8px 12px;gap:8px}
+  #ainf-global-nav .ainf-links{display:none}
+  #ainf-global-nav .ainf-brand small{display:none}
+}
+
+/* Hide Oxira / Framer template navbar completely */
+body.ainf-projects-skin [data-framer-name="Navigation"],
+body.ainf-projects-skin [data-framer-name="Navbar"],
+body.ainf-projects-skin [data-framer-name="Nav Items"],
+body.ainf-projects-skin [data-framer-name="Top"],
+body.ainf-projects-skin [data-framer-name="Header"],
+body.ainf-projects-skin [data-framer-name="Banner"],
+body.ainf-projects-skin header,
+body.ainf-projects-skin nav:not(#ainf-global-nav){
+  display:none!important;visibility:hidden!important;pointer-events:none!important;height:0!important;overflow:hidden!important
+}
+body.ainf-projects-skin #ainf-global-nav{display:flex!important;visibility:visible!important;height:auto!important;overflow:visible!important;pointer-events:auto!important}
+
+body.ainf-projects-skin{
+  --ainf-green:#39a46b;
+  --token-e3f77d53-9b12-48ea-9c29-327ba647a7e2:#39a46b;
+  /* Oxira dark-green brand token → AINF */
+  --token-aa09f766-4b4c-44d5-8207-66ca250b5f75:#39a46b;
+  --token-508c7d2b-295a-4a6d-b378-0e6a8233ced0:#39a46b66;
+  background:#f6faf0!important;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+  padding-top:88px!important;
+}
+body.ainf-projects-skin,
+body.ainf-projects-skin *:not(script):not(style){
+  --framer-font-family:Onest,Inter,system-ui,sans-serif!important;
+}
+body.ainf-projects-skin h1,
+body.ainf-projects-skin h2,
+body.ainf-projects-skin h3,
+body.ainf-projects-skin h4,
+body.ainf-projects-skin p,
+body.ainf-projects-skin a,
+body.ainf-projects-skin span,
+body.ainf-projects-skin button,
+body.ainf-projects-skin li{
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+}
