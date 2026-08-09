@@ -11,8 +11,11 @@ APP = ROOT / "app"
 SITE_CSS = '<link rel="stylesheet" href="/assets/css/ainf-site-nav.css" id="ainf-site-nav-css">'
 SITE_JS = '<script src="/assets/js/ainf-site-nav.js" id="ainf-site-nav-js"></script>'
 BOOT = '<script>document.documentElement.classList.add("ainf-shared-nav");</script>'
+PROJ_THEME_CSS = '<link rel="stylesheet" href="/assets/css/ainf-projects-theme.css" id="ainf-projects-theme-css">'
+PROJ_THEME_JS = '<script src="/assets/js/ainf-projects-theme.js" id="ainf-projects-theme-js"></script>'
 
 HEAD_BITS = BOOT + SITE_CSS + SITE_JS
+PROJ_HEAD_BITS = HEAD_BITS + PROJ_THEME_CSS + PROJ_THEME_JS
 
 
 def unescape(s: str) -> str:
@@ -39,8 +42,10 @@ def escape(s: str) -> str:
 def strip_old(html: str) -> str:
     patterns = [
         r'<link[^>]*ainf-projects\.css[^>]*>',
+        r'<link[^>]*ainf-projects-theme\.css[^>]*>',
         r'<link[^>]*ainf-site-nav\.css[^>]*>',
         r'<script[^>]*ainf-projects-nav\.js[^>]*>\s*</script>',
+        r'<script[^>]*ainf-projects-theme\.js[^>]*>\s*</script>',
         r'<script[^>]*ainf-site-nav\.js[^>]*>\s*</script>',
         r'<script>document\.documentElement\.classList\.add\("ainf-projects-skin"\);</script>',
         r'<script>document\.documentElement\.classList\.add\("ainf-shared-nav"\);</script>',
@@ -48,9 +53,29 @@ def strip_old(html: str) -> str:
         r'<style id="ainf-projects-theme">[\s\S]*?</style>',
         r'<script id="ainf-projects-theme-js">[\s\S]*?</script>',
         r'<div id="ainf-global-nav"[^>]*>[\s\S]*?</div>\s*',
+        r'<footer id="ainf-site-footer"[\s\S]*?</footer>\s*',
     ]
     for p in patterns:
         html = re.sub(p, "", html)
+    return html
+
+
+def rebrand_projects_copy(html: str) -> str:
+    replacements = [
+        ("@Oxira 2026", "© 2026 theainf"),
+        ("Oxira – Charity & Non-Profit Framer Template", "Projects | theainf.in"),
+        ("Oxira - Charity & Non-Profit Framer Template", "Projects | theainf.in"),
+        ("Ostra Supporter", "AINF Supporter"),
+        ("Volunteer at Ostra", "Volunteer at AINF"),
+        ("Ostra,", "AINF,"),
+        ("Through Ostra,", "Through AINF,"),
+        ("Ostra", "AINF"),
+        ("Oxira", "AINF"),
+        (">Donate now<", ">Support AINF<"),
+        (">Donate now", ">Support AINF"),
+    ]
+    for old, new in replacements:
+        html = html.replace(old, new)
     return html
 
 
@@ -74,14 +99,17 @@ def inject(html: str, projects: bool) -> str:
     html = strip_old(html)
     html = ensure_class("html", "ainf-shared-nav", html)
     html = ensure_class("body", "ainf-shared-nav", html)
+    bits = HEAD_BITS
     if projects:
         html = ensure_class("html", "ainf-projects-skin", html)
         html = ensure_class("body", "ainf-projects-skin", html)
+        html = rebrand_projects_copy(html)
+        bits = PROJ_HEAD_BITS
 
     if "</head>" in html:
-        html = html.replace("</head>", HEAD_BITS + "</head>", 1)
+        html = html.replace("</head>", bits + "</head>", 1)
     else:
-        html = HEAD_BITS + html
+        html = bits + html
     return html
 
 
@@ -95,7 +123,7 @@ def main() -> None:
         html = unescape(m.group(1))
         projects = rel.startswith("projects/")
         new_html = inject(html, projects)
-        if new_html == html and "ainf-site-nav.js" in html:
+        if new_html == html:
             continue
         path.write_text(
             text[: m.start(1)] + escape(new_html) + text[m.end(1) :],
@@ -103,10 +131,9 @@ def main() -> None:
         )
         print("updated", rel)
 
-    # Keep projects CSS as thin alias so old caches still get site nav styles
     alias = ROOT / "public" / "assets" / "css" / "ainf-projects.css"
     alias.write_text(
-        '/* alias — use ainf-site-nav.css */\n@import url("/assets/css/ainf-site-nav.css");\n',
+        '/* alias */\n@import url("/assets/css/ainf-site-nav.css");\n@import url("/assets/css/ainf-projects-theme.css");\n',
         encoding="utf-8",
     )
     print("wrote alias", alias.relative_to(ROOT))
