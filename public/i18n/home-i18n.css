@@ -50,7 +50,8 @@ a[data-framer-name="Mobile-Close"].ainf-cta-on-light {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  margin: 0 6px 0 10px;
+  margin: 0;
+  height: 44px;
   font-family: Onest, "Segoe UI", sans-serif;
 }
 
@@ -67,15 +68,17 @@ a[data-framer-name="Mobile-Close"].ainf-cta-on-light {
   border: 1px solid rgba(34, 34, 34, 0.1);
   background: #fff;
   color: var(--ainf-lang-ink);
-  min-width: 52px;
-  height: 40px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  padding: 0 10px;
+  padding: 0 14px;
+  box-sizing: border-box;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -219,8 +222,13 @@ a[data-framer-name="Mobile-Close"].ainf-cta-on-light {
 }
 
 @media (max-width: 809.98px) {
+  /* Framer-only pages: hide desktop switcher (mobile menu has its own) */
   #ainf-lang-switcher {
     display: none !important;
+  }
+  /* Shared AINF pill navbar: always keep language converter visible */
+  #ainf-global-nav #ainf-lang-switcher {
+    display: flex !important;
   }
 }
 

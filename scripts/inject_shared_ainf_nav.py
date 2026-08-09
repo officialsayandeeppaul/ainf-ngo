@@ -11,10 +11,12 @@ APP = ROOT / "app"
 SITE_CSS = '<link rel="stylesheet" href="/assets/css/ainf-site-nav.css" id="ainf-site-nav-css">'
 SITE_JS = '<script src="/assets/js/ainf-site-nav.js" id="ainf-site-nav-js"></script>'
 BOOT = '<script>document.documentElement.classList.add("ainf-shared-nav");</script>'
+I18N_CSS = '<link rel="stylesheet" href="/i18n/home-i18n.css" id="ainf-i18n-css">'
+I18N_JS = '<script src="/i18n/home-i18n.js" defer id="ainf-i18n-js"></script>'
 PROJ_THEME_CSS = '<link rel="stylesheet" href="/assets/css/ainf-projects-theme.css" id="ainf-projects-theme-css">'
 PROJ_THEME_JS = '<script src="/assets/js/ainf-projects-theme.js" id="ainf-projects-theme-js"></script>'
 
-HEAD_BITS = BOOT + SITE_CSS + SITE_JS
+HEAD_BITS = BOOT + SITE_CSS + I18N_CSS + SITE_JS + I18N_JS
 PROJ_HEAD_BITS = HEAD_BITS + PROJ_THEME_CSS + PROJ_THEME_JS
 
 
@@ -44,9 +46,12 @@ def strip_old(html: str) -> str:
         r'<link[^>]*ainf-projects\.css[^>]*>',
         r'<link[^>]*ainf-projects-theme\.css[^>]*>',
         r'<link[^>]*ainf-site-nav\.css[^>]*>',
+        r'<link[^>]*home-i18n\.css[^>]*>',
+        r'<link[^>]*id="ainf-i18n-css"[^>]*>',
         r'<script[^>]*ainf-projects-nav\.js[^>]*>\s*</script>',
         r'<script[^>]*ainf-projects-theme\.js[^>]*>\s*</script>',
         r'<script[^>]*ainf-site-nav\.js[^>]*>\s*</script>',
+        r'<script[^>]*home-i18n\.js[^>]*>\s*</script>',
         r'<script>document\.documentElement\.classList\.add\("ainf-projects-skin"\);</script>',
         r'<script>document\.documentElement\.classList\.add\("ainf-shared-nav"\);</script>',
         r'<style id="ainf-global-nav-css">[\s\S]*?</style>',

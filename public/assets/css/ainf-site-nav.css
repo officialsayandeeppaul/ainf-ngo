@@ -80,15 +80,19 @@
 #ainf-global-nav .ainf-cta{
   display:inline-flex!important;
   align-items:center!important;
+  justify-content:center!important;
   gap:8px!important;
   background:#39a46b!important;
   color:#fff!important;
-  padding:10px 16px!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:0 18px!important;
   border-radius:999px!important;
   font-size:13px!important;
   font-weight:600!important;
   white-space:nowrap!important;
   line-height:1!important;
+  box-sizing:border-box!important;
 }
 #ainf-global-nav .ainf-cta:hover{filter:brightness(1.05)}
 #ainf-global-nav .ainf-dot{
@@ -100,16 +104,39 @@
   flex:0 0 auto!important;
 }
 
-/* Slot for language switcher from home-i18n.js */
+/* Language switcher — same height as Support AINF */
 #ainf-global-nav #ainf-lang-switcher,
 #ainf-global-nav [data-ainf-lang-nav]{
   position:relative!important;
   flex:0 0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  margin:0!important;
+  height:44px!important;
+}
+#ainf-global-nav .ainf-lang-trigger{
+  height:44px!important;
+  min-height:44px!important;
+  min-width:44px!important;
+  padding:0 14px!important;
+  border-radius:999px!important;
+  box-sizing:border-box!important;
+  gap:6px!important;
+}
+#ainf-global-nav .ainf-lang-trigger svg{
+  width:18px!important;
+  height:18px!important;
+}
+#ainf-global-nav .ainf-lang-chevron{
+  width:12px!important;
+  height:12px!important;
 }
 
 @media(max-width:900px){
   #ainf-global-nav{padding:8px 8px 8px 12px!important;gap:8px!important}
   #ainf-global-nav .ainf-links{display:none!important}
+  /* keep language converter visible in the pill on mobile */
+  #ainf-global-nav #ainf-lang-switcher{display:flex!important}
 }
 
 /* When shared nav is active, hide EVERY template navbar */

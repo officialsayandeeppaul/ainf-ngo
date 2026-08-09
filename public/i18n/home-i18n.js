@@ -481,12 +481,26 @@
         window.__ainfEnsureSiteNav();
       } catch (_) {}
     }
-    var sharedRight = document.querySelector("#ainf-global-nav .ainf-right, #ainf-global-nav [data-ainf-nav-right]");
-    if (sharedRight && !document.getElementById(SWITCHER_ID)) {
-      var sharedSwitcher = createSwitcherShell("desktop");
-      var cta = sharedRight.querySelector(".ainf-cta");
-      if (cta) sharedRight.insertBefore(sharedSwitcher, cta);
-      else sharedRight.appendChild(sharedSwitcher);
+    var sharedRight = document.querySelector(
+      "#ainf-global-nav .ainf-right, #ainf-global-nav [data-ainf-nav-right]"
+    );
+    if (sharedRight) {
+      var existing = document.getElementById(SWITCHER_ID);
+      if (existing && existing.parentElement !== sharedRight) {
+        // Move fallback / misplaced switcher into the pill next to Support AINF
+        existing.style.position = "";
+        existing.style.top = "";
+        existing.style.right = "";
+        existing.style.zIndex = "";
+        var ctaMove = sharedRight.querySelector(".ainf-cta");
+        if (ctaMove) sharedRight.insertBefore(existing, ctaMove);
+        else sharedRight.appendChild(existing);
+      } else if (!existing) {
+        var sharedSwitcher = createSwitcherShell("desktop");
+        var cta = sharedRight.querySelector(".ainf-cta");
+        if (cta) sharedRight.insertBefore(sharedSwitcher, cta);
+        else sharedRight.appendChild(sharedSwitcher);
+      }
     }
 
     var navBlocks = Array.prototype.slice.call(
@@ -523,7 +537,7 @@
       fallback.style.top = "18px";
       fallback.style.right = "18px";
       fallback.style.zIndex = "10000";
-      document.body.appendChild(fallback);
+      (document.body || document.documentElement).appendChild(fallback);
     }
 
     var menus = document.querySelectorAll(
