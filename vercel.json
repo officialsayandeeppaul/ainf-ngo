@@ -3,7 +3,7 @@
   "trailingSlash": false,
   "headers": [
     {
-      "source": "/(.*)\\.(webp|avif|png|jpg|jpeg|gif|svg|ico|woff2|woff|ttf|otf|mp4|webm|css|js|json)",
+      "source": "/(.*)\\.(webp|avif|png|jpg|jpeg|gif|svg|ico|woff2|woff|ttf|otf|mp4|webm|css|js|mjs|json|framercms)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -16,7 +16,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, s-maxage=30, stale-while-revalidate=60"
+          "value": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400"
         },
         {
           "key": "X-Content-Type-Options",

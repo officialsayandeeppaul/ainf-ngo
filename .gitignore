@@ -7,3 +7,6 @@ next-env.d.ts
 public/_*.png
 public/_*.html
 scripts/_*.png
+scripts/_inspect-*.py
+scripts/_verify-*.py
+app/route.ts.hopper-backup

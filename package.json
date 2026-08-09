@@ -9,7 +9,8 @@
     "content:apply": "node scripts/apply-ainf-content.js",
     "content:verify": "node scripts/verify-ainf-content.js",
     "content:repair": "node scripts/repair-html-escapes.js",
-    "images:webp": "python scripts/optimize-images-to-webp.py"
+    "images:webp": "python scripts/optimize-images-to-webp.py",
+    "perf:hints": "python scripts/apply-perf-hints.py"
   },
   "dependencies": {
     "next": "14.2.35",
