@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140.238 29.888" overflow="visible" role="img" aria-label="theainf">
+  <!-- Mark -->
+  <circle cx="14.2" cy="14.94" r="12.2" fill="none" stroke="rgb(15, 51, 43)" stroke-width="2.1"/>
+  <path d="M14.2 3.2 A11.7 11.7 0 0 1 25.4 18.5" fill="none" stroke="rgb(201, 132, 42)" stroke-width="2.1" stroke-linecap="round"/>
+  <!-- Tiny India-inspired peak -->
+  <path d="M14.2 5.2 L16.1 8.1 L14.2 7.4 L12.3 8.1 Z" fill="rgb(15, 51, 43)"/>
+  <!-- Sprout -->
+  <path d="M14.2 22.8 C14.2 20.6 15.6 19.2 17.2 18.8 C15.5 19.6 14.6 21.2 14.2 22.8 C13.8 21.2 12.9 19.6 11.2 18.8 C12.8 19.2 14.2 20.6 14.2 22.8 Z" fill="rgb(47, 107, 85)"/>
+  <path d="M12.4 23.4 Q14.2 24.2 16 23.4" fill="none" stroke="rgb(15, 51, 43)" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Wordmark -->
+  <text x="33.5" y="19.6" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="15.5" font-weight="700" letter-spacing="-0.4" fill="rgb(34, 34, 34)">theainf</text>
+  <text x="101.5" y="19.2" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="7.2" font-weight="600" letter-spacing="0.8" fill="rgb(201, 132, 42)">AINF</text>
+</svg>

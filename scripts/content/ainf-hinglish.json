@@ -1,0 +1,388 @@
+{
+  "brand": {
+    "siteName": "theainf.in",
+    "orgName": "All Indian Nevarlands Foundation",
+    "shortName": "AINF",
+    "hq": "Nala, Jamtara, Jharkhand · West Bengal",
+    "darpan": "JH/2026/1133191",
+    "favicon": "/assets/img/theainf-logo.png",
+    "cdnPrefix": "https://framerusercontent.com/sites/4rh1Ar3UIHjE7dNhomsEMN/",
+    "localPrefix": "/framer-site/"
+  },
+  "h1Titles": {
+    "home": ["From Education to Employment,", "Opportunity for Every Youth"],
+    "about-us": ["Building Opportunity Across Jharkhand & West Bengal"],
+    "causes": ["Missions That Move Eastern India Forward"],
+    "blogs": ["Field Notes That Inspire Action"],
+    "contact-us": ["Reach AINF — Jharkhand & West Bengal"],
+    "donate-now": ["Give With Purpose. See Impact on the Ground."],
+    "join-as-volunteer": ["Stand With Students in Your District"],
+    "legal-pages/terms-conditions": ["Terms & Conditions — AINF"],
+    "causes/education-for-every-child": ["Shiksha Desk — Every Child Deserves a Classroom"],
+    "causes/healthcare-for-all": ["Swasthya Desk — Care Closer to Home"],
+    "causes/food-nutrition-for-families": ["Rozgar & Skills Desk — Jobs, Not Just Relief"],
+    "causes/women-empowerment-for-rise": ["Nari Suraksha Desk — Safety First, Dignity Always"],
+    "causes/water-sanitation-for-health": ["Janajati Sahyog & Kheti Desk"],
+    "blogs/a-day-in-the-life-of-our-volunteers": ["A Block Day With AINF Field Sevaks"],
+    "blogs/building-stronger-communities-together": ["Block Teams, Shared Progress"],
+    "blogs/education-can-break-poverty": ["Shiksha That Opens the First Door"],
+    "blogs/how-your-donations-are-changing-lives-every-day": ["Where Your Rupee Lands — Daily Impact"],
+    "blogs/simple-ways-to-make-impact-on-community": ["Small Acts, Big Ripple in Your Panchayat"],
+    "blogs/why-every-volunteer-matters": ["Why One Field Sevak Changes a Batch"]
+  },
+  "pageMeta": {
+    "home": {
+      "title": "theainf.in — All Indian Nevarlands Foundation | Education · Jobs · Seva",
+      "description": "AINF (theainf.in) — All Indian Nevarlands Foundation. HQ Nala, Jamtara (Jharkhand); active across West Bengal. Education, skills, placement, women safety, healthcare, farming, and tribal welfare."
+    },
+    "about-us": {
+      "title": "About AINF — Jharkhand & West Bengal | theainf.in",
+      "description": "Meet All Indian Nevarlands Foundation — Section 8 non-profit from Nala, Jamtara, working across Jharkhand and West Bengal. DARPAN JH/2026/1133191."
+    },
+    "causes": {
+      "title": "Our Missions — Seven Focus Areas | theainf.in",
+      "description": "Explore AINF desks: Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare programmes across India."
+    },
+    "blogs": {
+      "title": "Field Notes & Stories | theainf.in",
+      "description": "Ground reports from AINF teams — coaching batches, rozgar melas, and health camps across Jharkhand, West Bengal, and partner districts."
+    },
+    "contact-us": {
+      "title": "Contact AINF — Jharkhand & West Bengal | theainf.in",
+      "description": "Reach All Indian Nevarlands Foundation — HQ Nala, Jamtara (Jharkhand); field desks across West Bengal including Asansol and Kolkata region."
+    },
+    "donate-now": {
+      "title": "Support AINF — Donate | theainf.in",
+      "description": "Fund coaching batches, skill kits, travel stipends, and emergency relief through AINF — a registered Section 8 non-profit (DARPAN JH/2026/1133191)."
+    },
+    "join-as-volunteer": {
+      "title": "Volunteer With AINF | theainf.in",
+      "description": "Join AINF as a field sevak — teach a batch, review CVs, or help at a rozgar mela in your district. Flexible hours, real student impact."
+    },
+    "legal-pages/terms-conditions": {
+      "title": "Terms & Conditions — AINF | theainf.in",
+      "description": "Terms for using theainf.in and supporting All Indian Nevarlands Foundation — donations, volunteer signup, privacy, and Section 8 compliance."
+    },
+    "causes/education-for-every-child": {
+      "title": "Shiksha Desk — Every Child Deserves a Classroom | theainf.in",
+      "description": "AINF Shiksha Desk funds scholarships, study kits, and coaching support for students in Jamtara and partner districts."
+    },
+    "causes/healthcare-for-all": {
+      "title": "Swasthya Desk — Care Closer to Home | theainf.in",
+      "description": "Swasthya Desk runs health camps, referral support, and wellness drives for families in underserved blocks."
+    },
+    "causes/food-nutrition-for-families": {
+      "title": "Rozgar & Skills Desk — Jobs, Not Just Relief | theainf.in",
+      "description": "Rozgar & Skills Desk trains youth, hosts placement cells, and connects graduates to dignified work."
+    },
+    "causes/women-empowerment-for-rise": {
+      "title": "Nari Suraksha Desk — Safety First, Dignity Always | theainf.in",
+      "description": "Nari Suraksha Desk supports safety workshops, legal awareness, and livelihood pathways for women and girls."
+    },
+    "causes/water-sanitation-for-health": {
+      "title": "Janajati Sahyog & Kheti Desk | theainf.in",
+      "description": "Tribal welfare, farm inputs, and kheti support for janajati communities — fair markets and seasonal resilience."
+    },
+    "blogs/a-day-in-the-life-of-our-volunteers": {
+      "title": "A Block Day With AINF Field Sevaks | theainf.in",
+      "description": "Follow an AINF field sevak from morning coaching to evening rozgar mela — real schedules, real students."
+    },
+    "blogs/building-stronger-communities-together": {
+      "title": "Block Teams, Shared Progress | theainf.in",
+      "description": "How panchayat partners and AINF block teams align on education, health, and livelihood goals."
+    },
+    "blogs/education-can-break-poverty": {
+      "title": "Shiksha That Opens the First Door | theainf.in",
+      "description": "Why the first coaching stipend often matters more than the final job offer — a Shiksha Desk field note."
+    },
+    "blogs/how-your-donations-are-changing-lives-every-day": {
+      "title": "Where Your Rupee Lands — Daily Impact | theainf.in",
+      "description": "Transparent snapshots of how AINF tracks donations from receipt to desk delivery."
+    },
+    "blogs/simple-ways-to-make-impact-on-community": {
+      "title": "Small Acts, Big Ripple in Your Panchayat | theainf.in",
+      "description": "Five low-cost ways residents can support AINF desks without leaving their block."
+    },
+    "blogs/why-every-volunteer-matters": {
+      "title": "Why One Field Sevak Changes a Batch | theainf.in",
+      "description": "Volunteer density, not just funding, predicts whether a coaching batch finishes strong."
+    }
+  },
+  "banned": [
+    "Hopper",
+    "Driven by Purpose",
+    "Powered by People",
+    "Donate Now",
+    "Our Causes",
+    "Lives Transformed",
+    "Make a Donation",
+    "Become a Volunteer",
+    "Sponsor a Cause",
+    "Spread Awareness",
+    "Our impact, in their words",
+    "Stories & Insights",
+    "Frequently Asked Questions",
+    "Your Donation Can Change a Life Today",
+    "Learn More",
+    "Volunteers Worldwide",
+    "No amount is too small",
+    "empowering communities",
+    "My Framer Site",
+    "Non-Profit & Charity Framer Template",
+    "Pehle Clearance",
+    "Aapke Sawal",
+    "Yogdaan Dein",
+    "Shiksha Se Rozgar Tak",
+    "Mauka Har Yuva Ke Liye",
+    "Saat Pillars of AINF",
+    "Ground Se Aayi Aawazein",
+    "Teen Raste — Daan, Time, Ya Programme",
+    "Apna Time Do, Kisi Ka Career Banao",
+    "Campus Diary & Block Reports",
+    "Aaj Ka Yogdaan — Kal Ki Naukri Ya Degree"
+  ],
+  "requiredMarkers": {
+    "/": ["theainf", "AINF", "West Bengal", "Seven Focus Areas"],
+    "/about-us": ["theainf", "AINF", "West Bengal", "Section 8"],
+    "/causes": ["theainf", "AINF", "Shiksha", "Missions"],
+    "/blogs": ["theainf", "AINF", "Field Notes"],
+    "/contact-us": ["theainf", "AINF", "Jamtara"],
+    "/donate-now": ["theainf", "AINF", "Section 8"],
+    "/join-as-volunteer": ["theainf", "AINF", "field sevak"],
+    "/legal-pages/terms-conditions": ["theainf", "AINF", "Section 8"],
+    "/causes/education-for-every-child": ["Shiksha Desk", "AINF"],
+    "/causes/healthcare-for-all": ["Swasthya Desk", "AINF"],
+    "/causes/food-nutrition-for-families": ["Rozgar", "AINF"],
+    "/causes/women-empowerment-for-rise": ["Nari Suraksha", "AINF"],
+    "/causes/water-sanitation-for-health": ["Janajati", "Kheti", "AINF"]
+  },
+  "routes": [
+    "/",
+    "/about-us",
+    "/causes",
+    "/causes/education-for-every-child",
+    "/causes/healthcare-for-all",
+    "/causes/food-nutrition-for-families",
+    "/causes/women-empowerment-for-rise",
+    "/causes/water-sanitation-for-health",
+    "/blogs",
+    "/blogs/a-day-in-the-life-of-our-volunteers",
+    "/blogs/building-stronger-communities-together",
+    "/blogs/education-can-break-poverty",
+    "/blogs/how-your-donations-are-changing-lives-every-day",
+    "/blogs/simple-ways-to-make-impact-on-community",
+    "/blogs/why-every-volunteer-matters",
+    "/contact-us",
+    "/donate-now",
+    "/join-as-volunteer",
+    "/legal-pages/terms-conditions"
+  ],
+  "replacements": [
+    ["Hopper-  Non-Profit &amp; Charity Framer Template", "theainf.in — All Indian Nevarlands Foundation"],
+    ["Hopper- Non-Profit &amp; Charity Framer Template", "theainf.in — All Indian Nevarlands Foundation"],
+    ["Hopper is a modern Non-Profit &amp; Charity Framer Template designed for NGOs, fundraising campaigns, and community organizations.", "All Indian Nevarlands Foundation (AINF) is a Section 8 non-profit from Jamtara, Jharkhand — education, skills, placement, women safety, healthcare, farming, and tribal welfare."],
+    ["Driven by Purpose,", "From Education to Employment,"],
+    ["Driven by Purpose", "From Education to Employment"],
+    ["Powered by People", "Opportunity for Every Youth"],
+    ["Shiksha Se Rozgar Tak,", "From Education to Employment,"],
+    ["Shiksha Se Rozgar Tak", "From Education to Employment"],
+    ["Mauka Har Yuva Ke Liye", "Opportunity for Every Youth"],
+    ["Yogdaan Dein", "Support AINF"],
+    ["Donate NowDonate Now", "Support AINF"],
+    ["Donate Now", "Support AINF"],
+    ["Donate now", "Support AINF"],
+    ["Hopper- Non-Profit & Charity Framer Template", "theainf.in — All Indian Nevarlands Foundation"],
+    ["//   Title: \"Hopper- Non-Profit & Charity Framer Template\"", "//   Title: \"theainf.in — All Indian Nevarlands Foundation\""],
+    ["Our Causes", "Our Missions"],
+    ["How You Can Help ?", "Three Ways to Help — Donate, Volunteer, or Adopt a Desk"],
+    ["How You Can Help", "Three Ways to Help — Donate, Volunteer, or Adopt a Desk"],
+    ["Make a Donation", "Give to a Desk"],
+    ["Become a Volunteer", "Join as Field Sevak"],
+    ["Sponsor a Cause", "Adopt a Desk"],
+    ["Spread Awareness", "Share theainf.in"],
+    ["Your Donation Can Change a Life Today", "Support AINF Today"],
+    ["Frequently Asked Questions", "Questions Before You Donate"],
+    ["Learn More", "Read More"],
+    ["Stories &amp; Insights", "Field Notes &amp; Stories"],
+    ["Stories & Insights", "Field Notes & Stories"],
+    ["Related Stories &amp; Insights", "More Field Notes"],
+    ["Related Stories & Insights", "More Field Notes"],
+    ["Insights ThatInspire Change", "Field Notes That Inspire Action"],
+    ["Bringing Hopeto Those WhoNeed It Most.", "Building Opportunity From Jamtara Outward"],
+    ["Bringing Hope to Those Who Need It Most.", "Building Opportunity From Jamtara Outward"],
+    ["Ways you can help", "Ways You Can Stand With AINF"],
+    ["Our impact, in their words", "Voices from the Field"],
+    ["Meet the People Behind the Impact", "Meet the AINF Team"],
+    ["Moments That Matter", "Milestones on the Ground"],
+    ["Reach Out. We're Here Always", "Reach AINF — Jharkhand & West Bengal"],
+    ["Reach Out. We’re Here Always", "Reach AINF — Jharkhand & West Bengal"],
+    ["Reach AINF in Nala, Jamtara", "Reach AINF — Jharkhand & West Bengal"],
+    ["Building Opportunity From Jamtara Outward", "Building Opportunity Across Jharkhand & West Bengal"],
+    ["Missions That Move Jharkhand Forward", "Missions That Move Eastern India Forward"],
+    ["Donate. Impact.Transform Lives.", "Give With Purpose. See Impact on the Ground."],
+    ["Saat Pillars of AINF", "Seven Focus Areas at AINF"],
+    ["Apna Time Do, Kisi Ka Career Banao", "Give Your Time, Build Someone's Career"],
+    ["Teen Raste — Daan, Time, Ya Programme", "Three Ways to Help — Donate, Volunteer, or Adopt a Desk"],
+    ["Ground Se Aayi Aawazein", "Voices from the Field"],
+    ["Campus Diary &amp; Block Reports", "Field Notes &amp; Block Reports"],
+    ["Campus Diary & Block Reports", "Field Notes & Block Reports"],
+    ["Pehle Clearance, Phir Daan", "Questions Before You Donate"],
+    ["Aaj Ka Yogdaan — Kal Ki Naukri Ya Degree", "Today's Gift — Tomorrow's Job or Degree"],
+    ["Ek Hastakshar Se", "One Signature Can"],
+    ["Badle Kisi Ki Manzil", "Change a Student's Path"],
+    ["Aapke Sawal, Hamare Jawab", "FAQ — What Donors Ask Us"],
+    ["About Us", "About AINF"],
+    ["Causes", "Missions"],
+    ["Blogs", "Stories"],
+    ["Contact Us", "Contact"],
+    ["Join As Volunteer", "Join as Field Sevak"],
+    ["Field Sevak Banein", "Become a Field Sevak"],
+    ["Ek Vertical Apnao", "Adopt a Desk"],
+    ["Apne Pada Mein AINF Ke Paanch Chhote Kaam", "Five Quick Ways to Help in Your Block"],
+    ["Yogdaan", "Support AINF"],
+    ["Donation", "Support AINF"],
+    ["Please complete the form below to make your donation.", "Fill the form below — you'll receive a receipt once the amount is confirmed."],
+    ["Neeche form bhariye — amount confirm hone ke baad receipt milti hai.", "Fill the form below — you'll receive a receipt once the amount is confirmed."],
+    ["children:`Donation`", "children:`Support AINF`"],
+    ["children:`Donation Amount`", "children:`Amount (INR)`"],
+    ["children:`Cause`", "children:`Desk / Vertical`"],
+    ["children:`Message`", "children:`Note (optional)`"],
+    ["children:`Name`", "children:`Full Name`"],
+    ["children:`Email`", "children:`Email ID`"],
+    [">Donation<", ">Support AINF<"],
+    [">Donation Amount<", ">Amount (INR)<"],
+    [">Cause<", ">Desk / Vertical<"],
+    [">Message<", ">Note (optional)<"],
+    ["Education for Every Child", "Shiksha Desk — Every Child Deserves a Classroom"],
+    ["Healthcare for All", "Swasthya Desk — Care Closer to Home"],
+    ["Food &amp; Nutrition for families", "Rozgar &amp; Skills Desk — Jobs, Not Just Relief"],
+    ["Food & Nutrition for families", "Rozgar & Skills Desk — Jobs, Not Just Relief"],
+    ["Women Empowerment for rise", "Nari Suraksha Desk — Safety First, Dignity Always"],
+    ["Water &amp; Sanitation for health", "Janajati Sahyog &amp; Kheti Desk"],
+    ["Water & Sanitation for health", "Janajati Sahyog & Kheti Desk"],
+    ["A Day in the Life of Our Volunteers", "A Block Day With AINF Field Sevaks"],
+    ["Building Stronger Communities Together", "Block Teams, Shared Progress"],
+    ["Education Can Break Poverty", "Shiksha That Opens the First Door"],
+    ["How Your Donations Are Changing Lives Every Day", "Where Your Rupee Lands — Daily Impact"],
+    ["Simple Ways to Make Impact On Community", "Small Acts, Big Ripple in Your Panchayat"],
+    ["Why Every Volunteer Matters", "Why One Field Sevak Changes a Batch"],
+    ["Terms &amp; Conditions - My Framer Site", "Terms &amp; Conditions — AINF"],
+    ["Terms & Conditions - My Framer Site", "Terms & Conditions — AINF"],
+    [" - My Framer Site", " | theainf.in"],
+    ["empowering communities", "uplifting communities"],
+    ["theainf is a modern Non-Profit & Charity Framer Template designed for NGOs, fundraising campaigns, and community organizations.", "AINF (theainf.in) — All Indian Nevarlands Foundation, Jamtara (Jharkhand). Education, skills, placement, women safety, healthcare, farming, and tribal welfare."],
+    ["Non-Profit & Charity Framer Template", "All Indian Nevarlands Foundation"],
+    ["Please read these terms carefully before using our website and services.", "Please read these terms before using theainf.in or supporting All Indian Nevarlands Foundation (AINF)."],
+    ["Welcome to our organization. By accessing or using our website, you agree to comply with and be bound by these Terms &amp; Conditions. If you do not agree, please do not use our website.", "Welcome to theainf.in. By using this site or donating to AINF, you agree to these Terms &amp; Conditions. If you disagree, please do not use the website."],
+    ["Welcome to our organization. By accessing or using our website, you agree to comply with and be bound by these Terms & Conditions. If you do not agree, please do not use our website.", "Welcome to theainf.in. By using this site or donating to AINF, you agree to these Terms & Conditions. If you disagree, please do not use the website."],
+    ["You agree to use this website for lawful purposes only. You must not use our site in any way that may harm the organization, its users, or its reputation.", "Use theainf.in only for lawful purposes. Do not misuse the site, impersonate AINF, or harm students, donors, volunteers, or staff."],
+    ["All donations made through our website are voluntary. While we strive for transparency, donations are non-refundable unless stated otherwise. Funds are used to support our programs and initiatives.", "Donations to AINF are voluntary gifts under Section 8 rules. Funds are applied to registered charitable objects (education, health, rozgar, women safety, farming, tribal welfare). Refunds are only where required by law or stated in writing."],
+    ["All content on this website, including text, images, and graphics, is the property of our organization unless otherwise stated. You may not reproduce or distribute any content without prior permission", "Content on theainf.in belongs to All Indian Nevarlands Foundation unless credited otherwise. Do not copy field photos, student stories, or branding without written permission."],
+    ["Your use of our website is also governed by our Privacy Policy. We are committed to protecting your personal information and ensuring its security.", "Your data is handled per our Privacy Policy. AINF collects only what is needed for donations, volunteering, and programme delivery — and protects student identities on field reports."],
+    ["Our website may include links to third-party websites. We are not responsible for the content or practices of these external sites.", "theainf.in may link to partner portals (payment, DARPAN, social). AINF is not responsible for third-party content or policies."],
+    ["We strive to ensure all information on our website is accurate. However, we do not guarantee completeness or reliability. We are not liable for any losses resulting from the use of our website.", "We publish field numbers in good faith but do not guarantee completeness. AINF is not liable for indirect losses from site use; statutory rights remain unaffected."],
+    ["We may update these Terms &amp; Conditions at any time. Continued use of the website after changes means you accept the updated terms.", "AINF may update these terms; continued use of theainf.in means you accept the revised version."],
+    ["We may update these Terms & Conditions at any time. Continued use of the website after changes means you accept the updated terms.", "AINF may update these terms; continued use of theainf.in means you accept the revised version."],
+    ["If you have any questions regarding these Terms &amp; Conditions, please contact us through our website.", "Questions? Write to AINF via the Contact page — Nala, Jamtara, Jharkhand — or email listed on theainf.in."],
+    ["If you have any questions regarding these Terms & Conditions, please contact us through our website.", "Questions? Write to AINF via the Contact page — Nala, Jamtara, Jharkhand — or email listed on theainf.in."],
+    ["Every contribution you make helps provide food, education, and healthcare to those who need it most. No amount is too small—every donation creates impact.", "Your support funds coaching batches, skill kits, and travel stipends — directly for students across Jharkhand, West Bengal, and beyond."],
+    ["We are a non-profit organization dedicated to serving learners and families through education, healthcare, and sustainable support.", "AINF is a Section 8 non-profit helping learners and families through education, skills, healthcare, and dignified livelihoods."],
+    ["Education &amp; livelihood for every learner", "Scholarships, coaching, and job pathways for every learner"],
+    ["Skill training &amp; job placement support", "ITI bridges, rozgar melas, and employer tie-ups"],
+    ["Seven commitments: shiksha, swasthya, rozgar, nari suraksha, kheti, adivasi sahayata, and samajik nyay — measured on the ground.", "Seven focus areas — Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare — tracked block by block."],
+    ["AINF walks with tribal hamlets and low-income wards — books, skill kits, health camps, and equal respect without caste, faith, language, or region bias.", "AINF walks with tribal hamlets and low-income wards — books, skill kits, health camps, and equal respect regardless of caste, faith, language, or region."],
+    ["Born in Jharkhand. Active wherever a student needs coaching, a youth needs skills, or a family needs a fair chance.", "Registered in Jharkhand, active across West Bengal — wherever a student needs coaching, a youth needs skills, or a family needs a fair chance."],
+    ["Your support funds coaching batches, skill kits, and travel stipends — directly for students across Jharkhand and beyond.", "Your support funds coaching batches, skill kits, and travel stipends — directly for students across Jharkhand, West Bengal, and beyond."],
+    ["CIN-registered Section 8 body · DARPAN JH/2026/1133191 · HQ Nala, Jamtara, Jharkhand · Brand: theainf", "Section 8 non-profit · DARPAN JH/2026/1133191 · HQ Nala, Jamtara, Jharkhand · theainf.in"],
+    ["Aapka yogdaan stipend, study kit, counselling aur emergency relief seedha students aur families tak pahunchata hai.", "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families."],
+    ["Chhota amount bhi coaching fee, travel stipend, ya skill kit ban sakta hai. Bada amount — pura batch. Dono AINF ledger mein tracked rehte hain.", "Even a small amount can cover coaching fees, travel stipends, or a skill kit. Larger gifts can sponsor a full batch — every rupee is tracked in AINF's ledger."],
+    ["Coach exam batches, host skill weekends, or sit in placement cells with AINF. Do ghante bhi kaafi — agar kisi student ko direction mil jaye.", "Coach exam batches, host skill weekends, or sit in placement cells with AINF. Even two hours help if one student finds direction."],
+    ["Batch padhao, CV review karo, ya block-level camp organise karo — AINF ke field teams ke saath.", "Teach a batch, review CVs, or co-host a block-level camp with AINF field teams."],
+    ["Coaching rooms, ITI gates, and gram camps — honest snapshots of AINF's work across eastern India.", "Coaching rooms, ITI gates, and gram camps — honest snapshots from Jamtara to Asansol, Kolkata suburbs, and partner blocks."],
+    ["Explore field notes from coaching rooms, ITI gates, and gram camps across eastern India.", "Explore field notes from Jamtara to Asansol, Kolkata suburbs, and partner blocks across Jharkhand & West Bengal."],
+    ["Coaching batch ke students, field sevaks, aur Asansol–Jamtara ke sahyogi — seedhi baatein seekhne, kaam pane, aur izzat milne ki.", "Students, field sevaks, and partners from Asansol to Jamtara — straight talk on learning, landing work, and earning dignity."],
+    ["Section 8 rules clear hain — yahan padho daan kahan jata hai, kaun account handle karta hai, aur aap kaise sevak ban sakte ho.", "Section 8 rules are clear — read where donations go, which account handles them, and how to volunteer."],
+    ["AINF exactly kya deliver karti hai?", "What does AINF deliver on the ground?"],
+    ["Kya daan kisi ek desk ke liye tag ho sakta hai?", "Can I tag my donation to one desk?"],
+    ["Online / offline daan process?", "How do online and offline donations work?"],
+    ["Field team mein entry kaise?", "How do I join an AINF field team?"],
+    ["Scholarship, skill kit, safety workshop, health camp, or farm support — jo bhi aap chunein, pura paisa AINF ke registered objects par lagta hai.", "Scholarships, skill kits, safety workshops, health camps, or farm support — your full amount goes to AINF's registered objects."],
+    ["Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, ya janajati desk — ek chun kar apnao.", "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt."],
+    ["theainf.in ko apne group mein bhejo — ek forward kisi youth ko coaching ya job lead dilwa sakta hai.", "Share theainf.in in your group — one forward can connect a youth to coaching or a job lead."],
+    ["Jamtara Batch Report: Stipend Se Interview Tak", "Jamtara Batch Report: From Stipend to Interview"],
+    ["Nala Se Polytechnic: Ek Chhatra Ki Chadhawati", "Nala to Polytechnic: One Student's Climb"],
+    ["Subah Coaching, Sham Rozgar Mela — Ek Sevak Ki Diary", "Morning Coaching, Evening Rozgar Mela — A Sevak's Diary"],
+    ["© 2026 Hopper", "© 2026 theainf"],
+    ["© 2026 theainf · All Indian Nevarlands Foundation · theainf.in", "© 2026 theainf · All Indian Nevarlands Foundation · theainf.in"],
+    ["shiksha, rozgar &amp; kalyan desks.", "education, jobs &amp; welfare desks."],
+    ["shiksha, rozgar & kalyan desks.", "education, jobs & welfare desks."],
+    ["Water &amp; Sanitation", "Janajati &amp; Kheti"],
+    ["Water & Sanitation", "Janajati & Kheti"],
+    ["Food &amp; Nutrition", "Rozgar &amp; Skills"],
+    ["Food & Nutrition", "Rozgar & Skills"],
+    ["Women Empowerment", "Nari Suraksha"],
+    ["Education", "Shiksha"],
+    ["Healthcare", "Swasthya"],
+    ["title:t(e,n).title||`Donate Now`", "title:t(e,n).title||`Support AINF`"],
+    ["title:t(e,n).title||`About Us`", "title:t(e,n).title||`About AINF`"],
+    ["title:t(e,n).title||`Contact Us`", "title:t(e,n).title||`Contact AINF`"],
+    ["About AINF — Jamtara HQ | theainf.in", "About AINF — Jharkhand & West Bengal | theainf.in"],
+    ["Contact AINF — Nala, Jamtara | theainf.in", "Contact AINF — Jharkhand & West Bengal | theainf.in"],
+    ["Jamtara (Jharkhand). Shiksha, skills, placement", "Jamtara (Jharkhand) · active across West Bengal. Education, skills, placement"]
+  ],
+  "pageReplacements": {
+    "home": [
+      ["Our Missions", "Seven Focus Areas at AINF"],
+      ["Our Causes", "Seven Focus Areas at AINF"],
+      [">How You Can Help<", ">Three Ways to Help — Donate, Volunteer, or Adopt a Desk<"],
+      ["How You Can Help ?", "Three Ways to Help — Donate, Volunteer, or Adopt a Desk"],
+      ["Stand With Students in Your District", "Give Your Time, Build Someone's Career"],
+      ["Field Notes &amp; Stories", "Field Notes &amp; Block Reports"],
+      ["Field Notes & Stories", "Field Notes & Block Reports"]
+    ],
+    "causes/education-for-every-child": [
+      ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "AINF Shiksha Desk funds scholarships, study kits, and block-level coaching for students in Jamtara, Nala, and partner districts — so fees and travel never block a child from class."],
+      ["millions of children around the world are still denied this basic right", "thousands of students in our blocks still miss coaching, safe travel, or a quiet place to study"],
+      ["We believe that education should be accessible, inclusive, and empowering.", "We believe shiksha should be accessible, practical, and tied to real jobs — not just enrollment numbers on a board."]
+    ],
+    "causes/healthcare-for-all": [
+      ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "Swasthya Desk runs health camps, referral support, and wellness drives closer to home — so families in Jamtara blocks don't travel far for basic care."],
+      ["millions of children around the world are still denied this basic right", "many families still delay treatment because camps are far, costs are unclear, or follow-up is missing"],
+      ["We believe that education should be accessible, inclusive, and empowering.", "We believe swasthya support should be regular, respectful, and linked to schools and self-help groups — not one-off events."]
+    ],
+    "causes/food-nutrition-for-families": [
+      ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "Rozgar & Skills Desk trains youth, hosts rozgar melas, and connects graduates to employers — because dignity comes from work, not repeated relief alone."],
+      ["millions of children around the world are still denied this basic right", "many young people still leave school without a skill certificate or interview practice"],
+      ["We believe that education should be accessible, inclusive, and empowering.", "We believe rozgar pathways need coaching, soft skills, and local employer trust — built batch by batch."]
+    ],
+    "causes/women-empowerment-for-rise": [
+      ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "Nari Suraksha Desk supports safety workshops, legal awareness, and livelihood pathways — so women and girls know their rights and have options beyond fear."],
+      ["millions of children around the world are still denied this basic right", "too many girls still drop out when safety, transport, or family pressure closes the door"],
+      ["We believe that education should be accessible, inclusive, and empowering.", "We believe nari suraksha means prevention, quick response, and long-term economic independence together."]
+    ],
+    "causes/water-sanitation-for-health": [
+      ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "Janajati Sahyog & Kheti Desk stands with tribal hamlets — farm inputs, market links, and seasonal planning so kheti income survives a bad monsoon."],
+      ["millions of children around the world are still denied this basic right", "many janajati farmers still sell at distress rates without storage, advice, or collective bargaining"],
+      ["We believe that education should be accessible, inclusive, and empowering.", "We believe tribal welfare means land dignity, fair prices, and youth who don't have to migrate blindly."]
+    ],
+    "blogs/education-can-break-poverty": [
+      ["Shiksha is one of the strongest tools for breaking the cycle of poverty.", "At AINF, we've seen a ₹500 travel stipend keep a Jamtara student in coaching — that's often the first domino before a polytechnic seat or first job."],
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "Explore field notes from coaching rooms, ITI gates, and gram camps across eastern India."]
+    ],
+    "blogs/a-day-in-the-life-of-our-volunteers": [
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "A field sevak's day starts before the coaching bell and ends after the rozgar mela stalls close — here's what that looks like on the ground."]
+    ],
+    "blogs/building-stronger-communities-together": [
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "Block teams work when panchayat leads, school heads, and AINF desks share one simple weekly target — here's how we align them."]
+    ],
+    "blogs/how-your-donations-are-changing-lives-every-day": [
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "Every receipt maps to a desk ledger — stipend, kit, camp, or farm input — updated when money moves, not at year-end only."]
+    ],
+    "blogs/simple-ways-to-make-impact-on-community": [
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "You don't need a big cheque to help — host a CV review hour, share theainf.in, or connect one youth to a local employer."]
+    ],
+    "blogs/why-every-volunteer-matters": [
+      ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "When one experienced sevak joins a batch, attendance and interview readiness jump — volunteers multiply money, they don't replace it."]
+    ]
+  }
+}

@@ -1,0 +1,255 @@
+:root {
+  --ainf-lang-ink: rgb(34, 34, 34);
+  --ainf-lang-muted: rgba(34, 34, 34, 0.55);
+  --ainf-lang-green: rgb(57, 164, 107);
+  --ainf-lang-panel: #ffffff;
+}
+
+/* Only green CTA buttons get forced white labels */
+a[data-framer-name="Desktop"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Desktop"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Tablet"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Tablet"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Mobile-Close"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Mobile-Close"].ainf-cta-on-dark [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"].ainf-cta-on-dark,
+a[data-framer-name="Tablet"].ainf-cta-on-dark,
+a[data-framer-name="Mobile-Close"].ainf-cta-on-dark {
+  color: #ffffff !important;
+  --framer-text-color: #ffffff !important;
+  --extracted-r6o4lv: #ffffff !important;
+  --framer-link-text-color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  --framer-link-text-decoration: none !important;
+}
+
+/* White / light buttons need dark text */
+a[data-framer-name="Desktop"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Desktop"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Tablet"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Tablet"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Mobile-Close"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Mobile-Close"].ainf-cta-on-light [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"].ainf-cta-on-light,
+a[data-framer-name="Tablet"].ainf-cta-on-light,
+a[data-framer-name="Mobile-Close"].ainf-cta-on-light {
+  color: rgb(34, 34, 34) !important;
+  --framer-text-color: rgb(34, 34, 34) !important;
+  --extracted-r6o4lv: rgb(34, 34, 34) !important;
+  --framer-link-text-color: rgb(34, 34, 34) !important;
+  -webkit-text-fill-color: rgb(34, 34, 34) !important;
+  --framer-link-text-decoration: none !important;
+}
+
+/* Desktop language control — sits inside navbar */
+#ainf-lang-switcher {
+  position: relative;
+  z-index: 50;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: 0 6px 0 10px;
+  font-family: Onest, "Segoe UI", sans-serif;
+}
+
+#ainf-lang-switcher-mobile {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  padding: 12px 20px 16px;
+  font-family: Onest, "Segoe UI", sans-serif;
+}
+
+.ainf-lang-trigger {
+  appearance: none;
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  background: #fff;
+  color: var(--ainf-lang-ink);
+  min-width: 52px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ainf-lang-trigger:hover,
+.ainf-lang-trigger:focus-visible,
+#ainf-lang-switcher.is-open .ainf-lang-trigger,
+#ainf-lang-switcher-mobile.is-open .ainf-lang-trigger {
+  border-color: rgba(57, 164, 107, 0.45);
+  box-shadow: 0 4px 14px rgba(57, 164, 107, 0.18);
+  outline: none;
+}
+
+.ainf-lang-trigger svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: var(--ainf-lang-ink);
+  flex: 0 0 auto;
+}
+
+.ainf-lang-chevron {
+  width: 12px !important;
+  height: 12px !important;
+  opacity: 0.7;
+  transition: transform 0.18s ease;
+}
+
+#ainf-lang-switcher.is-open .ainf-lang-chevron,
+#ainf-lang-switcher-mobile.is-open .ainf-lang-chevron {
+  transform: rotate(180deg);
+}
+
+.ainf-lang-code {
+  display: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ainf-lang-ink);
+}
+
+#ainf-lang-switcher[data-lang="bn"] .ainf-lang-code,
+#ainf-lang-switcher[data-lang="hi"] .ainf-lang-code,
+#ainf-lang-switcher-mobile[data-lang="bn"] .ainf-lang-code,
+#ainf-lang-switcher-mobile[data-lang="hi"] .ainf-lang-code {
+  display: inline;
+}
+
+#ainf-lang-switcher[data-lang="bn"] .ainf-lang-trigger,
+#ainf-lang-switcher[data-lang="hi"] .ainf-lang-trigger,
+#ainf-lang-switcher-mobile[data-lang="bn"] .ainf-lang-trigger,
+#ainf-lang-switcher-mobile[data-lang="hi"] .ainf-lang-trigger {
+  padding: 0 10px;
+  gap: 5px;
+}
+
+.ainf-lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 168px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--ainf-lang-panel);
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+}
+
+#ainf-lang-switcher.is-open .ainf-lang-menu,
+#ainf-lang-switcher-mobile.is-open .ainf-lang-menu {
+  display: flex;
+}
+
+#ainf-lang-switcher-mobile .ainf-lang-menu {
+  left: 20px;
+  right: 20px;
+  min-width: 0;
+}
+
+.ainf-lang-option {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ainf-lang-ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.ainf-lang-option:hover,
+.ainf-lang-option:focus-visible {
+  background: rgba(57, 164, 107, 0.1);
+  outline: none;
+}
+
+.ainf-lang-option.is-active {
+  background: rgba(57, 164, 107, 0.16);
+  font-weight: 600;
+}
+
+.ainf-lang-glyph {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgb(34, 34, 34);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.ainf-lang-option[data-lang="en"] .ainf-lang-glyph {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.ainf-lang-option-label {
+  color: var(--ainf-lang-ink);
+  flex: 1 1 auto;
+}
+
+.ainf-lang-option-sub {
+  color: var(--ainf-lang-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 809.98px) {
+  #ainf-lang-switcher {
+    display: none !important;
+  }
+}
+
+@media (min-width: 810px) {
+  #ainf-lang-switcher-mobile {
+    display: none !important;
+  }
+}
+
+html[lang="bn"] a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"],
+html[lang="hi"] a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"] {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+html[lang="bn"] h1 .framer-text,
+html[lang="hi"] h1 .framer-text {
+  white-space: normal !important;
+}
+
+/* Hide Framer free-plan badge (bottom-right) */
+a[href*="framer.com/r/badge"],
+a[href*="utm_campaign=freeplanbadge"],
+a.__framer-badge,
+.__framer-badge,
+#__framer-badge-container,
+[data-framer-badge] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
