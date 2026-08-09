@@ -1,57 +1,106 @@
-/* AINF / Hopper footer — used on /projects pages */
+/* Hopper-style AINF footer + solid project CTAs */
 #ainf-site-footer{
   position:relative;
   z-index:2;
-  margin-top:48px;
-  background:#fff;
+  margin-top:64px;
+  padding:28px 20px 36px;
+  background:#f3f3f3;
   color:#222;
   font-family:Onest,Inter,system-ui,sans-serif;
-  border-top:1px solid rgba(34,34,34,.12);
 }
 #ainf-site-footer *{box-sizing:border-box}
 #ainf-site-footer a{color:#222;text-decoration:none}
 #ainf-site-footer a:hover{color:#39a46b}
-#ainf-site-footer .ainf-ft-inner{
-  max-width:1120px;
-  margin:0 auto;
-  padding:48px 24px 32px;
+#ainf-site-footer .ainf-ft-wrap{max-width:1120px;margin:0 auto}
+
+#ainf-site-footer .ainf-ft-row{
   display:grid;
-  grid-template-columns:1.2fr 1fr 1fr 1fr;
-  gap:32px;
+  grid-template-columns:minmax(260px,.9fr) minmax(0,1.4fr);
+  gap:14px;
+  margin-bottom:14px;
 }
-#ainf-site-footer .ainf-ft-brand a.ainf-ft-logo{
+#ainf-site-footer .ainf-ft-card{
+  background:#fff;
+  border-radius:28px;
+  border:1px solid rgba(34,34,34,.08);
+  padding:28px 26px;
+}
+#ainf-site-footer .ainf-ft-brand-card{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:220px;
+}
+#ainf-site-footer .ainf-ft-logo{
   display:inline-flex;align-items:center;gap:8px;
-  font-weight:700;font-size:18px;letter-spacing:-.02em;margin-bottom:12px;
+  font-weight:700;font-size:18px;letter-spacing:-.02em;
 }
-#ainf-site-footer .ainf-ft-brand img{width:28px;height:28px;border-radius:50%}
+#ainf-site-footer .ainf-ft-logo img{width:28px;height:28px;border-radius:50%}
+#ainf-site-footer .ainf-ft-badge{
+  display:inline-block;margin-left:4px;font-size:10px;font-weight:700;
+  color:#39a46b;letter-spacing:.04em;
+}
 #ainf-site-footer .ainf-ft-tag{
-  margin:10px 0 0;font-size:14px;line-height:1.5;color:rgba(34,34,34,.7);max-width:280px;
+  margin:18px 0 0;font-size:15px;line-height:1.55;color:rgba(34,34,34,.72);max-width:320px;
 }
 #ainf-site-footer .ainf-ft-copy{
-  margin:14px 0 0;font-size:13px;color:rgba(34,34,34,.55);
+  margin:24px 0 0;font-size:12px;color:rgba(34,34,34,.5);
+}
+
+#ainf-site-footer .ainf-ft-nav-card{
+  display:grid;
+  grid-template-columns:1fr 1fr 1.15fr;
+  gap:18px;
 }
 #ainf-site-footer h4{
   margin:0 0 14px;font-size:14px;font-weight:700;color:#222;
 }
-#ainf-site-footer .ainf-ft-col{display:flex;flex-direction:column;gap:10px}
+#ainf-site-footer .ainf-ft-col{display:flex;flex-direction:column;gap:11px}
 #ainf-site-footer .ainf-ft-col a{font-size:14px;font-weight:500}
-#ainf-site-footer .ainf-ft-bottom{
-  max-width:1120px;margin:0 auto;padding:18px 24px 28px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  border-top:1px solid rgba(34,34,34,.1);
+#ainf-site-footer .ainf-ft-col a.is-active{color:#39a46b;font-weight:600}
+
+#ainf-site-footer .ainf-ft-contact-row{
+  display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:500;
 }
-#ainf-site-footer .ainf-ft-social{display:flex;gap:10px;flex-wrap:wrap}
+#ainf-site-footer .ainf-ft-ico{
+  width:18px;height:18px;flex:0 0 auto;margin-top:2px;color:#39a46b;
+}
+
+#ainf-site-footer .ainf-ft-social{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
 #ainf-site-footer .ainf-ft-social a{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:10px 16px;border-radius:999px;background:#39a46b;color:#fff!important;
-  font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border:1px solid rgba(34,34,34,.08);
+  border-radius:22px;padding:18px 20px;
+  font-size:15px;font-weight:600;color:#222;
 }
-#ainf-site-footer .ainf-ft-social a:hover{filter:brightness(1.05);color:#fff!important}
+#ainf-site-footer .ainf-ft-social a:hover{color:#39a46b}
+#ainf-site-footer .ainf-ft-arrow{
+  width:18px;height:18px;color:#39a46b;flex:0 0 auto;
+}
+
 @media(max-width:900px){
-  #ainf-site-footer .ainf-ft-inner{grid-template-columns:1fr 1fr;gap:28px;padding:36px 20px 24px}
+  #ainf-site-footer .ainf-ft-row{grid-template-columns:1fr}
+  #ainf-site-footer .ainf-ft-nav-card{grid-template-columns:1fr 1fr}
+  #ainf-site-footer .ainf-ft-social{grid-template-columns:1fr 1fr}
 }
 @media(max-width:560px){
-  #ainf-site-footer .ainf-ft-inner{grid-template-columns:1fr}
+  #ainf-site-footer .ainf-ft-nav-card{grid-template-columns:1fr}
+  #ainf-site-footer .ainf-ft-social{grid-template-columns:1fr}
+  #ainf-site-footer .ainf-ft-brand-card{min-height:0}
+}
+
+/* Hide Oxira footer blocks only (not page content) */
+body.ainf-projects-skin [data-framer-name="projects list footer"],
+body.ainf-projects-skin [data-ainf-oxira-footer="1"]{
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
 }
 
 /* Kill Oxira glass buttons → solid AINF pills */
@@ -75,7 +124,6 @@ body.ainf-projects-skin a[data-framer-name="Primary btn"] *{
   -webkit-backdrop-filter:none!important;
   text-shadow:none!important;
 }
-/* neutralize glossy overlay layers inside Framer buttons */
 body.ainf-projects-skin [data-framer-name="Primary btn"] > div,
 body.ainf-projects-skin [data-framer-name="Primary btn"] [style*="inset"],
 body.ainf-projects-skin [data-framer-name="Primary btn"] [style*="box-shadow"]{
@@ -93,7 +141,6 @@ body.ainf-projects-skin [data-framer-name="Primary btn"] a{
   font-family:Onest,Inter,system-ui,sans-serif!important;
   font-weight:600!important;
 }
-/* round arrow chips next to testimonials */
 body.ainf-projects-skin [data-framer-name="Icon Sphere"],
 body.ainf-projects-skin [data-framer-name="arrow"]{
   background:#39a46b!important;

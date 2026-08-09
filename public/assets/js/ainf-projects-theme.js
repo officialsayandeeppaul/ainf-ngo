@@ -1,4 +1,4 @@
-/* Replace Oxira footer + polish buttons on /projects pages */
+/* Replace Oxira footer + polish buttons on /projects — keep page content intact */
 (function () {
   if (window.__ainfProjectsThemeBooted) return;
   window.__ainfProjectsThemeBooted = true;
@@ -7,79 +7,92 @@
   var isProjects = path === "/projects" || path.indexOf("/projects/") === 0;
   if (!isProjects) return;
 
+  var ARROW =
+    '<svg class="ainf-ft-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICO_MAIL =
+    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/></svg>';
+  var ICO_PHONE =
+    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6.5 3.5l2.2 2.2a1.5 1.5 0 010 2.1L7.5 9c1.6 3.1 4.4 5.9 7.5 7.5l1.2-1.2a1.5 1.5 0 012.1 0l2.2 2.2a1.5 1.5 0 010 2.1l-1.1 1.1c-.9.9-2.2 1.2-3.4.8C10.2 19.7 4.3 13.8 2.5 7.5c-.4-1.2-.1-2.5.8-3.4l1.1-1.1a1.5 1.5 0 012.1 0z"/></svg>';
+  var ICO_PIN =
+    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+
   function buildFooter() {
     var footer = document.createElement("footer");
     footer.id = "ainf-site-footer";
     footer.setAttribute("data-ainf-footer", "1");
     footer.innerHTML =
-      '<div class="ainf-ft-inner">' +
-      '<div class="ainf-ft-brand">' +
-      '<a class="ainf-ft-logo" href="/"><img src="/assets/img/theainf-mark.svg" alt="" width="28" height="28"/><span>theainf</span></a>' +
-      '<p class="ainf-ft-tag">All Indian Nevarlands Foundation works from Jamtara outward — classrooms, skill labs, job linkages, and village welfare.</p>' +
-      '<p class="ainf-ft-copy">© 2026 theainf. All rights reserved</p>' +
+      '<div class="ainf-ft-wrap">' +
+      '<div class="ainf-ft-row">' +
+      '<div class="ainf-ft-card ainf-ft-brand-card">' +
+      '<div><a class="ainf-ft-logo" href="/"><img src="/assets/img/theainf-mark.svg" alt="" width="28" height="28"/><span>theainf</span><span class="ainf-ft-badge">AINF</span></a>' +
+      '<p class="ainf-ft-tag">We are a non-profit organization dedicated to providing education, healthcare &amp; support.</p></div>' +
+      '<p class="ainf-ft-copy">© 2026 theainf · All Indian Nevarlands Foundation · theainf.in</p>' +
       "</div>" +
+      '<div class="ainf-ft-card ainf-ft-nav-card">' +
       '<div class="ainf-ft-col"><h4>Menu</h4>' +
-      '<a href="/">Home</a><a href="/about-us">About AINF</a><a href="/causes">Missions</a><a href="/projects">Projects</a><a href="/blogs">Stories</a></div>' +
+      '<a href="/">Home</a><a href="/about-us">About AINF</a><a href="/causes">Missions</a><a class="is-active" href="/projects">Projects</a><a href="/blogs">Stories</a></div>' +
       '<div class="ainf-ft-col"><h4>Quick Links</h4>' +
       '<a href="/contact-us">Contact</a><a href="/donate-now">Support AINF</a><a href="/join-as-volunteer">Join as Field Sevak</a><a href="/legal-pages/terms-conditions">Terms &amp; Conditions</a></div>' +
       '<div class="ainf-ft-col"><h4>Contact</h4>' +
-      '<a href="mailto:uiuxocean@gmail.com">uiuxocean@gmail.com</a><a href="tel:+919574468870">+91 95744 68870</a><a href="/contact-us">Reach Us</a></div>' +
-      "</div>" +
-      '<div class="ainf-ft-bottom">' +
-      '<p class="ainf-ft-copy" style="margin:0">We are a non-profit organization dedicated to providing education, healthcare &amp; support.</p>' +
+      '<a class="ainf-ft-contact-row" href="mailto:uiuxocean@gmail.com">' +
+      ICO_MAIL +
+      "<span>uiuxocean@gmail.com</span></a>" +
+      '<a class="ainf-ft-contact-row" href="tel:+919574468870">' +
+      ICO_PHONE +
+      "<span>+91 95744 68870</span></a>" +
+      '<div class="ainf-ft-contact-row">' +
+      ICO_PIN +
+      "<span>Surat, India</span></div>" +
+      "</div></div></div>" +
       '<div class="ainf-ft-social">' +
-      '<a href="/donate-now">Support AINF</a>' +
-      '<a href="/join-as-volunteer">Volunteer</a>' +
-      '<a href="/contact-us">Contact</a>' +
+      '<a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn' +
+      ARROW +
+      "</a>" +
+      '<a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram' +
+      ARROW +
+      "</a>" +
+      '<a href="https://x.com/" target="_blank" rel="noopener">X' +
+      ARROW +
+      "</a>" +
+      '<a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook' +
+      ARROW +
+      "</a>" +
       "</div></div>";
     return footer;
   }
 
-  function killOxiraFooter() {
+  function looksLikePageContent(el) {
+    var t = el.textContent || "";
+    return /Our Projects|Winter Relief|Medical Aid|Daily Meal|Education Support|Hear from|Projects That Create|Support a Project/i.test(
+      t
+    );
+  }
+
+  function hideOxiraFooterOnly() {
+    // Hide the Oxira link-columns footer block — do NOT walk up into page content.
     document.querySelectorAll('[data-framer-name="projects list footer"]').forEach(function (el) {
-      var node = el;
-      for (var i = 0; i < 10 && node; i++) {
-        var name = node.getAttribute && node.getAttribute("data-framer-name");
-        if (name === "Bottom") break;
-        node = node.parentElement;
-      }
-      try {
-        (node || el).remove();
-      } catch (e) {
-        el.style.setProperty("display", "none", "important");
-      }
+      el.setAttribute("data-ainf-oxira-footer", "1");
+      el.style.setProperty("display", "none", "important");
     });
 
+    // Green Oxira Bottom strip — only if it is footer-like and not page content
     document.querySelectorAll('[data-framer-name="Bottom"]').forEach(function (el) {
+      if (looksLikePageContent(el)) return;
       var t = el.textContent || "";
-      if (/Oxira|Ostra|xira|All Rights Reserved|Youtube|X \/ Twitter/i.test(t)) {
-        try {
-          el.remove();
-        } catch (e) {
-          el.style.setProperty("display", "none", "important");
-        }
-      }
-    });
-
-    // leftover brand bits
-    document.querySelectorAll("p, span, a, strong").forEach(function (el) {
-      var t = (el.textContent || "").replace(/\s+/g, " ").trim();
-      if (/^@?Oxira\b/i.test(t) || t === "Ostra Supporter" || t === "xira") {
-        var wrap = el.closest('[data-framer-name]') || el;
-        try {
-          wrap.remove();
-        } catch (e) {
-          el.style.setProperty("display", "none", "important");
-        }
+      if (
+        /All Rights Reserved|Youtube|X \/ Twitter|@Oxira|© 2026 theainf|Medical Aid & Health Camps/i.test(t) &&
+        /Instagram|Youtube|Twitter|FAQ|Privacy|Terms of Use|Help/i.test(t)
+      ) {
+        el.setAttribute("data-ainf-oxira-footer", "1");
+        el.style.setProperty("display", "none", "important");
       }
     });
   }
 
   function ensureFooter() {
-    killOxiraFooter();
+    hideOxiraFooterOnly();
     if (!document.getElementById("ainf-site-footer")) {
-      var host = document.body || document.documentElement;
-      host.appendChild(buildFooter());
+      (document.body || document.documentElement).appendChild(buildFooter());
     }
   }
 
@@ -138,14 +151,14 @@
   var timer = setInterval(function () {
     tick();
     i += 1;
-    if (i > 40) clearInterval(timer);
-  }, 250);
+    if (i > 30) clearInterval(timer);
+  }, 300);
+
   var mo = new MutationObserver(function () {
-    killOxiraFooter();
+    hideOxiraFooterOnly();
     if (!document.getElementById("ainf-site-footer") && document.body) {
       document.body.appendChild(buildFooter());
     }
-    restyleButtons();
   });
   if (document.body) mo.observe(document.body, { childList: true, subtree: true });
   else

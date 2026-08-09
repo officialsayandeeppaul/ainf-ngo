@@ -135,17 +135,17 @@
 @media(max-width:900px){
   #ainf-global-nav{padding:8px 8px 8px 12px!important;gap:8px!important}
   #ainf-global-nav .ainf-links{display:none!important}
-  /* keep language converter visible in the pill on mobile */
   #ainf-global-nav #ainf-lang-switcher{display:flex!important}
 }
 
-/* When shared nav is active, hide EVERY template navbar */
+/*
+  Hide ONLY template nav chrome — never "Top" on projects
+  (Oxira uses Top as the main page content wrapper).
+*/
 html.ainf-shared-nav [data-framer-name="Nav"],
 html.ainf-shared-nav [data-framer-name="Navigation"],
 html.ainf-shared-nav [data-framer-name="Navbar"],
 html.ainf-shared-nav [data-framer-name="Nav Items"],
-html.ainf-shared-nav [data-framer-name="Nav Links"],
-html.ainf-shared-nav [data-framer-name="Top"],
 html.ainf-shared-nav [data-framer-name="Header"],
 html.ainf-shared-nav [data-framer-name="Banner"],
 html.ainf-shared-nav header[data-framer-name="Desktop"],
@@ -154,8 +154,6 @@ body.ainf-shared-nav [data-framer-name="Nav"],
 body.ainf-shared-nav [data-framer-name="Navigation"],
 body.ainf-shared-nav [data-framer-name="Navbar"],
 body.ainf-shared-nav [data-framer-name="Nav Items"],
-body.ainf-shared-nav [data-framer-name="Nav Links"],
-body.ainf-shared-nav [data-framer-name="Top"],
 body.ainf-shared-nav [data-framer-name="Header"],
 body.ainf-shared-nav [data-framer-name="Banner"],
 body.ainf-shared-nav header[data-framer-name="Desktop"],
@@ -175,11 +173,9 @@ body.ainf-shared-nav nav[data-framer-name="Navigation"]{
 }
 html.ainf-shared-nav [data-framer-name="Nav"] *,
 html.ainf-shared-nav [data-framer-name="Navigation"] *,
-html.ainf-shared-nav [data-framer-name="Top"] *,
 html.ainf-shared-nav header[data-framer-name="Desktop"] *,
 body.ainf-shared-nav [data-framer-name="Nav"] *,
 body.ainf-shared-nav [data-framer-name="Navigation"] *,
-body.ainf-shared-nav [data-framer-name="Top"] *,
 body.ainf-shared-nav header[data-framer-name="Desktop"] *{
   visibility:hidden!important;
   pointer-events:none!important;

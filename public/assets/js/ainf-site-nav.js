@@ -88,12 +88,12 @@
   }
 
   function killTemplateNavs() {
+    // Never kill "Top" — on Oxira/projects it wraps the main page content.
     var selectors = [
       '[data-framer-name="Nav"]',
       '[data-framer-name="Navigation"]',
       '[data-framer-name="Navbar"]',
       '[data-framer-name="Nav Items"]',
-      '[data-framer-name="Top"]',
       '[data-framer-name="Header"]',
       '[data-framer-name="Banner"]',
       'header[data-framer-name="Desktop"]',
@@ -111,26 +111,15 @@
     });
 
     // Kill escaped leftover CTA labels from Oxira (top-left blue text)
-    document.querySelectorAll("a, p, span, div").forEach(function (el) {
+    document.querySelectorAll("a, p, span").forEach(function (el) {
       if (!shouldKill(el)) return;
-      if (el.id === NAV_ID || (el.closest && el.closest("#" + NAV_ID))) return;
+      if (el.closest && el.closest("#" + NAV_ID)) return;
       var t = (el.textContent || "").replace(/\s+/g, " ").trim();
       if (t !== "Support AINF" && t !== "Donate now" && t !== "• Support AINF") return;
-      // only nuke tiny leftover nodes (not big page sections)
-      if (el.children && el.children.length > 3) return;
+      if (el.children && el.children.length > 2) return;
       var r = el.getBoundingClientRect();
-      if (r.width === 0 && r.height === 0) {
-        try {
-          el.remove();
-        } catch (e) {}
-        return;
-      }
-      if (r.top < 140 && (r.left < 220 || r.right > window.innerWidth - 40)) {
-        var victim =
-          el.closest("a") ||
-          el.closest('[data-framer-name]') ||
-          el.closest(".framer-1alz978-container, .framer-l21yr0-container, .framer-gc2xy7-container") ||
-          el;
+      if (r.top < 120 && r.left < 180 && r.height < 40) {
+        var victim = el.closest("a") || el;
         try {
           victim.remove();
         } catch (e) {
