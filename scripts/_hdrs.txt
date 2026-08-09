@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+vary: accept-encoding
+x-nextjs-cache: HIT
+cache-control: public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400
+content-encoding: gzip
+content-type: text/html; charset=utf-8
+netlify-cdn-cache-control: public, durable, max-age=31536000, stale-while-revalidate=86400
+Date: Sun, 09 Aug 2026 21:40:34 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
