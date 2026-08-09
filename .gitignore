@@ -4,3 +4,6 @@
 .env*.local
 next-env.d.ts
 *.tsbuildinfo
+public/_*.png
+public/_*.html
+scripts/_*.png
