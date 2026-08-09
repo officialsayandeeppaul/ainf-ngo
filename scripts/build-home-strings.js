@@ -23,6 +23,9 @@ const entries = {
   strings: {
     "About AINF": { bn: "AINF সম্পর্কে", hi: "AINF के बारे में" },
     "Missions": { bn: "মিশন", hi: "मिशन" },
+    "Stories": { bn: "ডায়েরি", hi: "डायरी" },
+    "Contact": { bn: "যোগাযোগ", hi: "संपर्क करें" },
+    "Projects": { bn: "প্রজেক্ট", hi: "प्रोजेक्ट्स" },
     "Diary": { bn: "ডায়েরি", hi: "डायरी" },
     "Reach Us": { bn: "যোগাযোগ", hi: "संपर्क करें" },
     "Support AINF": { bn: "AINF সহায়তা", hi: "AINF समर्थन" },
