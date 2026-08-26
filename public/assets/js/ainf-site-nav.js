@@ -4,8 +4,37 @@
   window.__ainfSiteNavBooted = true;
 
   var NAV_ID = "ainf-global-nav";
+  var BRAND_LOGO = "/assets/img/theainf-logo.webp";
   var path = (location.pathname || "/").replace(/\/$/, "") || "/";
   var isProjects = path === "/projects" || path.indexOf("/projects/") === 0;
+
+  function brandHTML() {
+    return (
+      '<img src="' +
+      BRAND_LOGO +
+      '" alt="AINF" width="36" height="36" decoding="async"/>' +
+      '<span class="ainf-brand-text">AINF</span>'
+    );
+  }
+
+  function applyBrandToLink(link) {
+    if (!link || link.getAttribute("data-ainf-brand-sync") === "1") return false;
+    link.setAttribute("data-ainf-brand-sync", "1");
+    link.classList.add("ainf-brand", "ainf-ft-logo");
+    link.innerHTML = brandHTML();
+    link.setAttribute("aria-label", "AINF home");
+    return true;
+  }
+
+  function findFooterLogoLink(top) {
+    if (!top) return null;
+    return (
+      top.querySelector('[data-framer-name="Details Top"] a[href]') ||
+      top.querySelector(".framer-stohzb-container a[href]") ||
+      top.querySelector("a.framer-sLb0B") ||
+      top.querySelector('a[aria-label="Home"]')
+    );
+  }
 
   function isCurrent(href) {
     if (href === "/projects") return isProjects;
@@ -23,16 +52,8 @@
     var brand = document.createElement("a");
     brand.className = "ainf-brand";
     brand.href = "/";
-    var img = document.createElement("img");
-    img.src = "/assets/img/theainf-mark.svg";
-    img.alt = "";
-    img.width = 28;
-    img.height = 28;
-    img.decoding = "async";
-    var name = document.createElement("span");
-    name.textContent = "theainf";
-    brand.appendChild(img);
-    brand.appendChild(name);
+    brand.innerHTML = brandHTML();
+    brand.querySelector("img").setAttribute("fetchpriority", "high");
 
     var links = document.createElement("div");
     links.className = "ainf-links";
@@ -46,6 +67,7 @@
       var a = document.createElement("a");
       a.href = item[1];
       a.textContent = item[0];
+      a.setAttribute("data-ainf-i18n", item[0]);
       if (isCurrent(item[1])) a.setAttribute("aria-current", "page");
       links.appendChild(a);
     });
@@ -57,9 +79,15 @@
     var cta = document.createElement("a");
     cta.className = "ainf-cta";
     cta.href = "/donate-now";
-    var dot = document.createElement("span");
-    dot.className = "ainf-dot";
-    cta.appendChild(dot);
+    cta.setAttribute("data-ainf-i18n", "Support AINF");
+    var ico = document.createElement("span");
+    ico.className = "ainf-cta-ico";
+    ico.setAttribute("aria-hidden", "true");
+    ico.innerHTML =
+      '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">' +
+      '<path fill="#39a46b" d="M19.4 10.2c-.3-1.5-1.3-2.7-2.6-3.3.2-.4.3-.8.3-1.2 0-1.3-1-2.3-2.3-2.3-.5 0-1 .2-1.4.5C12.7 3.3 11.9 3 11 3c-1.7 0-3.1 1.2-3.4 2.8C6.4 6.1 5.5 7 5.1 8.1 3.9 8.5 3 9.6 3 11c0 .4.1.8.2 1.2H2v2h1.1c.3 1.1.9 2 1.8 2.6L3.6 18l1.4 1.4 1.4-1.4c.7.3 1.4.5 2.2.5v1.5h2V18.5c.4 0 .8-.1 1.2-.2.5.4 1.1.7 1.8.7.4 0 .8-.1 1.1-.2l1.3 1.3 1.4-1.4-1.2-1.2c.7-.7 1.2-1.6 1.4-2.6H22v-2h-1.3c.2-.4.3-.8.3-1.2 0-.5-.1-1-.3-1.4zM9.5 12.2a1 1 0 110-2 1 1 0 010 2z"/>' +
+      "</svg>";
+    cta.appendChild(ico);
     cta.appendChild(document.createTextNode(" Support AINF"));
     right.appendChild(cta);
 
@@ -98,10 +126,19 @@
       '[data-framer-name="Banner"]',
       'header[data-framer-name="Desktop"]',
       'nav[data-framer-name="Navigation"]',
+      'header',
     ];
     selectors.forEach(function (sel) {
       document.querySelectorAll(sel).forEach(function (el) {
         if (!shouldKill(el)) return;
+        // Keep page <header> only if it's Framer template chrome near top
+        if (sel === "header") {
+          var r = el.getBoundingClientRect();
+          var t = el.textContent || "";
+          if (!(r.top < 120 && (/Why Us|Impact|Donate now|Nav Items|Support AINF/i.test(t) || el.querySelector('[data-framer-name="Navigation"]')))) {
+            return;
+          }
+        }
         try {
           el.remove();
         } catch (e) {
@@ -110,40 +147,58 @@
       });
     });
 
-    // Kill escaped leftover CTA labels from Oxira (top-left blue text)
-    document.querySelectorAll("a, p, span").forEach(function (el) {
+    // Kill escaped leftover CTA labels from Oxira (top-left blue text / sticky orphans)
+    document.querySelectorAll("a").forEach(function (el) {
       if (!shouldKill(el)) return;
-      if (el.closest && el.closest("#" + NAV_ID)) return;
+      if (el.closest && el.closest("#" + NAV_ID + ", #ainf-site-footer")) return;
+      // Keep real project CTAs (Primary btn / green pills)
+      if (el.getAttribute("data-framer-name") === "Primary btn") return;
       var t = (el.textContent || "").replace(/\s+/g, " ").trim();
-      if (t !== "Support AINF" && t !== "Donate now" && t !== "• Support AINF") return;
-      if (el.children && el.children.length > 2) return;
+      if (
+        t !== "Support AINF" &&
+        t !== "Donate now" &&
+        t !== "• Support AINF" &&
+        t !== "Support a Project"
+      ) {
+        return;
+      }
       var r = el.getBoundingClientRect();
-      if (r.top < 120 && r.left < 180 && r.height < 40) {
-        var victim = el.closest("a") || el;
+      var color = "";
+      try {
+        color = getComputedStyle(el).color || "";
+      } catch (e) {}
+      var isDefaultBlue = color === "rgb(0, 0, 238)" || color === "rgb(0,0,238)";
+      // orphans under the floating pill / left rail (body pad is ~132px)
+      var nearTop = r.top < 220;
+      var leftRail = r.left < 40 && r.width < 120;
+      if (nearTop || leftRail || isDefaultBlue) {
         try {
-          victim.remove();
+          el.remove();
         } catch (e) {
           el.style.setProperty("display", "none", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+          el.style.setProperty("height", "0", "important");
+          el.style.setProperty("overflow", "hidden", "important");
         }
       }
     });
   }
 
   function paintProjectsBrand() {
-    if (!isProjects) return;
-    var GREEN = "#39a46b";
-    var BAD = {
-      "rgb(4, 63, 45)": 1,
-      "rgb(4, 64, 46)": 1,
-      "rgb(29, 82, 66)": 1,
-      "rgb(17, 115, 69)": 1,
-    };
-    document.querySelectorAll("a,button,div,span").forEach(function (el) {
-      if (el.closest && el.closest("#" + NAV_ID)) return;
-      try {
-        var bg = getComputedStyle(el).backgroundColor;
-        if (BAD[bg]) el.style.setProperty("background-color", GREEN, "important");
-      } catch (e) {}
+    // Intentionally no-op: painting all matching backgrounds to #39a46b
+    // was destroying white project cards / progress bars.
+  }
+
+  function syncHopperFooterBrand() {
+    if (isProjects) return;
+    document.querySelectorAll('[data-framer-name="Footer Top"]').forEach(function (top) {
+      var link = findFooterLogoLink(top);
+      if (!applyBrandToLink(link)) return;
+      top.querySelectorAll(
+        '[data-framer-component-type="SVG"], [data-framer-name="Logo"], .framer-1yg9568, .svgContainer'
+      ).forEach(function (el) {
+        el.style.setProperty("display", "none", "important");
+      });
     });
   }
 
@@ -156,6 +211,7 @@
     }
     ensureNav();
     killTemplateNavs();
+    syncHopperFooterBrand();
   }
 
   tick();
@@ -168,14 +224,20 @@
   var timer = setInterval(function () {
     tick();
     i += 1;
-    if (i > 50) clearInterval(timer);
-  }, 200);
+    if (i > 16) clearInterval(timer);
+  }, 300);
 
+  var moTimer = 0;
   var mo = new MutationObserver(function () {
-    if (!document.getElementById(NAV_ID) || document.getElementById(NAV_ID).parentNode !== document.documentElement) {
-      ensureNav();
-    }
-    killTemplateNavs();
+    if (moTimer) return;
+    moTimer = setTimeout(function () {
+      moTimer = 0;
+      if (!document.getElementById(NAV_ID) || document.getElementById(NAV_ID).parentNode !== document.documentElement) {
+        ensureNav();
+      }
+      killTemplateNavs();
+      syncHopperFooterBrand();
+    }, 180);
   });
   mo.observe(document.documentElement, { childList: true, subtree: true });
 

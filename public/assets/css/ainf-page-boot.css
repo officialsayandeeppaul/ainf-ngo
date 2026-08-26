@@ -1,0 +1,36 @@
+/* Keep Framer letter in/out. Hide the page until fonts + nav are ready so load is not faint/mashed. */
+h1 span[style*="inline-block"],
+h2 span[style*="inline-block"],
+h3 span[style*="inline-block"],
+[data-framer-component-type="RichTextContainer"] span[style*="inline-block"]{
+  white-space:pre!important;
+}
+
+[data-framer-appear-id]{
+  backface-visibility:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+html.ainf-booting #main{
+  opacity:0!important;
+}
+html.ainf-ready #main{
+  opacity:1;
+}
+
+html.ainf-booting img[alt="About Hero Image"],
+img.ainf-img-broken{
+  visibility:hidden!important;
+}
+
+/* Framer CTAs ship two stacked labels (hover + rest). Show one line only. */
+a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"] + [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Tablet"] [data-framer-component-type="RichTextContainer"] + [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Mobile-Close"] [data-framer-component-type="RichTextContainer"] + [data-framer-component-type="RichTextContainer"]{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}

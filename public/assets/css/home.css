@@ -1,4 +1,4 @@
-[style*="opacity:0.001"]{opacity:1!important;transform:none!important;filter:none!important}
+h1 span[style*="inline-block"],h2 span[style*="inline-block"],h3 span[style*="inline-block"]{white-space:pre!important}
 @font-face { font-family: "Onest"; src: url(/assets/fonts/0b532b340381e255.woff2); font-display: swap; font-style: normal; font-weight: 400 }
 @font-face { font-family: "Onest"; src: url(/assets/fonts/98a11855328341d1.woff2); font-display: swap; font-style: normal; font-weight: 700 }
 @font-face { font-family: "Inter"; src: url(/assets/fonts/197dd743787c17b1.woff2); font-display: swap; font-style: normal; font-weight: 400; unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }

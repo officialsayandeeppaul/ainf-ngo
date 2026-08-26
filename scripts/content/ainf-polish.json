@@ -1,0 +1,187 @@
+{
+  "banned": [
+    "Meal Distributed",
+    "Home rebuilt for needy",
+    "uiuxocean",
+    "Surat, India",
+    "Make an Impact",
+    "purpose-driven non-profit",
+    "Non-Profit Framer"
+  ],
+  "pageMeta": {
+    "projects": {
+      "title": "Projects on the Ground | theainf.in",
+      "description": "AINF field projects across Jharkhand and West Bengal — coaching, skills, health camps, water, and seasonal relief, tracked desk by desk."
+    },
+    "projects/daily-meal-program": {
+      "title": "Nutrition Support for Coaching Batches | theainf.in",
+      "description": "AINF Shiksha Desk keeps students in class with meal support, travel stipends, and study kits across Jamtara and partner blocks."
+    },
+    "projects/education-support-drive": {
+      "title": "Education Support Drive | theainf.in",
+      "description": "Scholarships, coaching batches, and study kits through AINF Shiksha Desk — so fees never block a child from class."
+    },
+    "projects/clean-water-initiative": {
+      "title": "Clean Water & Swasthya Support | theainf.in",
+      "description": "AINF Swasthya Desk backs safe water, hygiene awareness, and health camps in underserved blocks of Jharkhand and West Bengal."
+    },
+    "projects/medical-aid-health-camps": {
+      "title": "Medical Aid & Health Camps | theainf.in",
+      "description": "AINF Swasthya Desk runs health camps, referral support, and medicines closer to home for families in our blocks."
+    },
+    "projects/winter-relief-program": {
+      "title": "Seasonal Relief | theainf.in",
+      "description": "AINF seasonal relief — blankets, kits, and emergency support for families during winter and lean months."
+    }
+  },
+  "replacements": [
+    ["We are a non-profit organization dedicated to providing education, healthcare, and support to underprivileged communities.", "AINF is a Section 8 non-profit from Nala, Jamtara — education, skills, jobs, healthcare, farming, and tribal welfare across Jharkhand and West Bengal."],
+    ["We are a non-profit organization dedicated to uplifting communities through education, healthcare, and sustainable support.", "AINF is a Section 8 non-profit from Nala, Jamtara — education, skills, jobs, healthcare, farming, and tribal welfare across Jharkhand and West Bengal."],
+    ["We are a non-profit organization dedicated to providing education, healthcare &amp; support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."],
+    ["We are a non-profit organization dedicated to providing education, healthcare & support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."],
+    ["We are a non-profit organization dedicated to providing education,", "AINF is a Section 8 non-profit dedicated to education,"],
+    ["We are a passionate non-profit organization committed to<br class=\"framer-text\">making a meaningful difference in the lives of those in need.", "AINF is a Section 8 non-profit from Jamtara — classrooms, skill labs,<br class=\"framer-text\">and job pathways across Jharkhand and West Bengal."],
+    ["We are a passionate non-profit organization committed to making a meaningful difference in the lives of those in need.", "AINF is a Section 8 non-profit from Jamtara — classrooms, skill labs, and job pathways across Jharkhand and West Bengal."],
+    ["We are a passionate non-profit organization committed tomaking a meaningful difference in the lives of those in need.", "AINF is a Section 8 non-profit from Jamtara — classrooms, skill labs, and job pathways across Jharkhand and West Bengal."],
+    ["We are a passionate non profit organization committed to making a meaningful difference in the lives of those in need.", "AINF is a Section 8 non-profit from Jamtara — classrooms, skill labs, and job pathways across Jharkhand and West Bengal."],
+    ["We are a purpose-driven non-profit organization committed to creating meaningful change in the lives of underserved communities.", "All Indian Nevarlands Foundation walks with learners and families from Jamtara outward — classrooms, skill labs, health camps, and fair work under one roof."],
+    ["To empower underserved communities by providing access to education, healthcare, and essential resources.", "Help every learner in our blocks reach a classroom, a skill, and a first job — with health, safety, and farm support around them."],
+    ["A world where every individual has the opportunity to live with dignity, access opportunities, &amp; build a better future.", "Eastern India where a student's postcode does not decide their degree, their job, or their dignity."],
+    ["A world where every individual has the opportunity to live with dignity, access opportunities, & build a better future.", "Eastern India where a student's postcode does not decide their degree, their job, or their dignity."],
+    ["Meal Distributed\u2028\u2028for<br class=\"framer-text\">poor families", "Coaching batches funded<br class=\"framer-text\">for students in our blocks"],
+    ["Meal Distributed forpoor families", "Coaching batches funded for students in our blocks"],
+    ["Meal Distributed for poor families", "Coaching batches funded for students in our blocks"],
+    ["Home rebuilt for needy families across city", "Youth linked to skills, jobs, and first interviews"],
+    ["Ensuring food security<br class=\"framer-text\">for needy families", "Scholarships and coaching<br class=\"framer-text\">for students in our blocks"],
+    ["Ensuring food securityfor needy families", "Scholarships and coaching for students in our blocks"],
+    ["Giving living access to<br class=\"framer-text\">safe homes &amp; future", "Skills, placement, and<br class=\"framer-text\">dignified first jobs"],
+    ["Giving living access tosafe homes & future", "Skills, placement, and dignified first jobs"],
+    ["Giving living access to<br class=\"framer-text\">safe homes & future", "Skills, placement, and<br class=\"framer-text\">dignified first jobs"],
+    ["Our mission is to empower communities through education,\u2028\u2028healthcare, and sustainable development programs.", "Seven desks — Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare — tracked block by block."],
+    ["Our mission is to empower communities through education, healthcare, and sustainable development programs.", "Seven desks — Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare — tracked block by block."],
+    ["There are many ways you can support our mission and help us create lasting change. Every action, big or small, brings hope to someone in need.", "Give to a desk, join as a field sevak, or share theainf.in — every hour and every rupee reaches a student or family in our blocks."],
+    ["Share our mission with your friends and family to help us reach more people and grow our impact.", "Share theainf.in in your group — one forward can connect a youth to coaching or a job lead."],
+    ["We value your trust. Here you’ll find honest answers about how your donations are used to empower lives and create lasting change.", "Section 8 rules are clear — read where donations go, which account handles them, and how to volunteer."],
+    ["We value your trust. Here you'll find honest answers about how your donations are used to empower lives and create lasting change.", "Section 8 rules are clear — read where donations go, which account handles them, and how to volunteer."],
+    ["Your financial support helps us provide food, education, &amp; healthcare to those who need it.", "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families."],
+    ["Your financial support helps us provide food, education, & healthcare to those who need it.", "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families."],
+    ["Give your time and skills to support our initiatives and directly impact lives in your community.", "Coach exam batches, host skill weekends, or sit in placement cells with AINF. Even two hours help if one student finds direction."],
+    ["Support a specific program &amp; see exactly how your contribution is making a difference.", "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt."],
+    ["Support a specific program & see exactly how your contribution is making a difference.", "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt."],
+    ["Support a specific program or individual &amp; see exactly how your contribution is making a difference.", "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt."],
+    ["Support a specific program or individual & see exactly how your contribution is making a difference.", "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt."],
+    ["Join our community of passionate volunteers and help us create real impact where it matters most. Whether you can give a few hours or ongoing support, your time can change lives.", "Coach exam batches, host skill weekends, or sit in placement cells with AINF. Even two hours help if one student finds direction."],
+    ["What does your organization do?", "What does AINF deliver on the ground?"],
+    ["How can I donate?", "How do online and offline donations work?"],
+    ["Where does my donation go?", "Where does my donation go on the ledger?"],
+    ["How can I become a volunteer?", "How do I join an AINF field team?"],
+    ["Can I choose a specific cause to support?", "Can I tag my donation to one desk?"],
+    ["Testimonials share stories of gratitude, transformation, and personal positive experiences.", "Students, field sevaks, and partners from Asansol to Jamtara — straight talk on learning, landing work, and earning dignity."],
+    ["Their dedication, compassion, and commitment help us bring real change to communities every day.", "Field sevaks show up before the coaching bell and stay after the rozgar mela — that is how batches finish strong."],
+    ["A glimpse into the lives we’ve touched and the communities we serve.", "Milestones from coaching rooms, health camps, and gram visits across Jharkhand and West Bengal."],
+    ["A glimpse into the lives we've touched and the communities we serve.", "Milestones from coaching rooms, health camps, and gram visits across Jharkhand and West Bengal."],
+    ["Explore updates, field notes, and impact stories that amplify real-world change daily.", "Explore field notes from coaching rooms, ITI gates, and gram camps across Jharkhand and West Bengal."],
+    ["We provide access to quality education, school supplies, and mentorship programs for underprivileged children in need.", "AINF Shiksha Desk funds scholarships, study kits, and block-level coaching so fees never block a child from class."],
+    ["We deliver nutritious meals and essential food supplies to families facing hunger and daily food insecurity challenges.", "Rozgar &amp; Skills Desk trains youth, hosts rozgar melas, and connects graduates to employers — dignity from work, not repeated relief."],
+    ["href=\"mailto:uiuxocean@gmail.com\"", "href=\"mailto:hello@theainf.in\""],
+    [">uiuxocean@gmail.com<", ">hello@theainf.in<"],
+    ["uiuxocean@gmail.com", "hello@theainf.in"],
+    [">Surat, India<", ">Nala, Jamtara, Jharkhand<"],
+    ["Surat, India", "Nala, Jamtara, Jharkhand"],
+    ["All Indian Neverlands Foundation", "All Indian Nevarlands Foundation"],
+    ["href=\"./privacy\"", "href=\"/legal-pages/terms-conditions\""],
+    ["href=\"../privacy\"", "href=\"/legal-pages/terms-conditions\""],
+    ["href=\"./terms-of-use\"", "href=\"/legal-pages/terms-conditions\""],
+    ["href=\"../terms-of-use\"", "href=\"/legal-pages/terms-conditions\""],
+    ["href=\"./contact\"", "href=\"/contact-us\""],
+    ["href=\"../contact\"", "href=\"/contact-us\""],
+    ["Privacy &amp; Policy", "Terms &amp; Conditions"],
+    ["Privacy & Policy", "Terms & Conditions"],
+    [">Terms of Use<", ">Terms &amp; Conditions<"],
+    ["Support a Project", "Support AINF"],
+    ["Our mission is to help people in need.", "AINF desks deliver coaching, skills, health camps, and farm support where students and families need them most."],
+    ["We provide nutritious meals, clean water, and basic care to children and families who are struggling to meet daily needs.", "From Jamtara outward we fund study kits, skill labs, swasthya camps, and kheti inputs — tracked rupee by rupee."],
+    ["We’ve seen lives change when people come together, One meal, one family, one step at a time.", "We've seen paths change when a stipend, a skill kit, and a sevak show up together — one student, one job, one family at a time."],
+    ["We've seen lives change when people come together, One meal, one family, one step at a time.", "We've seen paths change when a stipend, a skill kit, and a sevak show up together — one student, one job, one family at a time."],
+    ["Providing nutritious daily meals to underprivileged children to fight hunger and malnutrition.", "AINF Shiksha Desk keeps students in class with meal support, travel stipends, and study kits in our blocks."],
+    ["This project ensures that children from low-income communities receive at least one healthy meal every day, helping them grow, learn, and live with dignity.", "This project keeps coaching-batch students fed, present, and able to sit the next exam — so hunger never ends a school day early."],
+    ["Daily Meal Program", "Nutrition Support for Batches"],
+    ["Why Nutrition Matters", "Why Skills Matter"],
+    ["Why Empowerment Matters", "Why Safety Matters"],
+    ["Why Clean Water Matters", "Why Tribal &amp; Farm Support Matters"],
+    ["Make an Impact", "Stand With AINF"],
+    ["AINF is a Section 8 non-profit dedicated to education, healthcare &amp; support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."],
+    ["AINF is a Section 8 non-profit dedicated to education, healthcare & support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."],
+    ["Coaching batches fundedfor students in our blocks", "Coaching batches funded for students in our blocks"],
+    ["Coaching batches funded<br class=\"framer-text\">for students in our blocks", "Coaching batches funded for students in our blocks"],
+    ["AINF – Charity &amp; Non-Profit Framer Template", "Projects on the Ground | theainf.in"],
+    ["AINF is a modern Charity &amp; Non-Profit Framer template designed for NGOs, fundraisers, and social causes. Easily create donation pages, campaigns, and impact-driven websites with a clean, fast, and fully responsive design.", "AINF field projects across Jharkhand and West Bengal — coaching, skills, health camps, and seasonal relief."],
+    ["Meal Distributed\\u2028\\u2028for`,a(`br`,{}),`poor families", "Coaching batches funded for`,a(`br`,{}),`students in our blocks"],
+    ["purpose-driven non-profit organization committed to creating meaningful change in the\\u2028lives of underserved communities.", "All Indian Nevarlands Foundation walks with learners and families from Jamtara outward — classrooms, skill labs, health camps, and fair work under one roof."],
+    ["Support AINFs to AINF are voluntary gifts", "Donations to AINF are voluntary gifts"],
+    ["Supporting Through Support AINFs", "Supporting Through Gifts"],
+    ["Support AINFs allow us", "Gifts allow us"],
+    [">Support AINFs<", ">Donations<"],
+    ["[5,\\\"Support AINFs\\\"]", "[5,\\\"Donations\\\"]"],
+    ["Support AINFs", "Donations"],
+    ["ProjectsProjects", "Projects"],
+    ["theainfAINF", "AINF"],
+    ["Create a free website with Framer, the website builder loved by startups, designers and agencies.", "AINF — All Indian Nevarlands Foundation · theainf.in"],
+    ["AINF is a Section 8 non-profit dedicated to education, healthcare &amp; support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."],
+    ["AINF is a Section 8 non-profit dedicated to education, healthcare & support.", "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal."]
+  ],
+  "pageReplacements": {
+    "about-us": [
+      [">1,000+<", ">12,500+<"],
+      [">300+<", ">500+<"]
+    ],
+    "home": [
+      ["Rozgar-ready skills for India's youth", "Rozgar-ready skills for youth across Jharkhand and West Bengal"],
+      ["Coaching, skills &amp; fair chances for youth across Jharkhand &amp; West Bengal", "Coaching, skills, and fair chances for youth across Jharkhand and West Bengal"]
+    ],
+    "causes/food-nutrition-for-families": [
+      ["Why Nutrition Matters", "Why Skills and Jobs Matter"],
+      ["Nutritious food is one of the most basic human needs, yet many families continue to face hunger and food insecurity every day. Proper nutrition is essential for healthy growth, energy, and overall well-being.", "A certificate and a first interview matter more than another relief packet. Rozgar Desk trains youth so they can earn, not wait."],
+      ["For children, access to healthy meals directly impacts learning, development, and long-term health. Without proper nutrition, families struggle to build stable and healthy lives.", "Without a skill, interview practice, or an employer who will listen, school-leavers stall. We close that gap batch by batch."],
+      ["The Reality of Hunger", "The Reality of Unemployment"],
+      ["Many families are forced to choose between food and other basic necessities. Rising costs and limited resources make it difficult for vulnerable communities to access balanced meals regularly.", "Many young people still leave school without a skill certificate or interview practice — and migrate blindly or sit idle."],
+      ["Food insecurity affects not only physical health but also emotional and mental well-being. Hunger limits opportunities and creates long-term challenges for families.", "Joblessness drains confidence. A rozgar mela, a CV review, and one local employer can restart a plan."],
+      ["Our Commitment to Support", "Our Commitment to Work"],
+      ["Our mission is to provide nutritious meals and food supplies to families facing difficult circumstances. Through food distribution programs and community support initiatives, we help reduce hunger and improve daily living conditions.", "Rozgar & Skills Desk trains youth, hosts placement cells, and connects graduates to dignified work across Jharkhand and West Bengal."],
+      ["We also focus on creating sustainable food support systems that help communities become more self-reliant over time.", "We also build local employer trust so the next batch walks into a known workshop, not a cold listing."],
+      ["Nourishing Communities Together", "Placing Youth Together"],
+      ["A simple meal can bring hope, comfort, and strength to a family in need. By working together, we can help ensure that no family has to face hunger alone.", "A first job can reset a household. By working together, we can make sure no youth in our blocks is left without a pathway."],
+      ["Together, we can create healthier and stronger communities through nutrition and care.", "Together, we can build stronger blocks through skills, placement, and follow-up."]
+    ],
+    "causes/women-empowerment-for-rise": [
+      ["Empowering women creates stronger families, healthier communities, and better opportunities for future generations. When women have access to education, skills, and resources, they", "When women and girls are safe, skilled, and heard, families hold together and girls stay in school. Nari Suraksha Desk starts with safety, then livelihood."],
+      ["Our Approach to Empowerment", "Our Approach to Safety and Dignity"],
+      ["When women rise, entire communities benefit. Empowered women inspire future generations, contribute to local economies, and help create positive social change.", "When a girl finishes a batch and a woman knows her rights, the whole panchayat shifts — safety first, dignity always."]
+    ],
+    "causes/water-sanitation-for-health": [
+      ["We provide clean drinking water and improved sanitation facilities to promote healthier living conditions in communities.", "Janajati Sahyog &amp; Kheti Desk stands with tribal hamlets — farm inputs, market links, and seasonal planning so kheti income survives a bad monsoon."],
+      ["Access to clean water and proper sanitation is essential for healthy living. Safe water reduces the spread of diseases, improves hygiene, and supports overall community well-being.", "Land dignity, fair prices, and youth who do not have to migrate blindly — that is tribal welfare with a ledger, not a slogan."],
+      ["Yet, many communities still lack access to reliable clean water sources and sanitation facilities.", "Yet many janajati farmers still sell at distress rates without storage, advice, or collective bargaining."],
+      ["The Challenges Communities Face", "The Challenges Hamlets Face"],
+      ["Unsafe drinking water and poor sanitation continue to create serious health risks for families. Children are especially vulnerable to waterborne diseases caused by contaminated water sources.", "A bad monsoon, a middleman, or a missing seed kit can wipe a season. We plan with hamlets before the rain, not after the loss."],
+      ["Limited sanitation facilities also impact education, health, and daily living conditions within communities.", "Limited market access also pushes youth out of the block before they finish a skill."],
+      ["Our Commitment to Change", "Our Commitment to Hamlets"],
+      ["We work to improve access to clean drinking water and proper sanitation facilities in underserved areas. Through awareness programs and infrastructure support, we help communities build healthier environments.", "We work on farm inputs, fair markets, and seasonal resilience — so janajati families keep land, income, and dignity."],
+      ["Our initiatives focus on long-term solutions that improve hygiene, health, and quality of life.", "Our work focuses on long-term farm income, not one-off relief drops."],
+      ["Building Healthier Communities", "Standing With Hamlets"],
+      ["Clean water changes lives. It improves health, supports education, and creates safer environments for families and children.", "Fair kheti income changes lives. It keeps youth in the block and students in class."]
+    ],
+    "causes/healthcare-for-all": [
+      ["In underserved communities, healthcare facilities are often limited or difficult to reach. Families may not have access to regular checkups, medicines, or emergency care when they", "In our blocks, camps are far, costs are unclear, and follow-up is missing. Swasthya Desk brings care closer to home — camps, referrals, and medicines families can actually reach."]
+    ],
+    "projects": [
+      ["Projects | theainf.in — All Indian Nevarlands Foundation", "Projects on the Ground | theainf.in"]
+    ],
+    "projects/daily-meal-program": [
+      ["12,000+ meals served", "12,500+ students reached"]
+    ],
+    "projects/winter-relief-program": [
+      ["1,000+ blankets distributed", "Seasonal kits delivered"]
+    ]
+  }
+}

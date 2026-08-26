@@ -1,0 +1,308 @@
+{
+  "meta": {
+    "title": {
+      "en": "theainf.in — All Indian Nevarlands Foundation | Education · Jobs · Seva",
+      "bn": "theainf.in — অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন | শিক্ষা · কর্ম · সেবা",
+      "hi": "theainf.in — ऑल इंडियन नेवरलैंड्स फाउंडेशन | शिक्षा · रोज़गार · सेवा"
+    },
+    "description": {
+      "en": "AINF (theainf.in) — All Indian Nevarlands Foundation. HQ Nala, Jamtara (Jharkhand); active across West Bengal. Education, skills, placement, women safety, healthcare, farming, and tribal welfare.",
+      "bn": "AINF (theainf.in) — অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন। প্রধান কার্যালয় নালা, জামতাড়া (ঝাড়খণ্ড); পশ্চিমবঙ্গ জুড়ে সক্রিয়। শিক্ষা, দক্ষতা, কর্মসংস্থান, নারী সুরক্ষা, স্বাস্থ্য, কৃষি ও আদিবাসী কল্যাণ।",
+      "hi": "AINF (theainf.in) — ऑल इंडियन नेवरलैंड्स फाउंडेशन। मुख्यालय नाला, जामताड़ा (झारखंड); पश्चिम बंगाल में सक्रिय। शिक्षा, कौशल, रोज़गार, महिला सुरक्षा, स्वास्थ्य, खेती और आदिवासी कल्याण।"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": {
+        "en": "theainf.in — All Indian Nevarlands Foundation | Education · Jobs · Seva",
+        "bn": "theainf.in — অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন | শিক্ষা · কর্ম · সেবা",
+        "hi": "theainf.in — ऑल इंडियन नेवरलैंड्स फाउंडेशन | शिक्षा · रोज़गार · सेवा"
+      },
+      "description": {
+        "en": "AINF (theainf.in) — All Indian Nevarlands Foundation. HQ Nala, Jamtara (Jharkhand); active across West Bengal. Education, skills, placement, women safety, healthcare, farming, and tribal welfare.",
+        "bn": "AINF (theainf.in) — অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন। প্রধান কার্যালয় নালা, জামতাড়া (ঝাড়খণ্ড); পশ্চিমবঙ্গ জুড়ে সক্রিয়। শিক্ষা, দক্ষতা, কর্মসংস্থান, নারী সুরক্ষা, স্বাস্থ্য, কৃষি ও আদিবাসী কল্যাণ।",
+        "hi": "AINF (theainf.in) — ऑल इंडियन नेवरलैंड्स फाउंडेशन। मुख्यालय नाला, जामताड़ा (झारखंड); पश्चिम बंगाल में सक्रिय। शिक्षा, कौशल, रोज़गार, महिला सुरक्षा, स्वास्थ्य, खेती और आदिवासी कल्याण।"
+      }
+    },
+    "about-us": {
+      "title": {
+        "en": "About AINF — Jharkhand & West Bengal | theainf.in",
+        "bn": "AINF সম্পর্কে — ঝাড়খণ্ড ও পশ্চিমবঙ্গ | theainf.in",
+        "hi": "AINF के बारे में — झारखंड और पश्चिम बंगाल | theainf.in"
+      },
+      "description": {
+        "en": "Meet All Indian Nevarlands Foundation — Section 8 non-profit from Nala, Jamtara, working across Jharkhand and West Bengal. DARPAN JH/2026/1133191.",
+        "bn": "অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন — নালা, জামতাড়ার Section 8 অলাভজনক সংস্থা, ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে কাজ করে। DARPAN JH/2026/1133191।",
+        "hi": "ऑल इंडियन नेवरलैंड्स फाउंडेशन — नाला, जामताड़ा की Section 8 गैर-लाभकारी संस्था, झारखंड और पश्चिम बंगाल में कार्यरत। DARPAN JH/2026/1133191।"
+      }
+    },
+    "contact-us": {
+      "title": {
+        "en": "Contact AINF — Jharkhand & West Bengal | theainf.in",
+        "bn": "AINF যোগাযোগ — ঝাড়খণ্ড ও পশ্চিমবঙ্গ | theainf.in",
+        "hi": "AINF संपर्क — झारखंड और पश्चिम बंगाल | theainf.in"
+      },
+      "description": {
+        "en": "Reach All Indian Nevarlands Foundation — HQ Nala, Jamtara (Jharkhand); field desks across West Bengal including Asansol and Kolkata region.",
+        "bn": "অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশনের সাথে যোগাযোগ করুন — HQ নালা, জামতাড়া (ঝাড়খণ্ড); আসানসোল ও কলকাতা সহ পশ্চিমবঙ্গ জুড়ে ফিল্ড ডেস্ক।",
+        "hi": "ऑल इंडियन नेवरलैंड्स फाउंडेशन से संपर्क करें — HQ नाला, जामताड़ा (झारखंड); आसनसोल और कोलकाता सहित पश्चिम बंगाल में फ़ील्ड डेस्क।"
+      }
+    },
+    "causes": {
+      "title": {
+        "en": "Our Missions — Seven Focus Areas | theainf.in",
+        "bn": "আমাদের মিশন — সাতটি মনোযোগের ক্ষেত্র | theainf.in",
+        "hi": "हमारे मिशन — सात फ़ोकस क्षेत्र | theainf.in"
+      },
+      "description": {
+        "en": "Explore AINF desks: Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare programmes across India.",
+        "bn": "AINF ডেস্ক দেখুন: শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, জনজাতি সহযোগ ও সামাজিক কল্যাণ।",
+        "hi": "AINF डेस्क देखें: शिक्षा, स्वास्थ्य, रोज़गार, नारी सुरक्षा, खेती, जनजाति सहयोग और सामाजिक कल्याण।"
+      }
+    },
+    "blogs": {
+      "title": {
+        "en": "Field Notes & Stories | theainf.in",
+        "bn": "ফিল্ড নোট ও গল্প | theainf.in",
+        "hi": "फ़ील्ड नोट और कहानियाँ | theainf.in"
+      },
+      "description": {
+        "en": "Ground reports from AINF teams — coaching batches, rozgar melas, and health camps across Jharkhand, West Bengal, and partner districts.",
+        "bn": "AINF দলের মাঠ প্রতিবেদন — কোচিং ব্যাচ, রোজগার মেলা ও স্বাস্থ্য শিবির।",
+        "hi": "AINF टीमों की ज़मीनी रिपोर्ट — कोचिंग बैच, रोज़गार मेला और स्वास्थ्य शिविर।"
+      }
+    },
+    "donate-now": {
+      "title": {
+        "en": "Support AINF — Donate | theainf.in",
+        "bn": "AINF সমর্থন — দান করুন | theainf.in",
+        "hi": "AINF समर्थन — दान करें | theainf.in"
+      },
+      "description": {
+        "en": "Fund coaching batches, skill kits, travel stipends, and emergency relief through AINF — a registered Section 8 non-profit (DARPAN JH/2026/1133191).",
+        "bn": "AINF-এর মাধ্যমে কোচিং ব্যাচ, দক্ষতা কিট, ভ্রমণ ভাতা ও জরুরি ত্রাণে তহবিল দিন।",
+        "hi": "AINF के माध्यम से कोचिंग बैच, कौशल किट, यात्रा भत्ता और आपात राहत को धन दें।"
+      }
+    },
+    "join-as-volunteer": {
+      "title": {
+        "en": "Volunteer With AINF | theainf.in",
+        "bn": "AINF-এর সাথে স্বেচ্ছাসেবা | theainf.in",
+        "hi": "AINF के साथ स्वयंसेवा | theainf.in"
+      },
+      "description": {
+        "en": "Join AINF as a field sevak — teach a batch, review CVs, or help at a rozgar mela in your district.",
+        "bn": "ফিল্ড সেবক হিসেবে AINF-এ যোগ দিন — ব্যাচ পড়ান, CV দেখুন, বা আপনার জেলায় রোজগার মেলায় সাহায্য করুন।",
+        "hi": "फ़ील्ड सेवक के रूप में AINF से जुड़ें — बैच पढ़ाएँ, CV देखें, या अपने ज़िले में रोज़गार मेले में मदद करें।"
+      }
+    },
+    "legal-pages/terms-conditions": {
+      "title": {
+        "en": "Terms & Conditions — AINF | theainf.in",
+        "bn": "শর্তাবলী — AINF | theainf.in",
+        "hi": "नियम और शर्तें — AINF | theainf.in"
+      },
+      "description": {
+        "en": "Terms for using theainf.in and supporting All Indian Nevarlands Foundation — donations, volunteer signup, privacy, and Section 8 compliance.",
+        "bn": "theainf.in ব্যবহার ও AINF সমর্থনের শর্তাবলী।",
+        "hi": "theainf.in के उपयोग और AINF समर्थन की शर्तें।"
+      }
+    },
+    "projects": {
+      "title": {
+        "en": "Projects on the Ground | theainf.in",
+        "bn": "মাঠের প্রকল্প | theainf.in",
+        "hi": "ज़मीन पर प्रोजेक्ट | theainf.in"
+      },
+      "description": {
+        "en": "AINF field projects across Jharkhand and West Bengal — coaching, skills, health camps, water, and seasonal relief.",
+        "bn": "ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে AINF-এর মাঠ প্রকল্প।",
+        "hi": "झारखंड और पश्चिम बंगाल में AINF के फ़ील्ड प्रोजेक्ट।"
+      }
+    },
+    "causes/education-for-every-child": {
+      "title": { "en": "Shiksha Desk — Every Child Deserves a Classroom | theainf.in", "bn": "শিক্ষা ডেস্ক — প্রতিটি শিশুর ক্লাসরুম | theainf.in", "hi": "शिक्षा डेस्क — हर बच्चे को कक्षा | theainf.in" },
+      "description": { "en": "AINF Shiksha Desk funds scholarships, study kits, and coaching support for students in Jamtara and partner districts.", "bn": "AINF শিক্ষা ডেস্ক বৃত্তি, পড়ার সামগ্রী ও কোচিং সহায়তা দেয়।", "hi": "AINF शिक्षा डेस्क छात्रवृत्ति, अध्ययन सामग्री और कोचिंग सहायता देता है।" }
+    },
+    "causes/healthcare-for-all": {
+      "title": { "en": "Swasthya Desk — Care Closer to Home | theainf.in", "bn": "স্বাস্থ্য ডেস্ক — বাড়ির কাছে সেবা | theainf.in", "hi": "स्वास्थ्य डेस्क — घर के पास देखभाल | theainf.in" },
+      "description": { "en": "Swasthya Desk runs health camps, referral support, and wellness drives for families in underserved blocks.", "bn": "স্বাস্থ্য ডেস্ক স্বাস্থ্য শিবির ও রেফারেল সহায়তা চালায়।", "hi": "स्वास्थ्य डेस्क स्वास्थ्य शिविर और रेफ़रल सहायता चलाता है।" }
+    },
+    "causes/food-nutrition-for-families": {
+      "title": { "en": "Rozgar & Skills Desk — Jobs, Not Just Relief | theainf.in", "bn": "রোজগার ও দক্ষতা ডেস্ক | theainf.in", "hi": "रोज़गार और कौशल डेस्क | theainf.in" },
+      "description": { "en": "Rozgar & Skills Desk trains youth, hosts placement cells, and connects graduates to dignified work.", "bn": "রোজগার ডেস্ক যুবকদের প্রশিক্ষণ দেয় ও কাজের সাথে যুক্ত করে।", "hi": "रोज़गार डेस्क युवाओं को प्रशिक्षण देकर काम से जोड़ता है।" }
+    },
+    "causes/women-empowerment-for-rise": {
+      "title": { "en": "Nari Suraksha Desk — Safety First, Dignity Always | theainf.in", "bn": "নারী সুরক্ষা ডেস্ক | theainf.in", "hi": "नारी सुरक्षा डेस्क | theainf.in" },
+      "description": { "en": "Nari Suraksha Desk supports safety workshops, legal awareness, and livelihood pathways for women and girls.", "bn": "নারী সুরক্ষা ডেস্ক নিরাপত্তা কর্মশালা ও জীবিকার পথ সমর্থন করে।", "hi": "नारी सुरक्षा डेस्क सुरक्षा कार्यशाला और आजीविका मार्गों का समर्थन करता है।" }
+    },
+    "causes/water-sanitation-for-health": {
+      "title": { "en": "Janajati Sahyog & Kheti Desk | theainf.in", "bn": "জনজাতি সহযোগ ও কৃষি ডেস্ক | theainf.in", "hi": "जनजाति सहयोग और खेती डेस्क | theainf.in" },
+      "description": { "en": "Tribal welfare, farm inputs, and kheti support for janajati communities — fair markets and seasonal resilience.", "bn": "আদিবাসী কল্যাণ, কৃষি সামগ্রী ও ন্যায্য বাজার।", "hi": "आदिवासी कल्याण, खेती सामग्री और निष्पक्ष बाज़ार।" }
+    },
+    "blogs/a-day-in-the-life-of-our-volunteers": {
+      "title": { "en": "A Block Day With AINF Field Sevaks | theainf.in", "bn": "AINF ফিল্ড সেবকদের এক দিন | theainf.in", "hi": "AINF फ़ील्ड सेवकों का एक दिन | theainf.in" },
+      "description": { "en": "Follow an AINF field sevak from morning coaching to evening rozgar mela.", "bn": "সকালের কোচিং থেকে সন্ধ্যার রোজগার মেলা পর্যন্ত এক সেবকের দিন।", "hi": "सुबह की कोचिंग से शाम के रोज़गार मेले तक एक सेवक का दिन।" }
+    },
+    "blogs/building-stronger-communities-together": {
+      "title": { "en": "Block Teams, Shared Progress | theainf.in", "bn": "ব্লক দল, ভাগ করা অগ্রগতি | theainf.in", "hi": "ब्लॉक टीमें, साझा प्रगति | theainf.in" },
+      "description": { "en": "How panchayat partners and AINF block teams align on education, health, and livelihood goals.", "bn": "পঞ্চায়েত অংশীদার ও AINF ব্লক দল কীভাবে লক্ষ্য মিলিয়ে কাজ করে।", "hi": "पंचायत साझेदार और AINF ब्लॉक टीमें लक्ष्य कैसे मिलाती हैं।" }
+    },
+    "blogs/education-can-break-poverty": {
+      "title": { "en": "Shiksha That Opens the First Door | theainf.in", "bn": "শিক্ষা যা প্রথম দরজা খোলে | theainf.in", "hi": "शिक्षा जो पहला दरवाज़ा खोलती है | theainf.in" },
+      "description": { "en": "Why the first coaching stipend often matters more than the final job offer.", "bn": "কেন প্রথম কোচিং ভাতা প্রায়ই চূড়ান্ত চাকরির অফারের চেয়ে বেশি গুরুত্বপূর্ণ।", "hi": "पहला कोचिंग भत्ता अक्सर अंतिम नौकरी के ऑफ़र से ज़्यादा मायने क्यों रखता है।" }
+    },
+    "blogs/how-your-donations-are-changing-lives-every-day": {
+      "title": { "en": "Where Your Rupee Lands — Daily Impact | theainf.in", "bn": "আপনার টাকা কোথায় যায় | theainf.in", "hi": "आपका रुपया कहाँ लगता है | theainf.in" },
+      "description": { "en": "Transparent snapshots of how AINF tracks donations from receipt to desk delivery.", "bn": "রসিদ থেকে ডেস্ক ডেলিভারি পর্যন্ত AINF কীভাবে অনুদান ট্র্যাক করে।", "hi": "रसीद से डेस्क डिलीवरी तक AINF दान कैसे ट्रैक करता है।" }
+    },
+    "blogs/simple-ways-to-make-impact-on-community": {
+      "title": { "en": "Small Acts, Big Ripple in Your Panchayat | theainf.in", "bn": "ছোট কাজ, পঞ্চায়েতে বড় প্রভাব | theainf.in", "hi": "छोटे काम, पंचायत में बड़ा असर | theainf.in" },
+      "description": { "en": "Five low-cost ways residents can support AINF desks without leaving their block.", "bn": "নিজের ব্লক না ছেড়ে AINF ডেস্ক সাহায্যের পাঁচটি সহজ উপায়।", "hi": "अपना ब्लॉक छोड़े बिना AINF डेस्क की मदद के पाँच सरल तरीके।" }
+    },
+    "blogs/why-every-volunteer-matters": {
+      "title": { "en": "Why One Field Sevak Changes a Batch | theainf.in", "bn": "কেন একজন ফিল্ড সেবক একটি ব্যাচ বদলে দেয় | theainf.in", "hi": "एक फ़ील्ड सेवक बैच क्यों बदल देता है | theainf.in" },
+      "description": { "en": "Volunteer density, not just funding, predicts whether a coaching batch finishes strong.", "bn": "শুধু অর্থ নয়, সেবকের উপস্থিতিই ব্যাচ শেষ করায়।", "hi": "केवल धन नहीं, सेवक की उपस्थिति बैच को पूरा कराती है।" }
+    },
+    "projects/daily-meal-program": {
+      "title": { "en": "Nutrition Support for Coaching Batches | theainf.in", "bn": "কোচিং ব্যাচের পুষ্টি সহায়তা | theainf.in", "hi": "कोचिंग बैच के लिए पोषण सहायता | theainf.in" },
+      "description": { "en": "AINF Shiksha Desk keeps students in class with meal support, travel stipends, and study kits.", "bn": "শিক্ষা ডেস্ক খাবার, ভ্রমণ ভাতা ও পড়ার সামগ্রী দিয়ে শিক্ষার্থীদের ক্লাসে রাখে।", "hi": "शिक्षा डेस्क भोजन, यात्रा भत्ता और अध्ययन सामग्री से छात्रों को कक्षा में रखता है।" }
+    },
+    "projects/education-support-drive": {
+      "title": { "en": "Education Support Drive | theainf.in", "bn": "শিক্ষা সহায়তা অভিযান | theainf.in", "hi": "शिक्षा सहायता अभियान | theainf.in" },
+      "description": { "en": "Scholarships, coaching batches, and study kits through AINF Shiksha Desk.", "bn": "AINF শিক্ষা ডেস্কের বৃত্তি, কোচিং ও পড়ার সামগ্রী।", "hi": "AINF शिक्षा डेस्क की छात्रवृत्ति, कोचिंग और अध्ययन सामग्री।" }
+    },
+    "projects/clean-water-initiative": {
+      "title": { "en": "Clean Water & Swasthya Support | theainf.in", "bn": "পরিষ্কার জল ও স্বাস্থ্য সহায়তা | theainf.in", "hi": "स्वच्छ जल और स्वास्थ्य सहायता | theainf.in" },
+      "description": { "en": "AINF Swasthya Desk backs safe water, hygiene awareness, and health camps in underserved blocks.", "bn": "স্বাস্থ্য ডেস্ক নিরাপদ জল, স্বাস্থ্যবিধি ও শিবির সমর্থন করে।", "hi": "स्वास्थ्य डेस्क सुरक्षित पानी, स्वच्छता और शिविरों का समर्थन करता है।" }
+    },
+    "projects/medical-aid-health-camps": {
+      "title": { "en": "Medical Aid & Health Camps | theainf.in", "bn": "চিকিৎসা সহায়তা ও স্বাস্থ্য শিবির | theainf.in", "hi": "चिकित्सा सहायता और स्वास्थ्य शिविर | theainf.in" },
+      "description": { "en": "AINF Swasthya Desk runs health camps, referral support, and medicines closer to home.", "bn": "স্বাস্থ্য ডেস্ক শিবির, রেফারেল ও ওষুধ বাড়ির কাছে পৌঁছায়।", "hi": "स्वास्थ्य डेस्क शिविर, रेफ़रल और दवा घर के पास पहुँचाता है।" }
+    },
+    "projects/winter-relief-program": {
+      "title": { "en": "Seasonal Relief | theainf.in", "bn": "মৌসুমি ত্রাণ | theainf.in", "hi": "मौसमी राहत | theainf.in" },
+      "description": { "en": "AINF seasonal relief — blankets, kits, and emergency support during winter and lean months.", "bn": "শীত ও দুর্ভিক্ষের মাসে AINF-এর মৌসুমি ত্রাণ।", "hi": "सर्दी और कठिन महीनों में AINF की मौसमी राहत।" }
+    }
+  },
+  "strings": {
+    "Stories": { "bn": "গল্প", "hi": "कहानियाँ" },
+    "Contact": { "bn": "যোগাযোগ", "hi": "संपर्क" },
+    "Projects": { "bn": "প্রকল্প", "hi": "प्रोजेक्ट" },
+    "AINF is a Section 8 non-profit from Nala, Jamtara — education, skills, jobs, healthcare, farming, and tribal welfare across Jharkhand and West Bengal.": {
+      "bn": "AINF নালা, জামতাড়ার একটি Section 8 অলাভজনক সংস্থা — ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে শিক্ষা, দক্ষতা, কাজ, স্বাস্থ্য, কৃষি ও আদিবাসী কল্যাণ।",
+      "hi": "AINF नाला, जामताड़ा की Section 8 गैर-लाभकारी संस्था है — झारखंड और पश्चिम बंगाल में शिक्षा, कौशल, काम, स्वास्थ्य, खेती और आदिवासी कल्याण।"
+    },
+    "AINF is a Section 8 non-profit from Jamtara — classrooms, skill labs, and job pathways across Jharkhand and West Bengal.": {
+      "bn": "AINF জামতাড়ার একটি Section 8 অলাভজনক সংস্থা — ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে ক্লাসরুম, দক্ষতা ল্যাব ও কর্মপথ।",
+      "hi": "AINF जामताड़ा की Section 8 गैर-लाभकारी संस्था है — झारखंड और पश्चिम बंगाल में कक्षाएँ, कौशल प्रयोगशालाएँ और रोज़गार मार्ग।"
+    },
+    "AINF is a Section 8 non-profit — education, skills, healthcare, and dignified livelihoods across Jharkhand and West Bengal.": {
+      "bn": "AINF একটি Section 8 অলাভজনক সংস্থা — ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে শিক্ষা, দক্ষতা, স্বাস্থ্য ও মর্যাদাপূর্ণ জীবিকা।",
+      "hi": "AINF एक Section 8 गैर-लाभकारी संस्था है — झारखंड और पश्चिम बंगाल में शिक्षा, कौशल, स्वास्थ्य और सम्मानजनक आजीविका।"
+    },
+    "All Indian Nevarlands Foundation walks with learners and families from Jamtara outward — classrooms, skill labs, health camps, and fair work under one roof.": {
+      "bn": "অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন জামতাড়া থেকে শিক্ষার্থী ও পরিবারের সাথে হাঁটে — এক ছাদের নিচে ক্লাসরুম, দক্ষতা ল্যাব, স্বাস্থ্য শিবির ও ন্যায্য কাজ।",
+      "hi": "ऑल इंडियन नेवरलैंड्स फाउंडेशन जामताड़ा से शिक्षार्थियों और परिवारों के साथ चलता है — एक छत के नीचे कक्षाएँ, कौशल प्रयोगशालाएँ, स्वास्थ्य शिविर और न्यायसंगत काम।"
+    },
+    "Help every learner in our blocks reach a classroom, a skill, and a first job — with health, safety, and farm support around them.": {
+      "bn": "আমাদের ব্লকের প্রতিটি শিক্ষার্থীকে ক্লাসরুম, দক্ষতা ও প্রথম চাকরি পর্যন্ত পৌঁছাতে সাহায্য করা — সাথে স্বাস্থ্য, নিরাপত্তা ও কৃষি সহায়তা।",
+      "hi": "हमारे ब्लॉक के हर शिक्षार्थी को कक्षा, कौशल और पहली नौकरी तक पहुँचाना — साथ में स्वास्थ्य, सुरक्षा और खेती सहायता।"
+    },
+    "Eastern India where a student's postcode does not decide their degree, their job, or their dignity.": {
+      "bn": "পূর্ব ভারত যেখানে একজন শিক্ষার্থীর পিনকোড তার ডিগ্রি, চাকরি বা মর্যাদা ঠিক করে না।",
+      "hi": "पूर्वी भारत जहाँ किसी छात्र का पिनकोड उसकी डिग्री, नौकरी या गरिमा तय नहीं करता।"
+    },
+    "Coaching batches funded for students in our blocks": {
+      "bn": "আমাদের ব্লকের শিক্ষার্থীদের জন্য কোচিং ব্যাচে তহবিল",
+      "hi": "हमारे ब्लॉक के छात्रों के लिए कोचिंग बैच को धन"
+    },
+    "Youth linked to skills, jobs, and first interviews": {
+      "bn": "দক্ষতা, কাজ ও প্রথম সাক্ষাৎকারের সাথে যুক্ত যুবক",
+      "hi": "कौशल, नौकरियों और पहली इंटरव्यू से जुड़े युवा"
+    },
+    "Stand With AINF": { "bn": "AINF-এর সাথে দাঁড়ান", "hi": "AINF के साथ खड़े हों" },
+    "Give to a desk, join as a field sevak, or share theainf.in — every hour and every rupee reaches a student or family in our blocks.": {
+      "bn": "একটি ডেস্কে দান করুন, ফিল্ড সেবক হোন, বা theainf.in শেয়ার করুন — প্রতি ঘণ্টা ও প্রতি টাকা আমাদের ব্লকের শিক্ষার্থী বা পরিবারে পৌঁছায়।",
+      "hi": "एक डेस्क को दें, फ़ील्ड सेवक बनें, या theainf.in साझा करें — हर घंटा और हर रुपया हमारे ब्लॉक के छात्र या परिवार तक पहुँचता है।"
+    },
+    "Coach exam batches, host skill weekends, or sit in placement cells with AINF. Even two hours help if one student finds direction.": {
+      "bn": "AINF-এর সাথে পরীক্ষার ব্যাচ কোচ করুন, দক্ষতা সপ্তাহান্ত রাখুন বা প্লেসমেন্ট সেলে বসুন। দুই ঘণ্টাও কাজে লাগে যদি একজন শিক্ষার্থী দিক পায়।",
+      "hi": "AINF के साथ परीक्षा बैच कोच करें, कौशल सप्ताहांत चलाएँ या प्लेसमेंट सेल में बैठें। दो घंटे भी काफी हैं अगर एक छात्र को दिशा मिल जाए।"
+    },
+    "Pick a Shiksha desk, rozgar cell, nari desk, swasthya van, kheti unit, or janajati desk to adopt.": {
+      "bn": "শিক্ষা ডেস্ক, রোজগার সেল, নারী ডেস্ক, স্বাস্থ্য ভ্যান, কৃষি ইউনিট বা জনজাতি ডেস্ক গ্রহণ করুন।",
+      "hi": "शिक्षा डेस्क, रोज़गार सेल, नारी डेस्क, स्वास्थ्य वैन, खेती यूनिट या जनजाति डेस्क अपनाएँ।"
+    },
+    "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families.": {
+      "bn": "আপনার উপহার ভাতা, পড়ার সামগ্রী, পরামর্শ ও জরুরি ত্রাণ — সরাসরি শিক্ষার্থী ও পরিবারের কাছে পৌঁছায়।",
+      "hi": "आपका उपहार भत्ता, अध्ययन सामग्री, परामर्श और आपात राहत — सीधे छात्रों और परिवारों तक पहुँचता है।"
+    },
+    "Students, field sevaks, and partners from Asansol to Jamtara — straight talk on learning, landing work, and earning dignity.": {
+      "bn": "আসানসোল থেকে জামতাড়া পর্যন্ত শিক্ষার্থী, ফিল্ড সেবক ও অংশীদার — শেখা, কাজ পাওয়া ও মর্যাদা অর্জনের সোজা কথা।",
+      "hi": "आसनसोल से जामताड़ा तक छात्र, फ़ील्ड सेवक और साझेदार — सीखने, काम पाने और गरिमा कमाने की सीधी बात।"
+    },
+    "Field sevaks show up before the coaching bell and stay after the rozgar mela — that is how batches finish strong.": {
+      "bn": "ফিল্ড সেবকরা কোচিংয়ের ঘণ্টির আগে আসে এবং রোজগার মেলার পরেও থাকে — এভাবেই ব্যাচ শক্তভাবে শেষ হয়।",
+      "hi": "फ़ील्ड सेवक कोचिंग की घंटी से पहले आते हैं और रोज़गार मेले के बाद भी रहते हैं — इसी से बैच मज़बूती से पूरा होता है।"
+    },
+    "Milestones from coaching rooms, health camps, and gram visits across Jharkhand and West Bengal.": {
+      "bn": "ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে কোচিং রুম, স্বাস্থ্য শিবির ও গ্রাম সফরের মাইলফলক।",
+      "hi": "झारखंड और पश्चिम बंगाल में कोचिंग कक्ष, स्वास्थ्य शिविर और गाँव दौरों के पड़ाव।"
+    },
+    "Seven desks — Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, Janajati Sahyog, and social welfare — tracked block by block.": {
+      "bn": "সাতটি ডেস্ক — শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, জনজাতি সহযোগ ও সামাজিক কল্যাণ — ব্লক অনুযায়ী নজরে রাখা হয়।",
+      "hi": "सात डेस्क — शिक्षा, स्वास्थ्य, रोज़गार, नारी सुरक्षा, खेती, जनजाति सहयोग और सामाजिक कल्याण — ब्लॉक-दर-ब्लॉक ट्रैक।"
+    },
+    "Section 8 rules are clear — read where donations go, which account handles them, and how to volunteer.": {
+      "bn": "Section 8 নিয়ম স্পষ্ট — পড়ুন অনুদান কোথায় যায়, কোন অ্যাকাউন্ট পরিচালনা করে, এবং কীভাবে স্বেচ্ছাসেবক হবেন।",
+      "hi": "Section 8 नियम स्पष्ट हैं — पढ़ें दान कहाँ जाता है, कौन सा खाता संभालता है, और स्वयंसेवक कैसे बनें।"
+    },
+    "Where does my donation go on the ledger?": {
+      "bn": "খাতায় আমার অনুদান কোথায় যায়?",
+      "hi": "खाते में मेरा दान कहाँ जाता है?"
+    },
+    "Nala, Jamtara, Jharkhand": { "bn": "নালা, জামতাড়া, ঝাড়খণ্ড", "hi": "नाला, जामताड़ा, झारखंड" },
+    "hello@theainf.in": { "bn": "hello@theainf.in", "hi": "hello@theainf.in" },
+    "Nutrition Support for Batches": { "bn": "ব্যাচের পুষ্টি সহায়তা", "hi": "बैच के लिए पोषण सहायता" },
+    "AINF Shiksha Desk keeps students in class with meal support, travel stipends, and study kits in our blocks.": {
+      "bn": "AINF শিক্ষা ডেস্ক খাবার, ভ্রমণ ভাতা ও পড়ার সামগ্রী দিয়ে শিক্ষার্থীদের ক্লাসে রাখে।",
+      "hi": "AINF शिक्षा डेस्क भोजन, यात्रा भत्ता और अध्ययन सामग्री से छात्रों को कक्षा में रखता है।"
+    },
+    "AINF desks deliver coaching, skills, health camps, and farm support where students and families need them most.": {
+      "bn": "AINF ডেস্ক সেখানে কোচিং, দক্ষতা, স্বাস্থ্য শিবির ও কৃষি সহায়তা পৌঁছায় যেখানে সবচেয়ে দরকার।",
+      "hi": "AINF डेस्क वहाँ कोचिंग, कौशल, स्वास्थ्य शिविर और खेती सहायता पहुँचाते हैं जहाँ सबसे ज़्यादा ज़रूरत है।"
+    },
+    "From Jamtara outward we fund study kits, skill labs, swasthya camps, and kheti inputs — tracked rupee by rupee.": {
+      "bn": "জামতাড়া থেকে বাইরে আমরা পড়ার সামগ্রী, দক্ষতা ল্যাব, স্বাস্থ্য শিবির ও কৃষি উপকরণে তহবিল দিই — টাকা কে টাকা হিসাব।",
+      "hi": "जामताड़ा से बाहर हम अध्ययन सामग्री, कौशल प्रयोगशाला, स्वास्थ्य शिविर और खेती सामग्री को धन देते हैं — रुपये-दर-रुपये हिसाब।"
+    },
+    "We've seen paths change when a stipend, a skill kit, and a sevak show up together — one student, one job, one family at a time.": {
+      "bn": "ভাতা, দক্ষতা কিট ও একজন সেবক একসাথে এলে পথ বদলায় — এক শিক্ষার্থী, এক কাজ, এক পরিবার করে।",
+      "hi": "जब भत्ता, कौशल किट और एक सेवक साथ आते हैं तो रास्ता बदलता है — एक छात्र, एक नौकरी, एक परिवार।"
+    },
+    "Meet the AINF Team": { "bn": "AINF দলের সাথে পরিচিত হোন", "hi": "AINF टीम से मिलें" },
+    "Milestones on the Ground": { "bn": "মাঠের মাইলফলক", "hi": "ज़मीन पर पड़ाव" },
+    "Support AINF Today": { "bn": "আজই AINF সমর্থন করুন", "hi": "आज ही AINF का समर्थन करें" },
+    "Youth Supported": { "bn": "সহায়তাপ্রাপ্ত যুবক", "hi": "सहायता प्राप्त युवा" },
+    "Field Volunteers": { "bn": "ফিল্ড স্বেচ্ছাসেবক", "hi": "फ़ील्ड स्वयंसेवक" },
+    "Scholarships and coaching for students in our blocks": { "bn": "আমাদের ব্লকের শিক্ষার্থীদের বৃত্তি ও কোচিং", "hi": "हमारे ब्लॉक के छात्रों के लिए छात्रवृत्ति और कोचिंग" },
+    "Skills, placement, and dignified first jobs": { "bn": "দক্ষতা, প্লেসমেন্ট ও মর্যাদাপূর্ণ প্রথম কাজ", "hi": "कौशल, प्लेसमेंट और सम्मानजनक पहली नौकरी" },
+    "Current Status : Live": { "bn": "বর্তমান অবস্থা : চলমান", "hi": "वर्तमान स्थिति : सक्रिय" },
+    "Clean Water Initiative": { "bn": "পরিষ্কার জল উদ্যোগ", "hi": "स्वच्छ जल पहल" },
+    "Winter Relief Program": { "bn": "শীতকালীন ত্রাণ কর্মসূচি", "hi": "शीतकालीन राहत कार्यक्रम" },
+    "Medical Aid & Health Camps": { "bn": "চিকিৎসা সহায়তা ও স্বাস্থ্য শিবির", "hi": "चिकित्सा सहायता और स्वास्थ्य शिविर" },
+    "Shiksha Support Drive": { "bn": "শিক্ষা সহায়তা অভিযান", "hi": "शिक्षा सहायता अभियान" },
+    "Education Support Drive": { "bn": "শিক্ষা সহায়তা অভিযান", "hi": "शिक्षा सहायता अभियान" },
+    "Hear from those who’ve seen the impact.": { "bn": "যাঁরা প্রভাব দেখেছেন, তাঁদের কথা শুনুন।", "hi": "जिनोंने असर देखा है, उनसे सुनें।" },
+    "Hear from those who've seen the impact.": { "bn": "যাঁরা প্রভাব দেখেছেন, তাঁদের কথা শুনুন।", "hi": "जिनोंने असर देखा है, उनसे सुनें।" },
+    "Introduction": { "bn": "ভূমিকা", "hi": "परिचय" },
+    "Impact / Results": { "bn": "প্রভাব / ফলাফল", "hi": "प्रभाव / परिणाम" },
+    "Image Gallery": { "bn": "ছবির গ্যালারি", "hi": "चित्र दीर्घा" },
+    "How This Work": { "bn": "এই কাজ কীভাবে হয়", "hi": "यह काम कैसे होता है" },
+    "Raised": { "bn": "সংগৃহীত", "hi": "जुटाया" },
+    "Goal": { "bn": "লক্ষ্য", "hi": "लक्ष्य" },
+    "All Rights Reserved": { "bn": "সর্বস্বত্ব সংরক্ষিত", "hi": "सर्वाधिकार सुरक्षित" },
+    "© 2026 theainf. All rights reserved": { "bn": "© ২০২৬ theainf. সর্বস্বত্ব সংরক্ষিত", "hi": "© 2026 theainf. सर्वाधिकार सुरक्षित" }
+  }
+}

@@ -1,0 +1,72 @@
+/* Design-matched motion — complements Framer letter reveals, does not replace them */
+@keyframes ainf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes ainf-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html.ainf-ready [data-framer-name="Hero Sectiion"] h1,
+html.ainf-ready [data-framer-name="Hero Section"] h1 {
+  animation: ainf-fade-up 0.7s ease both;
+}
+
+html.ainf-ready [data-framer-name="Short Description"],
+html.ainf-ready [data-framer-name="Statastic"] {
+  animation: ainf-fade-up 0.8s ease 0.12s both;
+}
+
+html.ainf-ready [data-framer-name="Statastic"] > div,
+html.ainf-ready [data-framer-name="Statastic"] [data-framer-name="Card"] {
+  animation: ainf-float 5.5s ease-in-out infinite;
+}
+
+.ainf-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.ainf-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.ainf-lift {
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.ainf-lift:hover {
+  transform: translateY(-4px);
+}
+
+#ainf-global-nav .ainf-cta,
+#ainf-global-nav .ainf-links a {
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+#ainf-global-nav .ainf-cta:hover {
+  transform: translateY(-1px);
+}
+
+html.ainf-i18n-wait #main {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainf-reveal,
+  html.ainf-ready [data-framer-name="Hero Sectiion"] h1,
+  html.ainf-ready [data-framer-name="Hero Section"] h1,
+  html.ainf-ready [data-framer-name="Short Description"],
+  html.ainf-ready [data-framer-name="Statastic"],
+  html.ainf-ready [data-framer-name="Statastic"] > div,
+  html.ainf-ready [data-framer-name="Statastic"] [data-framer-name="Card"] {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

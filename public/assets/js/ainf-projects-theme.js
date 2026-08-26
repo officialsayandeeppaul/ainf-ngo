@@ -1,4 +1,4 @@
-/* Replace Oxira footer + polish buttons on /projects — keep page content intact */
+/* Projects-only polish: INR currency, piggy raised badges, solid CTAs, kill Oxira chrome */
 (function () {
   if (window.__ainfProjectsThemeBooted) return;
   window.__ainfProjectsThemeBooted = true;
@@ -7,59 +7,10 @@
   var isProjects = path === "/projects" || path.indexOf("/projects/") === 0;
   if (!isProjects) return;
 
-  var ARROW =
-    '<svg class="ainf-ft-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  var ICO_MAIL =
-    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/></svg>';
-  var ICO_PHONE =
-    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6.5 3.5l2.2 2.2a1.5 1.5 0 010 2.1L7.5 9c1.6 3.1 4.4 5.9 7.5 7.5l1.2-1.2a1.5 1.5 0 012.1 0l2.2 2.2a1.5 1.5 0 010 2.1l-1.1 1.1c-.9.9-2.2 1.2-3.4.8C10.2 19.7 4.3 13.8 2.5 7.5c-.4-1.2-.1-2.5.8-3.4l1.1-1.1a1.5 1.5 0 012.1 0z"/></svg>';
-  var ICO_PIN =
-    '<svg class="ainf-ft-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
-
-  function buildFooter() {
-    var footer = document.createElement("footer");
-    footer.id = "ainf-site-footer";
-    footer.setAttribute("data-ainf-footer", "1");
-    footer.innerHTML =
-      '<div class="ainf-ft-wrap">' +
-      '<div class="ainf-ft-row">' +
-      '<div class="ainf-ft-card ainf-ft-brand-card">' +
-      '<div><a class="ainf-ft-logo" href="/"><img src="/assets/img/theainf-mark.svg" alt="" width="28" height="28"/><span>theainf</span><span class="ainf-ft-badge">AINF</span></a>' +
-      '<p class="ainf-ft-tag">We are a non-profit organization dedicated to providing education, healthcare &amp; support.</p></div>' +
-      '<p class="ainf-ft-copy">© 2026 theainf · All Indian Nevarlands Foundation · theainf.in</p>' +
-      "</div>" +
-      '<div class="ainf-ft-card ainf-ft-nav-card">' +
-      '<div class="ainf-ft-col"><h4>Menu</h4>' +
-      '<a href="/">Home</a><a href="/about-us">About AINF</a><a href="/causes">Missions</a><a class="is-active" href="/projects">Projects</a><a href="/blogs">Stories</a></div>' +
-      '<div class="ainf-ft-col"><h4>Quick Links</h4>' +
-      '<a href="/contact-us">Contact</a><a href="/donate-now">Support AINF</a><a href="/join-as-volunteer">Join as Field Sevak</a><a href="/legal-pages/terms-conditions">Terms &amp; Conditions</a></div>' +
-      '<div class="ainf-ft-col"><h4>Contact</h4>' +
-      '<a class="ainf-ft-contact-row" href="mailto:uiuxocean@gmail.com">' +
-      ICO_MAIL +
-      "<span>uiuxocean@gmail.com</span></a>" +
-      '<a class="ainf-ft-contact-row" href="tel:+919574468870">' +
-      ICO_PHONE +
-      "<span>+91 95744 68870</span></a>" +
-      '<div class="ainf-ft-contact-row">' +
-      ICO_PIN +
-      "<span>Surat, India</span></div>" +
-      "</div></div></div>" +
-      '<div class="ainf-ft-social">' +
-      '<a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn' +
-      ARROW +
-      "</a>" +
-      '<a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram' +
-      ARROW +
-      "</a>" +
-      '<a href="https://x.com/" target="_blank" rel="noopener">X' +
-      ARROW +
-      "</a>" +
-      '<a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook' +
-      ARROW +
-      "</a>" +
-      "</div></div>";
-    return footer;
-  }
+  var PIGGY =
+    '<svg class="ainf-piggy" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">' +
+    '<path fill="#fff" d="M19.4 10.2c-.3-1.5-1.3-2.7-2.6-3.3.2-.4.3-.8.3-1.2 0-1.3-1-2.3-2.3-2.3-.5 0-1 .2-1.4.5C12.7 3.3 11.9 3 11 3c-1.7 0-3.1 1.2-3.4 2.8C6.4 6.1 5.5 7 5.1 8.1 3.9 8.5 3 9.6 3 11c0 .4.1.8.2 1.2H2v2h1.1c.3 1.1.9 2 1.8 2.6L3.6 18l1.4 1.4 1.4-1.4c.7.3 1.4.5 2.2.5v1.5h2V18.5c.4 0 .8-.1 1.2-.2.5.4 1.1.7 1.8.7.4 0 .8-.1 1.1-.2l1.3 1.3 1.4-1.4-1.2-1.2c.7-.7 1.2-1.6 1.4-2.6H22v-2h-1.3c.2-.4.3-.8.3-1.2 0-.5-.1-1-.3-1.4zM9.5 12.2a1 1 0 110-2 1 1 0 010 2z"/>' +
+    "</svg>";
 
   function looksLikePageContent(el) {
     var t = el.textContent || "";
@@ -68,32 +19,104 @@
     );
   }
 
-  function hideOxiraFooterOnly() {
-    // Hide the Oxira link-columns footer block — do NOT walk up into page content.
-    document.querySelectorAll('[data-framer-name="projects list footer"]').forEach(function (el) {
-      el.setAttribute("data-ainf-oxira-footer", "1");
-      el.style.setProperty("display", "none", "important");
-    });
+  function killOxiraNode(el) {
+    if (!el || el.id === "ainf-site-footer") return;
+    if (looksLikePageContent(el)) return;
+    el.setAttribute("data-ainf-oxira-footer", "1");
+    el.style.setProperty("display", "none", "important");
+    el.style.setProperty("visibility", "hidden", "important");
+    el.style.setProperty("height", "0", "important");
+    el.style.setProperty("max-height", "0", "important");
+    el.style.setProperty("overflow", "hidden", "important");
+    el.style.setProperty("pointer-events", "none", "important");
+    el.style.setProperty("margin", "0", "important");
+    el.style.setProperty("padding", "0", "important");
+  }
 
-    // Green Oxira Bottom strip — only if it is footer-like and not page content
+  function isOxiraFooterText(t) {
+    return /Through AINF|100k\+|Privacy & Policy|All Rights Reserved|@Oxira|X \/ Twitter|Youtube|Help FAQ|How It Works/i.test(
+      t || ""
+    );
+  }
+
+  function hideOxiraFooterOnly() {
+    document.querySelectorAll('[data-framer-name="projects list footer"]').forEach(killOxiraNode);
+
+    document
+      .querySelectorAll(
+        "footer[data-framer-name='Primary'], footer[data-framer-name='Container'], footer[data-framer-name='Bottom']"
+      )
+      .forEach(function (el) {
+        if (el.id === "ainf-site-footer") return;
+        if (looksLikePageContent(el)) return;
+        if (isOxiraFooterText(el.textContent)) killOxiraNode(el);
+      });
+
     document.querySelectorAll('[data-framer-name="Bottom"]').forEach(function (el) {
       if (looksLikePageContent(el)) return;
-      var t = el.textContent || "";
-      if (
-        /All Rights Reserved|Youtube|X \/ Twitter|@Oxira|© 2026 theainf|Medical Aid & Health Camps/i.test(t) &&
-        /Instagram|Youtube|Twitter|FAQ|Privacy|Terms of Use|Help/i.test(t)
-      ) {
-        el.setAttribute("data-ainf-oxira-footer", "1");
-        el.style.setProperty("display", "none", "important");
+      if (isOxiraFooterText(el.textContent) || /xira|Donate/i.test(el.textContent || "")) {
+        killOxiraNode(el);
+      }
+    });
+
+    document.querySelectorAll("p, span, a, h1, h2, h3, h4").forEach(function (el) {
+      if (el.closest && el.closest("#ainf-site-footer, #ainf-global-nav")) return;
+      var t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (t === "xira" || t === "Oxira" || /^@Oxira/i.test(t)) {
+        var wrap =
+          el.closest("footer[data-framer-name]") ||
+          el.closest('[data-framer-name="Bottom"]') ||
+          el.closest("[data-ainf-oxira-footer]") ||
+          el;
+        killOxiraNode(wrap);
       }
     });
   }
 
-  function ensureFooter() {
-    hideOxiraFooterOnly();
-    if (!document.getElementById("ainf-site-footer")) {
-      (document.body || document.documentElement).appendChild(buildFooter());
+  function convertToInr() {
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (!node.parentElement) continue;
+      if (node.parentElement.closest("#ainf-global-nav, #ainf-site-footer, script, style")) continue;
+      var v = node.nodeValue;
+      if (!v) continue;
+      var trimmed = v.trim();
+      if (trimmed === "$" || trimmed === "US$" || trimmed === "USD") {
+        node.nodeValue = v.replace(trimmed, "₹");
+        continue;
+      }
+      if (/\$/.test(v) && !/₹/.test(v)) {
+        node.nodeValue = v.replace(/\$/g, "₹");
+      }
     }
+  }
+
+  function injectPiggyIcons() {
+    // ONLY raised-amount badges (Icon & title). Never status dots / hero spheres.
+    document
+      .querySelectorAll('[data-framer-name="Icon & title"] > [data-framer-name="Icon Sphere"]')
+      .forEach(function (sphere) {
+        if (sphere.getAttribute("data-ainf-piggy") === "1") return;
+        // Skip status / live indicators even if nested under Icon & title
+        var near = (sphere.parentElement && sphere.parentElement.textContent) || "";
+        if (/Current Status|:\s*Live/i.test(near) && !/Raised/i.test(near)) return;
+
+        sphere.setAttribute("data-ainf-piggy", "1");
+        sphere.style.setProperty("display", "inline-flex", "important");
+        sphere.style.setProperty("align-items", "center", "important");
+        sphere.style.setProperty("justify-content", "center", "important");
+        sphere.style.setProperty("background", "#39a46b", "important");
+        sphere.style.setProperty("background-image", "none", "important");
+        sphere.style.setProperty("border-radius", "999px", "important");
+        sphere.querySelectorAll("svg, img, [data-framer-name]").forEach(function (child) {
+          if (child.classList && child.classList.contains("ainf-piggy")) return;
+          child.style.setProperty("display", "none", "important");
+        });
+        if (!sphere.querySelector(".ainf-piggy")) {
+          sphere.insertAdjacentHTML("beforeend", PIGGY);
+        }
+      });
   }
 
   function restyleButtons() {
@@ -134,14 +157,18 @@
       map.forEach(function (pair) {
         if (next.indexOf(pair[0]) >= 0) next = next.split(pair[0]).join(pair[1]);
       });
+      next = next.replace(/\bOstra\b/gi, "AINF").replace(/\bOxira\b/gi, "AINF");
       if (next !== v) node.nodeValue = next;
     }
   }
 
   function tick() {
-    ensureFooter();
+    hideOxiraFooterOnly();
+    convertToInr();
+    injectPiggyIcons();
     restyleButtons();
     rebrandCopy();
+    if (window.__ainfEnsureSiteFooter) window.__ainfEnsureSiteFooter();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tick);
@@ -151,14 +178,13 @@
   var timer = setInterval(function () {
     tick();
     i += 1;
-    if (i > 30) clearInterval(timer);
+    if (i > 40) clearInterval(timer);
   }, 300);
 
   var mo = new MutationObserver(function () {
     hideOxiraFooterOnly();
-    if (!document.getElementById("ainf-site-footer") && document.body) {
-      document.body.appendChild(buildFooter());
-    }
+    convertToInr();
+    injectPiggyIcons();
   });
   if (document.body) mo.observe(document.body, { childList: true, subtree: true });
   else

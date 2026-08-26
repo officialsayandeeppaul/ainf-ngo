@@ -154,7 +154,13 @@
     "/causes/healthcare-for-all": ["Swasthya Desk", "AINF"],
     "/causes/food-nutrition-for-families": ["Rozgar", "AINF"],
     "/causes/women-empowerment-for-rise": ["Nari Suraksha", "AINF"],
-    "/causes/water-sanitation-for-health": ["Janajati", "Kheti", "AINF"]
+    "/causes/water-sanitation-for-health": ["Janajati", "Kheti", "AINF"],
+    "/projects": ["theainf", "AINF", "Projects"],
+    "/projects/daily-meal-program": ["AINF", "Shiksha"],
+    "/projects/education-support-drive": ["AINF", "Shiksha"],
+    "/projects/clean-water-initiative": ["AINF", "Swasthya"],
+    "/projects/medical-aid-health-camps": ["AINF", "Swasthya"],
+    "/projects/winter-relief-program": ["AINF"]
   },
   "routes": [
     "/",
@@ -175,7 +181,13 @@
     "/contact-us",
     "/donate-now",
     "/join-as-volunteer",
-    "/legal-pages/terms-conditions"
+    "/legal-pages/terms-conditions",
+    "/projects",
+    "/projects/daily-meal-program",
+    "/projects/education-support-drive",
+    "/projects/clean-water-initiative",
+    "/projects/medical-aid-health-camps",
+    "/projects/winter-relief-program"
   ],
   "replacements": [
     ["Hopper-  Non-Profit &amp; Charity Framer Template", "theainf.in — All Indian Nevarlands Foundation"],
@@ -240,7 +252,6 @@
     ["Ek Vertical Apnao", "Adopt a Desk"],
     ["Apne Pada Mein AINF Ke Paanch Chhote Kaam", "Five Quick Ways to Help in Your Block"],
     ["Yogdaan", "Support AINF"],
-    ["Donation", "Support AINF"],
     ["Please complete the form below to make your donation.", "Fill the form below — you'll receive a receipt once the amount is confirmed."],
     ["Neeche form bhariye — amount confirm hone ke baad receipt milti hai.", "Fill the form below — you'll receive a receipt once the amount is confirmed."],
     ["children:`Donation`", "children:`Support AINF`"],

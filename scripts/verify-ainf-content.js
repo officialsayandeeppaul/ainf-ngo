@@ -6,11 +6,31 @@
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
+const zlib = require("zlib");
 
 const ROOT = path.join(__dirname, "..");
-const MANIFEST = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "content/ainf-hinglish.json"), "utf8")
-);
+function loadManifest() {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "content/ainf-hinglish.json"), "utf8")
+  );
+  const polishPath = path.join(__dirname, "content/ainf-polish.json");
+  if (!fs.existsSync(polishPath)) return manifest;
+  const polish = JSON.parse(fs.readFileSync(polishPath, "utf8"));
+  if (polish.requiredMarkers) Object.assign(manifest.requiredMarkers, polish.requiredMarkers);
+  if (Array.isArray(polish.routes)) {
+    for (const route of polish.routes) {
+      if (!manifest.routes.includes(route)) manifest.routes.push(route);
+    }
+  }
+  if (Array.isArray(polish.banned)) {
+    for (const token of polish.banned) {
+      if (!manifest.banned.includes(token)) manifest.banned.push(token);
+    }
+  }
+  return manifest;
+}
+
+const MANIFEST = loadManifest();
 
 const baseUrl = process.argv.includes("--url")
   ? process.argv[process.argv.indexOf("--url") + 1]
@@ -77,10 +97,21 @@ function getAllRoutes() {
 function httpGet(url) {
   return new Promise((resolve, reject) => {
     http
-      .get(url, (res) => {
-        let d = "";
-        res.on("data", (c) => (d += c));
-        res.on("end", () => resolve({ status: res.statusCode, body: d }));
+      .get(url, { headers: { "accept-encoding": "gzip, deflate, identity" } }, (res) => {
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => {
+          let buf = Buffer.concat(chunks);
+          const enc = (res.headers["content-encoding"] || "").toLowerCase();
+          try {
+            if (enc.includes("gzip")) buf = zlib.gunzipSync(buf);
+            else if (enc.includes("deflate")) buf = zlib.inflateSync(buf);
+          } catch (e) {
+            reject(e);
+            return;
+          }
+          resolve({ status: res.statusCode, body: buf.toString("utf8") });
+        });
       })
       .on("error", reject);
   });

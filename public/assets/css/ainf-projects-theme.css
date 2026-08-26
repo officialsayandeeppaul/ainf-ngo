@@ -1,112 +1,22 @@
-/* Hopper-style AINF footer + solid project CTAs */
-#ainf-site-footer{
-  position:relative;
-  z-index:2;
-  margin-top:64px;
-  padding:28px 20px 36px;
-  background:#f3f3f3;
-  color:#222;
-  font-family:Onest,Inter,system-ui,sans-serif;
-}
-#ainf-site-footer *{box-sizing:border-box}
-#ainf-site-footer a{color:#222;text-decoration:none}
-#ainf-site-footer a:hover{color:#39a46b}
-#ainf-site-footer .ainf-ft-wrap{max-width:1120px;margin:0 auto}
-
-#ainf-site-footer .ainf-ft-row{
-  display:grid;
-  grid-template-columns:minmax(260px,.9fr) minmax(0,1.4fr);
-  gap:14px;
-  margin-bottom:14px;
-}
-#ainf-site-footer .ainf-ft-card{
-  background:#fff;
-  border-radius:28px;
-  border:1px solid rgba(34,34,34,.08);
-  padding:28px 26px;
-}
-#ainf-site-footer .ainf-ft-brand-card{
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  min-height:220px;
-}
-#ainf-site-footer .ainf-ft-logo{
-  display:inline-flex;align-items:center;gap:8px;
-  font-weight:700;font-size:18px;letter-spacing:-.02em;
-}
-#ainf-site-footer .ainf-ft-logo img{width:28px;height:28px;border-radius:50%}
-#ainf-site-footer .ainf-ft-badge{
-  display:inline-block;margin-left:4px;font-size:10px;font-weight:700;
-  color:#39a46b;letter-spacing:.04em;
-}
-#ainf-site-footer .ainf-ft-tag{
-  margin:18px 0 0;font-size:15px;line-height:1.55;color:rgba(34,34,34,.72);max-width:320px;
-}
-#ainf-site-footer .ainf-ft-copy{
-  margin:24px 0 0;font-size:12px;color:rgba(34,34,34,.5);
-}
-
-#ainf-site-footer .ainf-ft-nav-card{
-  display:grid;
-  grid-template-columns:1fr 1fr 1.15fr;
-  gap:18px;
-}
-#ainf-site-footer h4{
-  margin:0 0 14px;font-size:14px;font-weight:700;color:#222;
-}
-#ainf-site-footer .ainf-ft-col{display:flex;flex-direction:column;gap:11px}
-#ainf-site-footer .ainf-ft-col a{font-size:14px;font-weight:500}
-#ainf-site-footer .ainf-ft-col a.is-active{color:#39a46b;font-weight:600}
-
-#ainf-site-footer .ainf-ft-contact-row{
-  display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:500;
-}
-#ainf-site-footer .ainf-ft-ico{
-  width:18px;height:18px;flex:0 0 auto;margin-top:2px;color:#39a46b;
-}
-
-#ainf-site-footer .ainf-ft-social{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-#ainf-site-footer .ainf-ft-social a{
-  display:flex;align-items:center;justify-content:space-between;
-  background:#fff;border:1px solid rgba(34,34,34,.08);
-  border-radius:22px;padding:18px 20px;
-  font-size:15px;font-weight:600;color:#222;
-}
-#ainf-site-footer .ainf-ft-social a:hover{color:#39a46b}
-#ainf-site-footer .ainf-ft-arrow{
-  width:18px;height:18px;color:#39a46b;flex:0 0 auto;
-}
-
-@media(max-width:900px){
-  #ainf-site-footer .ainf-ft-row{grid-template-columns:1fr}
-  #ainf-site-footer .ainf-ft-nav-card{grid-template-columns:1fr 1fr}
-  #ainf-site-footer .ainf-ft-social{grid-template-columns:1fr 1fr}
-}
-@media(max-width:560px){
-  #ainf-site-footer .ainf-ft-nav-card{grid-template-columns:1fr}
-  #ainf-site-footer .ainf-ft-social{grid-template-columns:1fr}
-  #ainf-site-footer .ainf-ft-brand-card{min-height:0}
-}
-
-/* Hide Oxira footer blocks only (not page content) */
+/* Projects-only: solid CTAs, green Icon Spheres with piggy, Oxira hide helpers */
+body.ainf-projects-skin [data-ainf-oxira-footer="1"],
 body.ainf-projects-skin [data-framer-name="projects list footer"],
-body.ainf-projects-skin [data-ainf-oxira-footer="1"]{
+body.ainf-projects-skin footer[data-framer-name="Primary"]:not(#ainf-site-footer),
+body.ainf-projects-skin footer[data-framer-name="Container"]:not(#ainf-site-footer),
+body.ainf-projects-skin footer[data-framer-name="Bottom"]:not(#ainf-site-footer){
   display:none!important;
   visibility:hidden!important;
   height:0!important;
+  max-height:0!important;
   overflow:hidden!important;
   pointer-events:none!important;
+  margin:0!important;
+  padding:0!important;
 }
 
-/* Kill Oxira glass buttons → solid AINF pills */
+/* Kill Oxira glass buttons → solid AINF pills (ONLY Primary btn — never "Primary" sections/cards) */
 body.ainf-projects-skin [data-framer-name="Primary btn"],
-body.ainf-projects-skin a[data-framer-name="Primary btn"],
-body.ainf-projects-skin [data-framer-name="Primary"]{
+body.ainf-projects-skin a[data-framer-name="Primary btn"]{
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
   background:#39a46b!important;
@@ -141,11 +51,28 @@ body.ainf-projects-skin [data-framer-name="Primary btn"] a{
   font-family:Onest,Inter,system-ui,sans-serif!important;
   font-weight:600!important;
 }
-body.ainf-projects-skin [data-framer-name="Icon Sphere"],
-body.ainf-projects-skin [data-framer-name="arrow"]{
+
+/* Green Icon Sphere ONLY on raised-amount piggy badges — never status live dots */
+body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"]{
   background:#39a46b!important;
   background-image:none!important;
   box-shadow:none!important;
   backdrop-filter:none!important;
   border-radius:999px!important;
+}
+
+/* Do not force every "arrow" solid green — leave Framer testimonial/hero arrows alone */
+
+body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"]{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"] .ainf-piggy{
+  width:55%!important;
+  height:55%!important;
+  display:block!important;
+  flex:0 0 auto!important;
+  pointer-events:none!important;
 }

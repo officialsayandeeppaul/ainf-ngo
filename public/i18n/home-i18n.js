@@ -14,7 +14,10 @@
   };
 
   function normalize(text) {
-    return (text || "").replace(/\s+/g, " ").trim();
+    return (text || "")
+      .replace(/[\u2013\u2014\u2212]/g, "—")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   function dedupeRepeated(text) {
@@ -45,19 +48,46 @@
 
   function buildReverseMaps(strings) {
     state.reverse = { bn: {}, hi: {} };
+    state.compact = {};
     Object.keys(strings).forEach(function (key) {
       var entry = strings[key];
       if (entry.bn) state.reverse.bn[entry.bn] = key;
       if (entry.hi) state.reverse.hi[entry.hi] = key;
+      state.compact[compact(key)] = key;
+      if (entry.bn) state.compact[compact(entry.bn)] = key;
+      if (entry.hi) state.compact[compact(entry.hi)] = key;
+    });
+    state.compactKeys = Object.keys(state.compact).sort(function (a, b) {
+      return b.length - a.length;
     });
   }
 
+  function compact(text) {
+    return normalize(text)
+      .toLowerCase()
+      .replace(/[\u2019']/g, "")
+      .replace(/[^a-z0-9\u0980-\u09FF\u0900-\u097F]+/gi, "");
+  }
+
   function resolveEnglishKey(text) {
-    var t = dedupeRepeated(text);
+    var t = dedupeRepeated(normalize(text));
     if (!t || !state.dict) return null;
     if (state.dict.strings[t]) return t;
     if (state.reverse.bn[t]) return state.reverse.bn[t];
     if (state.reverse.hi[t]) return state.reverse.hi[t];
+    var nospace = t.replace(/\s+/g, "");
+    if (state.dict.strings[nospace]) return nospace;
+    var c = compact(t);
+    if (c && state.compact && state.compact[c]) return state.compact[c];
+    if (c && state.compactKeys) {
+      var best = "";
+      for (var i = 0; i < state.compactKeys.length; i++) {
+        var ck = state.compactKeys[i];
+        if (ck.length < 10) continue;
+        if (c.indexOf(ck) === 0 && ck.length > best.length) best = ck;
+      }
+      if (best) return state.compact[best];
+    }
     return null;
   }
 
@@ -77,16 +107,17 @@
 
   function detectPageKey() {
     var path = (location.pathname || "/").replace(/\/+$/, "") || "/";
-    if (path === "/contact-us" || path.endsWith("/contact-us")) return "contact";
     if (path === "/" || path === "") return "home";
-    return "home";
+    var key = path.replace(/^\//, "");
+    if (key === "contact-us") return "contact-us";
+    return key;
   }
 
   function applyMeta(lang) {
     if (!state.dict) return;
     var pageKey = detectPageKey();
     var pageMeta =
-      (state.dict.pages && state.dict.pages[pageKey]) ||
+      (state.dict.pages && (state.dict.pages[pageKey] || (pageKey === "contact-us" && state.dict.pages.contact))) ||
       null;
     var meta = pageMeta || state.dict.meta;
     if (!meta) return;
@@ -103,7 +134,11 @@
           ? state.dict.meta.title.en
           : state.dict.meta.title[lang] || state.dict.meta.title.en;
     }
-    if (title) document.title = title;
+    if (title) {
+      document.title = title;
+      var titleEl = document.querySelector("head title");
+      if (titleEl && titleEl.textContent !== title) titleEl.textContent = title;
+    }
 
     var descEl = document.querySelector('meta[name="description"]');
     if (descEl) {
@@ -138,21 +173,44 @@
     el.appendChild(wrapper);
   }
 
+  function setTextPreserveIcon(el, next) {
+    var ico = el.querySelector("svg, img, .ainf-cta-ico");
+    if (ico) {
+      var nodes = [];
+      for (var i = 0; i < el.childNodes.length; i++) {
+        if (el.childNodes[i].nodeType === 3) nodes.push(el.childNodes[i]);
+      }
+      if (nodes.length) {
+        nodes[0].textContent = " " + next;
+        for (var j = 1; j < nodes.length; j++) nodes[j].textContent = "";
+        return;
+      }
+    }
+    if (el.children.length > 0) {
+      var target = el.querySelector("p.framer-text, span.framer-text, p, span") || el;
+      if (target === el) replaceAnimatedHeading(el, next);
+      else target.textContent = next;
+      return;
+    }
+    el.textContent = next;
+  }
+
+  function stampKey(el, text) {
+    var stamped = el.getAttribute("data-ainf-i18n");
+    if (stamped) return stamped;
+    var key = resolveEnglishKey(text);
+    if (key) el.setAttribute("data-ainf-i18n", key);
+    return key;
+  }
+
   function applyHeadings(lang) {
-    document.querySelectorAll("h1, h2, h3").forEach(function (el) {
+    document.querySelectorAll("h1, h2, h3, h4").forEach(function (el) {
       if (inSwitcher(el)) return;
-      var key = resolveEnglishKey(el.textContent);
+      var key = stampKey(el, el.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
-      if (hasLetterAnimation(el)) {
-        replaceAnimatedHeading(el, next);
-      } else if (el.children.length > 0) {
-        var target = el.querySelector("p.framer-text, span.framer-text, p, span") || el;
-        if (target === el) replaceAnimatedHeading(el, next);
-        else target.textContent = next;
-      } else {
-        el.textContent = next;
-      }
+      if (normalize(el.textContent) === normalize(next)) return;
+      replaceAnimatedHeading(el, next);
     });
   }
 
@@ -163,27 +221,55 @@
         if (inSwitcher(container)) return;
         var link = container.querySelector("a.framer-text, a");
         var paragraph = container.querySelector("p.framer-text, p");
-        var target = link || paragraph;
-        if (!target || hasLetterAnimation(target)) return;
-        var key = resolveEnglishKey(target.textContent);
+        var target = paragraph || link;
+        if (link && paragraph) {
+          var lt = normalize(link.textContent);
+          var pt = normalize(paragraph.textContent);
+          if (pt.length >= lt.length) target = paragraph;
+          else target = link;
+        }
+        if (!target) return;
+        var key = stampKey(target, target.textContent) || stampKey(container, container.textContent);
         if (!key) return;
         var next = translateKey(key, lang);
         if (normalize(target.textContent) === normalize(next)) return;
-        target.textContent = next;
+        if (hasLetterAnimation(target) || hasLetterAnimation(container)) {
+          replaceAnimatedHeading(target, next);
+        } else {
+          target.textContent = next;
+        }
       });
   }
 
   function applyPlainAnchors(lang) {
     document.querySelectorAll("a").forEach(function (anchor) {
       if (inSwitcher(anchor)) return;
-      if (anchor.querySelector('[data-framer-component-type="RichTextContainer"]')) return;
-      if (anchor.children.length > 0) return;
-      var key = resolveEnglishKey(anchor.textContent);
+      if (anchor.classList.contains("ainf-brand")) return;
+      var key = stampKey(anchor, anchor.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
-      if (normalize(anchor.textContent) !== normalize(next)) {
-        anchor.textContent = next;
-      }
+      if (normalize(anchor.textContent) === normalize(next)) return;
+      setTextPreserveIcon(anchor, next);
+    });
+  }
+
+  function applySharedChrome(lang) {
+    document.querySelectorAll("#ainf-global-nav a[data-ainf-i18n], #ainf-site-footer a[data-ainf-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-ainf-i18n");
+      var next = translateKey(key, lang);
+      if (!next) return;
+      if (el.classList.contains("ainf-cta")) setTextPreserveIcon(el, next);
+      else if (normalize(el.textContent) !== normalize(next)) el.textContent = next;
+    });
+    document.querySelectorAll("#ainf-global-nav .ainf-cta").forEach(function (el) {
+      var key = stampKey(el, "Support AINF") || "Support AINF";
+      setTextPreserveIcon(el, translateKey(key, lang));
+    });
+    document.querySelectorAll("#ainf-global-nav .ainf-links a").forEach(function (el) {
+      var key = stampKey(el, el.textContent);
+      if (!key) return;
+      var next = translateKey(key, lang);
+      if (normalize(el.textContent) !== normalize(next)) el.textContent = next;
     });
   }
 
@@ -258,12 +344,20 @@
         var key = resolveEnglishKey(containers[0].textContent);
         if (!key) return;
         var next = translateKey(key, lang);
-        containers.forEach(function (container) {
+        containers.forEach(function (container, idx) {
           var textTarget = container.querySelector("p, span") || container;
           if (normalize(textTarget.textContent) !== normalize(next)) {
             textTarget.textContent = next;
           }
+          if (idx > 0) {
+            container.style.setProperty("display", "none", "important");
+            container.setAttribute("aria-hidden", "true");
+          }
         });
+        var ps = anchor.querySelectorAll("p");
+        for (var i = 1; i < ps.length; i++) {
+          ps[i].style.setProperty("display", "none", "important");
+        }
       });
   }
 
@@ -329,21 +423,44 @@
     });
   }
 
+  function applyBlockCopy(lang) {
+    document.querySelectorAll("p, li, h1, h2, h3, h4").forEach(function (el) {
+      if (inSwitcher(el)) return;
+      if (el.closest && el.closest("#ainf-global-nav .ainf-brand")) return;
+      var key = stampKey(el, el.textContent);
+      if (!key) return;
+      var next = translateKey(key, lang);
+      if (normalize(el.textContent) === normalize(next)) return;
+      if (hasLetterAnimation(el)) replaceAnimatedHeading(el, next);
+      else if (el.childElementCount && el.querySelector("p, span.framer-text")) {
+        var inner = el.querySelector("p.framer-text, span.framer-text, p, span") || el;
+        inner.textContent = next;
+      } else {
+        el.textContent = next;
+      }
+    });
+  }
+
   function applyLanguage(lang, fromObserver) {
     if (!state.dict || state.applying) return;
     if (!fromObserver) state.lang = lang;
     state.applying = true;
     try {
       applyMeta(lang);
-      applyHeadings(lang);
-      applyRichTextContainers(lang);
-      applyPlainAnchors(lang);
-      applyFramerButtons(lang);
-      applyDuplicateParagraphs(lang);
-      applyLeafTextNodes(lang);
-      applyAttributes(lang);
-      forceCtaContrast();
+      applySharedChrome(lang);
       updateSwitcherButtons(lang);
+      var lettersPending = lang === "en" && !window.__ainfLettersDone;
+      if (!lettersPending) {
+        applyHeadings(lang);
+        applyRichTextContainers(lang);
+        applyBlockCopy(lang);
+        applyPlainAnchors(lang);
+        applyFramerButtons(lang);
+        applyDuplicateParagraphs(lang);
+        applyLeafTextNodes(lang);
+        applyAttributes(lang);
+      }
+      forceCtaContrast();
       try {
         localStorage.setItem(STORAGE_KEY, lang);
       } catch (_) {}
@@ -605,14 +722,30 @@
       hideFramerBadge();
       scheduleApply(true);
     });
-    state.observer.observe(document.body, {
+    state.observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
       characterData: true,
     });
   }
 
+  function readQueryLang() {
+    try {
+      var params = new URLSearchParams(location.search || "");
+      var q = (params.get("lang") || "").toLowerCase();
+      if (q === "bn" || q === "hi" || q === "en") return q;
+    } catch (_) {}
+    return null;
+  }
+
   function readStoredLang() {
+    var fromQuery = readQueryLang();
+    if (fromQuery) {
+      try {
+        localStorage.setItem(STORAGE_KEY, fromQuery);
+      } catch (_) {}
+      return fromQuery;
+    }
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
       if (saved === "bn" || saved === "hi" || saved === "en") return saved;
@@ -621,7 +754,7 @@
   }
 
   function boot() {
-    fetch("/i18n/home-strings.json", { cache: "no-store" })
+    fetch("/i18n/home-strings.json")
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load translations");
         return res.json();
@@ -630,17 +763,42 @@
         state.dict = json;
         buildReverseMaps(json.strings || {});
         state.lang = readStoredLang();
+        if (state.lang !== "en") {
+          document.documentElement.setAttribute("lang", state.lang === "hi" ? "hi" : "bn");
+        }
         mountSwitchers();
         hideFramerBadge();
-        attachObserver();
-        [300, 800, 1600, 3000].forEach(function (ms) {
-          setTimeout(function () {
-            if (menuIsOpen()) return;
-            mountSwitchers();
-            hideFramerBadge();
-            applyLanguage(state.lang, false);
-          }, ms);
+        var start = function () {
+          attachObserver();
+          applyLanguage(state.lang, false);
+          document.documentElement.classList.remove("ainf-i18n-wait");
+          if (state.lang === "en") {
+            setTimeout(function () {
+              window.__ainfLettersDone = true;
+              applyLanguage(state.lang, true);
+            }, 1900);
+          } else {
+            window.__ainfLettersDone = true;
+            setTimeout(function () {
+              applyLanguage(state.lang, true);
+            }, 200);
+            setTimeout(function () {
+              applyLanguage(state.lang, true);
+            }, 1200);
+          }
+        };
+        start();
+        window.addEventListener("load", function () {
+          applyMeta(state.lang);
+          applyLanguage(state.lang, true);
         });
+        var keep = 0;
+        var keepTimer = setInterval(function () {
+          mountSwitchers();
+          applyMeta(state.lang);
+          keep += 1;
+          if (keep > 20) clearInterval(keepTimer);
+        }, 300);
       })
       .catch(function (err) {
         console.warn("[ainf-i18n]", err);

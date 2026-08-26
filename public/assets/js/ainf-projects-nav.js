@@ -30,12 +30,13 @@
     brand.className = "ainf-brand";
     brand.href = "/";
     var img = document.createElement("img");
-    img.src = "/assets/img/theainf-logo.svg";
-    img.alt = "theainf";
-    img.width = 28;
-    img.height = 28;
+    img.src = "/assets/img/theainf-logo.webp";
+    img.alt = "AINF";
+    img.width = 36;
+    img.height = 36;
     var name = document.createElement("span");
-    name.textContent = "theainf";
+    name.className = "ainf-brand-text";
+    name.textContent = "AINF";
     brand.appendChild(img);
     brand.appendChild(name);
 

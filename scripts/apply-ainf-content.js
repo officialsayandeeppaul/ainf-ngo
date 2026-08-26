@@ -7,9 +7,45 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const MANIFEST = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "content/ainf-hinglish.json"), "utf8")
-);
+function loadManifest() {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "content/ainf-hinglish.json"), "utf8")
+  );
+  const polishPath = path.join(__dirname, "content/ainf-polish.json");
+  if (!fs.existsSync(polishPath)) return manifest;
+  const polish = JSON.parse(fs.readFileSync(polishPath, "utf8"));
+  if (Array.isArray(polish.replacements)) {
+    manifest.replacements.push(...polish.replacements);
+  }
+  if (polish.pageReplacements) {
+    manifest.pageReplacements = manifest.pageReplacements || {};
+    for (const [key, pairs] of Object.entries(polish.pageReplacements)) {
+      manifest.pageReplacements[key] = [
+        ...(manifest.pageReplacements[key] || []),
+        ...pairs,
+      ];
+    }
+  }
+  if (polish.pageMeta) {
+    manifest.pageMeta = { ...(manifest.pageMeta || {}), ...polish.pageMeta };
+  }
+  if (Array.isArray(polish.routes)) {
+    for (const route of polish.routes) {
+      if (!manifest.routes.includes(route)) manifest.routes.push(route);
+    }
+  }
+  if (polish.requiredMarkers) {
+    Object.assign(manifest.requiredMarkers, polish.requiredMarkers);
+  }
+  if (Array.isArray(polish.banned)) {
+    for (const token of polish.banned) {
+      if (!manifest.banned.includes(token)) manifest.banned.push(token);
+    }
+  }
+  return manifest;
+}
+
+const MANIFEST = loadManifest();
 
 function decodeOnce(raw) {
   let out = "";
@@ -313,6 +349,21 @@ function main() {
       fs.writeFileSync(fp, text, "utf8");
       jsChanges++;
       console.log("patched js:", name);
+    }
+  }
+
+  const extraFiles = [
+    path.join(ROOT, "public/assets/js/ainf-footer-template.js"),
+  ];
+  for (const fp of extraFiles) {
+    if (!fs.existsSync(fp)) continue;
+    let text = fs.readFileSync(fp, "utf8");
+    const orig = text;
+    text = applyReplacements(text, replacements);
+    if (text !== orig) {
+      fs.writeFileSync(fp, text, "utf8");
+      jsChanges++;
+      console.log("patched extra:", path.relative(ROOT, fp));
     }
   }
 
