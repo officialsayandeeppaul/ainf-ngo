@@ -950,25 +950,6 @@ form.framer-et7jxz button[type="submit"]{
   outline:none;
   border-color:#c3dece;
 }
-.ainf-gift-locked-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  font-size:11px;
-  color:#1c7d48;
-  background:#e7f6ee;
-  border:1px solid #b8e0cc;
-  border-radius:6px;
-  padding:2px 7px;
-  font-weight:500;
-  letter-spacing:0.01em;
-  margin-bottom:2px;
-  align-self:flex-start;
-}
-.ainf-gift-locked-badge::before{
-  content:"🔒";
-  font-size:10px;
-}
 /* Inline field-level errors */
 .ainf-gift-field-error{
   font-size:12px;

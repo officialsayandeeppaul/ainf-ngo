@@ -220,9 +220,10 @@
     if (n === "name") {
       if (v.length < 2) { setGiftFieldError(el, "Enter your full name."); return false; }
     } else if (n === "email") {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { setGiftFieldError(el, "Enter a valid email address."); return false; }
+      if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { setGiftFieldError(el, "Enter a valid email address."); return false; }
     } else if (n === "phone") {
-      if (v.replace(/[^\d]/g, "").length < 8) { setGiftFieldError(el, "Enter a phone number we can reach."); return false; }
+      var digits = v.replace(/[^\d]/g, "");
+      if (digits.length !== 10) { setGiftFieldError(el, "Enter your 10-digit mobile number."); return false; }
     } else if (n === "amount") {
       if (v && !/^\d+(\.\d{1,2})?$/.test(v)) { setGiftFieldError(el, "Enter a number, e.g. 500"); return false; }
     }
@@ -331,13 +332,6 @@
         if (!input || !giver[key]) return;
         input.readOnly = true;
         input.setAttribute("data-gift-locked", "1");
-        var label = input.closest("label");
-        if (label && !label.querySelector(".ainf-gift-locked-badge")) {
-          var badge = document.createElement("span");
-          badge.className = "ainf-gift-locked-badge";
-          badge.textContent = "from your account";
-          label.insertBefore(badge, input);
-        }
       });
     }
   }
@@ -440,7 +434,10 @@
       });
       form.addEventListener("blur", function (event) {
         var el = event.target;
-        if (!el || !el.name || el.getAttribute("data-gift-locked") === "1") return;
+        if (!el || !el.name) return;
+        if (el.getAttribute("data-gift-locked") === "1") return;
+        if (el.getAttribute("data-gift-loading") === "1") return;
+        if (el.getAttribute("data-ainf-touched") !== "1") return;
         validateGiftField(root, el);
       }, true);
       document.addEventListener("keydown", function (event) {
@@ -721,13 +718,15 @@
       if (name) name.focus();
       return;
     }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-      giftNote(root, "Enter a valid email.", true);
+    var emailVal = email ? email.value.trim() : "";
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      giftNote(root, "Enter a valid email address.", true);
       if (email) email.focus();
       return;
     }
-    if (!phone || phone.value.replace(/[^\d]/g, "").length < 8) {
-      giftNote(root, "Enter a phone number we can reach.", true);
+    var phoneDigits = phone ? phone.value.replace(/[^\d]/g, "") : "";
+    if (phoneDigits.length !== 10) {
+      giftNote(root, "Enter your 10-digit mobile number.", true);
       if (phone) phone.focus();
       return;
     }
