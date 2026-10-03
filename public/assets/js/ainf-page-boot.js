@@ -196,6 +196,40 @@
     line.className = isError ? "ainf-gift-note is-error" : "ainf-gift-note";
   }
 
+  function clearGiftFieldError(el) {
+    if (!el) return;
+    el.removeAttribute("data-gift-error");
+    var msg = el.parentElement && el.parentElement.querySelector(".ainf-gift-field-error");
+    if (msg) msg.remove();
+  }
+
+  function setGiftFieldError(el, text) {
+    if (!el) return;
+    el.setAttribute("data-gift-error", "1");
+    var existing = el.parentElement && el.parentElement.querySelector(".ainf-gift-field-error");
+    if (existing) { existing.textContent = text; return; }
+    var msg = document.createElement("span");
+    msg.className = "ainf-gift-field-error";
+    msg.textContent = text;
+    el.parentElement.appendChild(msg);
+  }
+
+  function validateGiftField(root, el) {
+    var n = el.name;
+    var v = (el.value || "").trim();
+    if (n === "name") {
+      if (v.length < 2) { setGiftFieldError(el, "Enter your full name."); return false; }
+    } else if (n === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { setGiftFieldError(el, "Enter a valid email address."); return false; }
+    } else if (n === "phone") {
+      if (v.replace(/[^\d]/g, "").length < 8) { setGiftFieldError(el, "Enter a phone number we can reach."); return false; }
+    } else if (n === "amount") {
+      if (v && !/^\d+(\.\d{1,2})?$/.test(v)) { setGiftFieldError(el, "Enter a number, e.g. 500"); return false; }
+    }
+    clearGiftFieldError(el);
+    return true;
+  }
+
   function whenRazorpay(done, fail) {
     if (window.Razorpay) {
       done();
@@ -284,25 +318,53 @@
     return plain[hint.mission] || "";
   }
 
-  function applyGiver(root, giver) {
+  function applyGiver(root, giver, signedIn) {
     if (!giver) return;
     ["name", "email", "phone"].forEach(function (key) {
       var input = root.querySelector('[name="' + key + '"]');
       if (!input || input.value || input.getAttribute("data-ainf-touched") === "1" || !giver[key]) return;
       input.value = giver[key];
     });
+    if (signedIn) {
+      ["name", "email"].forEach(function (key) {
+        var input = root.querySelector('[name="' + key + '"]');
+        if (!input || !giver[key]) return;
+        input.readOnly = true;
+        input.setAttribute("data-gift-locked", "1");
+        var label = input.closest("label");
+        if (label && !label.querySelector(".ainf-gift-locked-badge")) {
+          var badge = document.createElement("span");
+          badge.className = "ainf-gift-locked-badge";
+          badge.textContent = "from your account";
+          label.insertBefore(badge, input);
+        }
+      });
+    }
   }
 
   function loadGiver(root) {
+    var nameInput = root.querySelector('[name="name"]');
+    var emailInput = root.querySelector('[name="email"]');
+    [nameInput, emailInput].forEach(function (el) {
+      if (el) el.setAttribute("data-gift-loading", "1");
+    });
     fetch("/api/session/state", { credentials: "same-origin", headers: { accept: "application/json" } })
       .then(function (response) { return response.json(); })
       .then(function (state) {
-        applyGiver(root, state && state.giver);
+        [nameInput, emailInput].forEach(function (el) {
+          if (el) el.removeAttribute("data-gift-loading");
+        });
+        applyGiver(root, state && state.giver, state && state.signedIn);
         var name = root.querySelector('[name="name"]');
         var amount = root.querySelector('[name="amount"]');
         if (name && name.value && amount && document.activeElement === name) amount.focus();
+        else if (name && !name.readOnly) name.focus();
       })
-      .catch(function () {});
+      .catch(function () {
+        [nameInput, emailInput].forEach(function (el) {
+          if (el) el.removeAttribute("data-gift-loading");
+        });
+      });
   }
 
   function openGiftModal() {
@@ -364,11 +426,23 @@
         submitGiftModal(root);
       });
       form.querySelector('[name="amount"]').addEventListener("input", function () {
+        var v = this.value;
+        var cleaned = v.replace(/[^\d.]/g, "").replace(/^(\d*\.?\d{0,2}).*/, "$1");
+        if (cleaned !== v) this.value = cleaned;
+        clearGiftFieldError(this);
         markGiftChips(root);
       });
       form.addEventListener("input", function (event) {
-        if (event.target && event.target.name) event.target.setAttribute("data-ainf-touched", "1");
+        if (event.target && event.target.name) {
+          event.target.setAttribute("data-ainf-touched", "1");
+          clearGiftFieldError(event.target);
+        }
       });
+      form.addEventListener("blur", function (event) {
+        var el = event.target;
+        if (!el || !el.name || el.getAttribute("data-gift-locked") === "1") return;
+        validateGiftField(root, el);
+      }, true);
       document.addEventListener("keydown", function (event) {
         if (root.hidden) return;
         if (event.key === "Escape") {

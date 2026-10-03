@@ -924,4 +924,63 @@ form.framer-et7jxz button[type="submit"]{
 }
 @media (prefers-reduced-motion: reduce){
   .ainf-gift-modal, .ainf-gift-modal__card{ animation:none; }
+  .ainf-gift-modal input[data-gift-loading]{ animation:none; }
+}
+/* Skeleton shimmer while session data loads */
+@keyframes ainf-gift-shimmer{
+  0%{ background-position:200% center; }
+  100%{ background-position:-200% center; }
+}
+.ainf-gift-modal input[data-gift-loading]{
+  color:transparent;
+  background:linear-gradient(90deg,#eef2ef 25%,#dce8e2 50%,#eef2ef 75%);
+  background-size:200% 100%;
+  animation:ainf-gift-shimmer 1.4s ease infinite;
+  pointer-events:none;
+  border-color:#e0e8e3;
+}
+/* Locked fields (signed-in identity) */
+.ainf-gift-modal input[data-gift-locked]{
+  background:#f4faf6;
+  color:#2d5e3e;
+  cursor:default;
+  border-color:#c3dece;
+}
+.ainf-gift-modal input[data-gift-locked]:focus{
+  outline:none;
+  border-color:#c3dece;
+}
+.ainf-gift-locked-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  color:#1c7d48;
+  background:#e7f6ee;
+  border:1px solid #b8e0cc;
+  border-radius:6px;
+  padding:2px 7px;
+  font-weight:500;
+  letter-spacing:0.01em;
+  margin-bottom:2px;
+  align-self:flex-start;
+}
+.ainf-gift-locked-badge::before{
+  content:"🔒";
+  font-size:10px;
+}
+/* Inline field-level errors */
+.ainf-gift-field-error{
+  font-size:12px;
+  color:#8d2b2b;
+  line-height:1.4;
+  margin-top:-2px;
+}
+.ainf-gift-modal input[data-gift-error]{
+  border-color:#c0392b;
+  background:#fff8f8;
+}
+.ainf-gift-modal input[data-gift-error]:focus{
+  outline:2px solid rgba(192,57,43,0.25);
+  border-color:#c0392b;
 }
