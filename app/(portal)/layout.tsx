@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Onest } from "next/font/google";
+import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { isClerkConfigured } from "@/lib/env";
 import "./portal.css";
@@ -13,9 +13,17 @@ import "./portal.css";
  * keeping the layout scoped to the group makes that separation explicit.
  */
 
-const onest = Onest({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+// Self-hosted rather than next/font/google: Google Fonts intermittently serves
+// an extensionless kit URL that crashes the bundled @next/font loader on
+// Vercel (vercel/next.js#99114) — self-hosting removes the build-time fetch
+// entirely. The single file is Onest's variable font (latin subset); each
+// weight below points at the same file, matching what Google's own CSS did.
+const onest = localFont({
+  src: [
+    { path: "./fonts/onest-variable-latin.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/onest-variable-latin.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/onest-variable-latin.woff2", weight: "600", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-onest",
 });
