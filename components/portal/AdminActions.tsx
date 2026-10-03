@@ -14,7 +14,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 const ROLE_OPTIONS = [
   { value: Role.USER, label: "Member" },
-  { value: Role.VERIFIED_USER, label: "Verified" },
+  { value: Role.VERIFIED_USER, label: "Verified member" },
   { value: Role.SUPER_ADMIN, label: "Super admin" },
 ];
 
