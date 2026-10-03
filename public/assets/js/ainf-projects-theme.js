@@ -702,7 +702,7 @@
   function wireProjectButtons() {
     if (location.pathname.indexOf("/projects/") < 0) return;
 
-    // "Our mission" button → smooth scroll to #our-mission section
+    // "Our mission" button → open the Support AINF donation modal
     document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"]').forEach(function (el) {
       var text = (el.textContent || "").trim();
       if (!/^our mission$/i.test(text)) return;
@@ -711,22 +711,33 @@
       el.style.cursor = "pointer";
       el.addEventListener("click", function (e) {
         e.preventDefault();
-        var target = document.getElementById("our-mission");
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        // openGiftModal is defined in ainf-page-boot.js via window.__ainfOpenGiftModal
+        if (typeof window.__ainfOpenGiftModal === "function") {
+          window.__ainfOpenGiftModal();
+        } else {
+          // fallback: click any "Support AINF" button on the page
+          var cta = document.querySelector('[data-ainf-gift-trigger],[data-ainf-donate],.ainf-cta');
+          if (cta) cta.click();
+        }
       });
     });
 
-    // "Image Gallery" button → open a lightbox with #impact images
+    // "Image Gallery" button → hide it (removed per design decision)
     document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"],[data-framer-name="content"]').forEach(function (el) {
       var text = (el.textContent || "").replace(/\s+/g, " ").trim();
       if (!/image gallery/i.test(text)) return;
       if (el.getAttribute("data-ainf-wired")) return;
       el.setAttribute("data-ainf-wired", "1");
-      el.style.cursor = "pointer";
-      el.addEventListener("click", function (e) {
-        e.preventDefault();
-        openImageGallery();
-      });
+      var wrapper = el.closest('[data-framer-name]') || el;
+      // Walk up to find the button container (usually 2-3 levels up from text)
+      var btn = el;
+      for (var i = 0; i < 4; i++) {
+        if (!btn.parentElement) break;
+        btn = btn.parentElement;
+        if (btn.getAttribute && (btn.getAttribute("data-framer-name") || "").indexOf("btn") >= 0) break;
+      }
+      btn.style.setProperty("display", "none", "important");
+      btn.setAttribute("aria-hidden", "true");
     });
   }
 

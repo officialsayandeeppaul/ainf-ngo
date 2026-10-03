@@ -361,6 +361,8 @@
       });
   }
 
+  window.__ainfOpenGiftModal = function () { openGiftModal(); };
+
   function openGiftModal() {
     ensureCheckout();
     giftReturn = document.activeElement;
