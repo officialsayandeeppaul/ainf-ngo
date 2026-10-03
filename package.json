@@ -8,7 +8,8 @@
   "scripts": {
     "//bundler": "Turbopack needs junction points for its dev node_modules mirror; the project drive is exFAT, which cannot create them. Both commands stay on webpack until the repo lives on NTFS.",
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "prisma generate && next build --webpack",
+    "postinstall": "prisma generate",
     "dev:turbo": "next dev",
     "start": "next start",
     "typecheck": "tsc --noEmit",
