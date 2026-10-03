@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
-import { Role } from "@prisma/client";
+import { Role } from "@/lib/prisma-enums-client";
 import { AinfBrand } from "./AinfBrand";
 import { PortalFooter } from "./PortalChrome";
 

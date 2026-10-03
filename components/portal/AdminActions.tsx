@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Role, UserStatus } from "@prisma/client";
+import { Role, UserStatus } from "@/lib/prisma-enums-client";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PortalSelect } from "@/components/portal/PortalSelect";
 
