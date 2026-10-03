@@ -697,6 +697,131 @@
     setTimeout(tick, ms);
   });
 
+  /* ---- Project page interactive buttons ----------------------------------------- */
+
+  function wireProjectButtons() {
+    if (location.pathname.indexOf("/projects/") < 0) return;
+
+    // "Our mission" button → smooth scroll to #our-mission section
+    document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"]').forEach(function (el) {
+      var text = (el.textContent || "").trim();
+      if (!/^our mission$/i.test(text)) return;
+      if (el.getAttribute("data-ainf-wired")) return;
+      el.setAttribute("data-ainf-wired", "1");
+      el.style.cursor = "pointer";
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        var target = document.getElementById("our-mission");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // "Image Gallery" button → open a lightbox with #impact images
+    document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"],[data-framer-name="content"]').forEach(function (el) {
+      var text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/image gallery/i.test(text)) return;
+      if (el.getAttribute("data-ainf-wired")) return;
+      el.setAttribute("data-ainf-wired", "1");
+      el.style.cursor = "pointer";
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        openImageGallery();
+      });
+    });
+  }
+
+  function openImageGallery() {
+    if (document.getElementById("ainf-gallery-modal")) {
+      document.getElementById("ainf-gallery-modal").hidden = false;
+      return;
+    }
+
+    var impact = document.getElementById("impact");
+    var imgs = [];
+    if (impact) {
+      impact.querySelectorAll("img").forEach(function (img) {
+        var src = img.getAttribute("src") || "";
+        if (!src || /\.svg($|\?)/i.test(src) || /arrow/i.test(img.getAttribute("alt") || "")) return;
+        if (imgs.indexOf(src) < 0) imgs.push(src);
+      });
+    }
+    // Fallback: grab images from the whole page (excluding nav/footer icons)
+    if (imgs.length === 0) {
+      document.querySelectorAll("img").forEach(function (img) {
+        if (img.closest && (img.closest("#ainf-global-nav") || img.closest("#ainf-site-footer"))) return;
+        var src = img.getAttribute("src") || "";
+        if (!src || /\.svg($|\?)/i.test(src) || /logo|arrow|icon/i.test(img.getAttribute("alt") || "")) return;
+        if (imgs.indexOf(src) < 0) imgs.push(src);
+      });
+    }
+    if (!imgs.length) return;
+
+    var current = 0;
+
+    var modal = document.createElement("div");
+    modal.id = "ainf-gallery-modal";
+    modal.style.cssText = "position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;";
+
+    var card = document.createElement("div");
+    card.style.cssText = "position:relative;max-width:900px;width:100%;display:flex;flex-direction:column;gap:12px;align-items:center;";
+
+    var closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.setAttribute("aria-label", "Close gallery");
+    closeBtn.style.cssText = "position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:32px;line-height:1;cursor:pointer;padding:4px 10px;opacity:0.8;";
+    closeBtn.addEventListener("click", function () { modal.hidden = true; });
+
+    var imgEl = document.createElement("img");
+    imgEl.src = imgs[current];
+    imgEl.style.cssText = "max-width:100%;max-height:70vh;object-fit:contain;border-radius:12px;display:block;";
+    imgEl.alt = "Gallery image";
+
+    var counter = document.createElement("span");
+    counter.style.cssText = "color:#ccc;font-size:13px;font-family:system-ui,sans-serif;";
+
+    function showSlide(idx) {
+      current = (idx + imgs.length) % imgs.length;
+      imgEl.src = imgs[current];
+      counter.textContent = (current + 1) + " / " + imgs.length;
+    }
+    showSlide(0);
+
+    var controls = document.createElement("div");
+    controls.style.cssText = "display:flex;gap:12px;align-items:center;";
+
+    var prev = document.createElement("button");
+    prev.textContent = "←";
+    prev.setAttribute("aria-label", "Previous");
+    prev.style.cssText = "background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;";
+    prev.addEventListener("click", function () { showSlide(current - 1); });
+
+    var next = document.createElement("button");
+    next.textContent = "→";
+    next.setAttribute("aria-label", "Next");
+    next.style.cssText = "background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;";
+    next.addEventListener("click", function () { showSlide(current + 1); });
+
+    controls.appendChild(prev);
+    controls.appendChild(counter);
+    controls.appendChild(next);
+
+    card.appendChild(closeBtn);
+    card.appendChild(imgEl);
+    card.appendChild(controls);
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) modal.hidden = true;
+    });
+    document.addEventListener("keydown", function (e) {
+      if (modal.hidden) return;
+      if (e.key === "Escape") modal.hidden = true;
+      if (e.key === "ArrowLeft") showSlide(current - 1);
+      if (e.key === "ArrowRight") showSlide(current + 1);
+    });
+  }
+
   var moTimer = 0;
   var mo = new MutationObserver(function () {
     if (moTimer) return;
@@ -708,6 +833,7 @@
       restyleButtons();
       indianizeCopy();
       loadFieldProjects();
+      wireProjectButtons();
     }, 220);
   });
   function observeBody() {
@@ -715,6 +841,7 @@
   }
   if (document.body) observeBody();
   else document.addEventListener("DOMContentLoaded", observeBody);
+  [800, 1600, 2800].forEach(function (ms) { setTimeout(wireProjectButtons, ms); });
   setTimeout(function () {
     mo.disconnect();
   }, 4500);
