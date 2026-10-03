@@ -2446,9 +2446,18 @@ body.ainf-portal b {
   background: var(--surface-alt);
 }
 
+.pt-table td .pt-badge {
+  white-space: normal;
+}
+
+.pt-table--users th:nth-child(2),
+.pt-table--users td:nth-child(2) {
+  width: 13%;
+}
+
 .pt-table--users th:nth-child(3),
 .pt-table--users td:nth-child(3) {
-  width: 12%;
+  width: 11%;
 }
 
 .pt-table--users th:nth-child(4),
