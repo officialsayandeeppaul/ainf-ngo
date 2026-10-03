@@ -1,14 +1,20 @@
 /node_modules
 /.next/
 /out/
-.env*.local
-next-env.d.ts
+.env
+.env.*
+!.env.example
+# next-env.d.ts
 *.tsbuildinfo
+/prisma/*.db
+/test-results/
+/playwright-report/
+/coverage/
 public/_*.png
 public/_*.html
-scripts/_*.png
-scripts/_inspect-*.py
-scripts/_verify-*.py
+scripts/_*
+tmp-card-ref/
+ilovepdf_images-extracted/
 app/route.ts.hopper-backup
 
 axinn-theme-framer-website-optimized/
@@ -18,4 +24,5 @@ scripts/_home.gz
 scripts/_hdrs.txt
 scripts/_lh-*.json
 scripts/_lighthouse-home.json
-
+/public/ilove-pdf/*
+!/public/ilove-pdf/.gitkeep

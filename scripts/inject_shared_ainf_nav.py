@@ -9,13 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app"
 
 SITE_CSS = '<link rel="stylesheet" href="/assets/css/ainf-site-nav.css" id="ainf-site-nav-css">'
-SITE_JS = '<script src="/assets/js/ainf-site-nav.js" id="ainf-site-nav-js"></script>'
+SITE_JS = '<script src="/assets/js/ainf-site-nav.js" defer id="ainf-site-nav-js"></script>'
 BOOT_CSS = '<link rel="stylesheet" href="/assets/css/ainf-page-boot.css" id="ainf-page-boot-css">'
-BOOT_JS = '<script src="/assets/js/ainf-page-boot.js" id="ainf-page-boot-js"></script>'
-BOOT_FLAG = '<script>document.documentElement.classList.add("ainf-shared-nav","ainf-booting");</script>'
+BOOT_JS = '<script src="/assets/js/ainf-page-boot.js" defer id="ainf-page-boot-js"></script>'
+BOOT_FLAG = '<script>document.documentElement.classList.add("ainf-shared-nav","ainf-booting");if(/\\/blogs\\/[^/?#]+/.test(location.pathname))document.documentElement.classList.add("ainf-blog-title");</script>'
 FOOTER_CSS = '<link rel="stylesheet" href="/assets/css/ainf-site-footer.css" id="ainf-site-footer-css">'
-FOOTER_TEMPLATE_JS = '<script src="/assets/js/ainf-footer-template.js" id="ainf-footer-template-js"></script>'
-FOOTER_JS = '<script src="/assets/js/ainf-site-footer.js" id="ainf-site-footer-js"></script>'
+FOOTER_TEMPLATE_JS = '<script src="/assets/js/ainf-footer-template.js" defer id="ainf-footer-template-js"></script>'
+FOOTER_JS = '<script src="/assets/js/ainf-site-footer.js" defer id="ainf-site-footer-js"></script>'
 BOOT = BOOT_FLAG
 I18N_CSS = '<link rel="stylesheet" href="/i18n/home-i18n.css" id="ainf-i18n-css">'
 I18N_JS = '<script src="/i18n/home-i18n.js" defer id="ainf-i18n-js"></script>'
@@ -29,7 +29,7 @@ I18N_EARLY = (
     'document.documentElement.lang=l==="hi"?"hi":"bn";}}catch(e){}</script>'
 )
 PROJ_THEME_CSS = '<link rel="stylesheet" href="/assets/css/ainf-projects-theme.css" id="ainf-projects-theme-css">'
-PROJ_THEME_JS = '<script src="/assets/js/ainf-projects-theme.js" id="ainf-projects-theme-js"></script>'
+PROJ_THEME_JS = '<script src="/assets/js/ainf-projects-theme.js" defer id="ainf-projects-theme-js"></script>'
 
 # Boot CSS/JS first so FOUC is covered before page CSS paints mashed letters
 HEAD_BITS = BOOT + BOOT_CSS + SITE_CSS + I18N_CSS + MOTION_CSS + I18N_EARLY + BOOT_JS + SITE_JS + I18N_JS + MOTION_JS
@@ -61,7 +61,6 @@ def escape(s: str) -> str:
 
 def strip_old(html: str) -> str:
     patterns = [
-        r'<link[^>]*ainf-projects\.css[^>]*>',
         r'<link[^>]*ainf-projects-theme\.css[^>]*>',
         r'<link[^>]*ainf-site-nav\.css[^>]*>',
         r'<link[^>]*ainf-site-footer\.css[^>]*>',
@@ -133,8 +132,17 @@ def ensure_class(tag_open: str, classname: str, html: str) -> str:
     return html.replace(full, new, 1)
 
 
+def restore_framer_css(html: str) -> str:
+    return re.sub(
+        r'<link rel="preload" href="(/assets/css/(?!ainf)[^"]+\.css)" as="style"[^>]*>\s*<noscript><link rel="stylesheet" href="\1"></noscript>',
+        r'<link rel="stylesheet" href="\1">',
+        html,
+    )
+
+
 def inject(html: str, projects: bool) -> str:
     html = strip_old(html)
+    html = restore_framer_css(html)
     html = ensure_class("html", "ainf-shared-nav", html)
     html = ensure_class("html", "ainf-booting", html)
     html = ensure_class("body", "ainf-shared-nav", html)
@@ -153,6 +161,18 @@ def inject(html: str, projects: bool) -> str:
 
 
 def main() -> None:
+    html_dir = ROOT / "framer-html"
+    if html_dir.exists():
+        for path in sorted(html_dir.rglob("*.html")):
+            rel = path.relative_to(html_dir).as_posix()
+            html = path.read_text(encoding="utf-8")
+            projects = rel.startswith("projects/")
+            new_html = inject(html, projects)
+            if new_html == html:
+                continue
+            path.write_text(new_html, encoding="utf-8")
+            print("updated", rel)
+
     for path in sorted(APP.rglob("route.ts")):
         rel = path.relative_to(APP).as_posix()
         text = path.read_text(encoding="utf-8")

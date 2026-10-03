@@ -34,6 +34,19 @@ body.ainf-projects-skin,
   opacity:1!important;
   transform:none!important;
 }
+#ainf-site-footer h4,
+#ainf-site-footer h4 .ainf-letter,
+#ainf-site-footer [data-framer-name="Menu"] h4,
+#ainf-site-footer [data-framer-name="Quick links"] h4,
+#ainf-site-footer [data-framer-name="Contact"] h4{
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  transform:none!important;
+  overflow:visible!important;
+  backface-visibility:visible!important;
+  padding-left:1px;
+}
 
 #ainf-site-footer .ainf-brand,
 #ainf-site-footer .ainf-ft-logo{
@@ -45,13 +58,15 @@ body.ainf-projects-skin,
 }
 #ainf-site-footer .ainf-brand img,
 #ainf-site-footer .ainf-ft-logo img{
-  width:36px;
-  height:36px;
+  width:40px;
+  height:40px;
   border-radius:50%;
   object-fit:cover;
   object-position:center;
-  flex:0 0 auto;
+  flex:0 0 40px;
   display:block;
+  visibility:visible;
+  opacity:1;
 }
 #ainf-site-footer .ainf-brand-text,
 #ainf-site-footer .ainf-ft-brand-text{
@@ -62,7 +77,12 @@ body.ainf-projects-skin,
 }
 
 #ainf-site-footer a[data-framer-page-link-current="true"]{
-  color:#39a46b!important;
+  color:#1c7d48!important;
+}
+#ainf-site-footer li a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
 }
 
 body.ainf-projects-skin #ainf-site-footer{

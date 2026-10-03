@@ -43,6 +43,88 @@ a[data-framer-name="Mobile-Close"].ainf-cta-on-light {
   --framer-link-text-decoration: none !important;
 }
 
+/* CTA labels: regular weight, never a transparent Framer fill */
+a[data-framer-name="Desktop"],
+a[data-framer-name="Tablet"],
+a[data-framer-name="Mobile-Close"] {
+  --framer-font-weight: 400;
+  --framer-font-weight-bold: 400;
+}
+a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Tablet"] [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Tablet"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Tablet"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Mobile-Close"] [data-framer-component-type="RichTextContainer"],
+a[data-framer-name="Mobile-Close"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Mobile-Close"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Desktop"] .framer-text,
+a[data-framer-name="Tablet"] .framer-text,
+a[data-framer-name="Mobile-Close"] .framer-text {
+  font-weight: 400 !important;
+  font-style: normal !important;
+  letter-spacing: 0 !important;
+  -webkit-text-stroke: 0 !important;
+}
+a[data-framer-name="Desktop"] .framer-text[data-text-fill],
+a[data-framer-name="Tablet"] .framer-text[data-text-fill],
+a[data-framer-name="Mobile-Close"] .framer-text[data-text-fill] {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+}
+
+/* Green pill buttons: white regular text (not empty, not extra-bold) */
+a[data-framer-name="Desktop"][style*="57, 164, 107"],
+a[data-framer-name="Tablet"][style*="57, 164, 107"],
+a[data-framer-name="Mobile-Close"][style*="57, 164, 107"],
+a[data-framer-name="Desktop"][style*="39a46b"],
+a[data-framer-name="Tablet"][style*="39a46b"],
+a[data-framer-name="Mobile-Close"][style*="39a46b"] {
+  color: #ffffff !important;
+  --framer-text-color: #ffffff !important;
+  --extracted-r6o4lv: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+a[data-framer-name="Desktop"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Desktop"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Tablet"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Tablet"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Mobile-Close"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] p,
+a[data-framer-name="Mobile-Close"][style*="57, 164, 107"] [data-framer-component-type="RichTextContainer"] span,
+a[data-framer-name="Desktop"][style*="57, 164, 107"] .framer-text,
+a[data-framer-name="Tablet"][style*="57, 164, 107"] .framer-text,
+a[data-framer-name="Mobile-Close"][style*="57, 164, 107"] .framer-text,
+a[data-framer-name="Desktop"][style*="39a46b"] .framer-text,
+a[data-framer-name="Tablet"][style*="39a46b"] .framer-text,
+a[data-framer-name="Mobile-Close"][style*="39a46b"] .framer-text {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 400 !important;
+}
+
+/* White button sitting on the green CTA card */
+[data-framer-name="Support AINF CTA"] a[data-framer-name="Desktop"]:not([style*="57, 164, 107"]),
+[data-framer-name="Support AINF CTA"] a[data-framer-name="Tablet"]:not([style*="57, 164, 107"]),
+[data-framer-name="Support AINF CTA"] a[data-framer-name="Mobile-Close"]:not([style*="57, 164, 107"]) {
+  color: rgb(34, 34, 34) !important;
+  --framer-text-color: rgb(34, 34, 34) !important;
+  --extracted-r6o4lv: rgb(34, 34, 34) !important;
+  -webkit-text-fill-color: rgb(34, 34, 34) !important;
+}
+
+/* Project / gallery pills use the same regular label */
+[data-framer-name="Primary btn"],
+[data-framer-name="Primary btn"] p,
+[data-framer-name="Primary btn"] span,
+[data-framer-name="Primary btn"] .framer-text {
+  font-weight: 400 !important;
+  font-style: normal !important;
+  --framer-font-weight: 400 !important;
+  --framer-font-weight-bold: 400 !important;
+}
+
 /* Desktop language control — sits inside navbar */
 #ainf-lang-switcher {
   position: relative;

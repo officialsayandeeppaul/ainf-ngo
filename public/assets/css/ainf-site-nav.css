@@ -43,15 +43,15 @@
   line-height:1!important;
 }
 #ainf-global-nav .ainf-brand img{
-  width:36px!important;
-  height:36px!important;
+  width:40px!important;
+  height:40px!important;
   border-radius:50%!important;
   object-fit:cover!important;
   object-position:center!important;
   display:block!important;
-  flex:0 0 auto!important;
+  flex:0 0 40px!important;
   background:#fff!important;
-  box-shadow:none!important;
+  box-shadow:0 0 0 1px rgba(20,30,25,.08)!important;
 }
 #ainf-global-nav .ainf-brand .ainf-brand-text{
   display:inline-block!important;
@@ -80,14 +80,16 @@ a.ainf-brand img,
 a.ainf-ft-logo img,
 .ainf-brand img,
 .ainf-ft-logo img{
-  width:36px!important;
-  height:36px!important;
+  width:40px!important;
+  height:40px!important;
   border-radius:50%!important;
   object-fit:cover!important;
   object-position:center!important;
   display:block!important;
-  flex:0 0 auto!important;
+  visibility:visible!important;
+  flex:0 0 40px!important;
   background:#fff!important;
+  opacity:1!important;
 }
 .ainf-brand-text,
 .ainf-ft-brand-text{
@@ -98,11 +100,11 @@ a.ainf-ft-logo img,
   color:#222!important;
 }
 
-/* Hide legacy Framer theainf SVG wordmark in footer brand area only */
-[data-framer-name="Details Top"] [data-framer-name="Logo"],
-[data-framer-name="Details Top"] .framer-1yg9568,
-[data-framer-name="Details Top"] .svgContainer,
-[data-framer-name="Details Top"] [data-framer-component-type="SVG"]{
+/* Hide legacy Framer SVG wordmark, never the injected seal image */
+[data-framer-name="Details Top"] [data-framer-name="Logo"]:not(:has(img)),
+[data-framer-name="Details Top"] .svgContainer:not(:has(img)),
+[data-framer-name="Details Top"] [data-framer-component-type="SVG"]:not(:has(img)),
+[data-framer-name="Details Top"] svg:not(a.ainf-brand svg):not(a.ainf-ft-logo svg){
   display:none!important;
   visibility:hidden!important;
   width:0!important;
@@ -111,12 +113,25 @@ a.ainf-ft-logo img,
 }
 [data-framer-name="Details Top"] a.ainf-brand,
 [data-framer-name="Details Top"] a.ainf-ft-logo,
+[data-framer-name="Details Top"] a.ainf-brand img,
+[data-framer-name="Details Top"] a.ainf-ft-logo img,
 #ainf-site-footer a.ainf-brand,
-#ainf-site-footer a.ainf-ft-logo{
+#ainf-site-footer a.ainf-ft-logo,
+#ainf-site-footer a.ainf-brand img,
+#ainf-site-footer a.ainf-ft-logo img{
   display:inline-flex!important;
   visibility:visible!important;
   width:auto!important;
   height:auto!important;
+  opacity:1!important;
+}
+[data-framer-name="Details Top"] a.ainf-brand img,
+[data-framer-name="Details Top"] a.ainf-ft-logo img,
+#ainf-site-footer a.ainf-brand img,
+#ainf-site-footer a.ainf-ft-logo img{
+  display:block!important;
+  width:40px!important;
+  height:40px!important;
 }
 #ainf-global-nav .ainf-links{
   display:flex!important;
@@ -132,10 +147,14 @@ a.ainf-ft-logo img,
   color:#222!important;
   white-space:nowrap!important;
   line-height:1.2!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  min-height:44px!important;
+  padding:0 2px!important;
 }
-#ainf-global-nav .ainf-links a:hover{color:#39a46b!important}
+#ainf-global-nav .ainf-links a:hover{color:#1c7d48!important}
 #ainf-global-nav .ainf-links a[aria-current="page"]{
-  color:#39a46b!important;
+  color:#1c7d48!important;
   font-weight:600!important;
 }
 #ainf-global-nav .ainf-right{
@@ -143,13 +162,95 @@ a.ainf-ft-logo img,
   align-items:center!important;
   gap:10px!important;
   flex:0 0 auto!important;
+  margin-left:auto!important;
 }
+#ainf-global-nav .ainf-cta-short{display:none!important}
+#ainf-global-nav .ainf-cta-full{display:inline!important}
+/* Portal entry point: quieter than the donate CTA so it does not compete */
+#ainf-global-nav .ainf-account{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  height:40px!important;
+  padding:0 14px!important;
+  border:1px solid rgba(15,23,42,.12)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  color:#222!important;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+  font-size:13px!important;
+  font-weight:400!important;
+  line-height:1!important;
+  text-decoration:none!important;
+  white-space:nowrap!important;
+  flex:0 0 auto!important;
+  transition:background .15s ease,border-color .15s ease!important;
+}
+#ainf-global-nav .ainf-account:hover{
+  background:#f6f8f7!important;
+  border-color:rgba(57,164,107,.4)!important;
+  color:#2e8657!important;
+}
+#ainf-global-nav .ainf-account svg{flex:0 0 auto!important}
+#ainf-global-nav .ainf-account.is-in{
+  width:40px!important;
+  height:40px!important;
+  padding:0!important;
+  gap:0!important;
+  border:0!important;
+  background:transparent!important;
+  overflow:visible!important;
+}
+#ainf-global-nav .ainf-account.is-in:hover{
+  background:transparent!important;
+  border:0!important;
+  color:inherit!important;
+}
+#ainf-global-nav .ainf-account-avatar{
+  display:block!important;
+  width:40px!important;
+  height:40px!important;
+  border-radius:999px!important;
+  object-fit:cover!important;
+  background:#1c7d48!important;
+  box-shadow:0 0 0 1px rgba(15,23,42,.08)!important;
+}
+#ainf-global-nav .ainf-account.is-in:hover .ainf-account-avatar{
+  box-shadow:0 0 0 3px rgba(57,164,107,.35)!important;
+}
+#ainf-global-nav .ainf-account-avatar--mark{
+  background:#1c7d48 center / 20px 20px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.2'/%3E%3Cpath d='M5.5 19.2c1.2-3 3.4-4.5 6.5-4.5s5.3 1.5 6.5 4.5'/%3E%3C/svg%3E")!important;
+}
+#ainf-global-nav .ainf-menu-btn{
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:40px!important;
+  height:40px!important;
+  margin:0!important;
+  padding:0!important;
+  border:1px solid rgba(15,23,42,.12)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  color:#222!important;
+  cursor:pointer!important;
+  flex:0 0 auto!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+#ainf-global-nav .ainf-menu-btn:hover{
+  background:#f8fafc!important;
+}
+#ainf-global-nav .ainf-menu-x{display:none!important}
+#ainf-global-nav.is-open .ainf-menu-bars{display:none!important}
+#ainf-global-nav.is-open .ainf-menu-x{display:block!important}
 #ainf-global-nav .ainf-cta{
   display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
   gap:8px!important;
-  background:#39a46b!important;
+  background:#1c7d48!important;
   color:#fff!important;
   height:44px!important;
   min-height:44px!important;
@@ -157,7 +258,7 @@ a.ainf-ft-logo img,
   padding:0 18px!important;
   border-radius:999px!important;
   font-size:13px!important;
-  font-weight:600!important;
+  font-weight:400!important;
   white-space:nowrap!important;
   line-height:1!important;
   box-sizing:border-box!important;
@@ -211,11 +312,99 @@ a.ainf-ft-logo img,
 }
 
 @media(max-width:900px){
-  #ainf-global-nav{padding:8px 8px 8px 12px!important;gap:8px!important}
-  #ainf-global-nav .ainf-links{display:none!important}
+  #ainf-global-nav{
+    justify-content:flex-start!important;
+    padding:6px 8px 6px 10px!important;
+    gap:6px!important;
+  }
+  #ainf-global-nav .ainf-menu-btn{
+    display:inline-flex!important;
+    width:40px!important;
+    height:40px!important;
+    margin-left:0!important;
+  }
+  #ainf-global-nav .ainf-brand .ainf-brand-text{display:none!important}
+  #ainf-global-nav .ainf-right{
+    margin-left:auto!important;
+    gap:6px!important;
+  }
+  #ainf-global-nav .ainf-cta{
+    height:36px!important;
+    min-height:36px!important;
+    max-height:36px!important;
+    padding:0 12px!important;
+    gap:6px!important;
+    font-size:12px!important;
+  }
+  #ainf-global-nav .ainf-cta-full{display:none!important}
+  #ainf-global-nav .ainf-cta-short{display:inline!important}
+  /* Icon only on narrow screens; the donate CTA keeps the wording */
+  #ainf-global-nav .ainf-account{
+    height:36px!important;
+    width:36px!important;
+    padding:0!important;
+    gap:0!important;
+  }
+  #ainf-global-nav .ainf-account .ainf-account-text{display:none!important}
+  #ainf-global-nav .ainf-account.is-in,
+  #ainf-global-nav .ainf-account.is-in .ainf-account-avatar{
+    width:36px!important;
+    height:36px!important;
+  }
+  #ainf-global-nav .ainf-cta-ico{
+    width:18px!important;
+    height:18px!important;
+  }
+  #ainf-global-nav .ainf-cta-ico svg{
+    width:11px!important;
+    height:11px!important;
+  }
+  #ainf-global-nav #ainf-lang-switcher,
+  #ainf-global-nav [data-ainf-lang-nav],
+  #ainf-global-nav .ainf-lang-trigger{
+    height:36px!important;
+    min-height:36px!important;
+    max-height:36px!important;
+  }
+  #ainf-global-nav .ainf-lang-trigger{
+    min-width:36px!important;
+    padding:0 8px!important;
+  }
+  #ainf-global-nav .ainf-lang-chevron{display:none!important}
+  #ainf-global-nav .ainf-links{
+    display:none!important;
+    position:absolute!important;
+    top:calc(100% + 8px)!important;
+    left:0!important;
+    right:0!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:4px!important;
+    padding:10px!important;
+    background:#fff!important;
+    border:1px solid rgba(15,23,42,.1)!important;
+    border-radius:18px!important;
+    box-shadow:0 18px 40px rgba(15,23,42,.16)!important;
+    z-index:40!important;
+    flex:none!important;
+  }
+  #ainf-global-nav.is-open .ainf-links{
+    display:flex!important;
+  }
+  #ainf-global-nav .ainf-links a{
+    width:100%!important;
+    justify-content:flex-start!important;
+    padding:12px 14px!important;
+    border-radius:12px!important;
+    display:flex!important;
+  }
+  #ainf-global-nav .ainf-links a[aria-current="page"]{
+    background:rgba(57,164,107,.1)!important;
+  }
   #ainf-global-nav #ainf-lang-switcher{display:flex!important}
-  #ainf-global-nav .ainf-brand img{width:32px!important;height:32px!important}
-  #ainf-global-nav .ainf-brand .ainf-brand-text{font-size:15px!important}
+  #ainf-global-nav .ainf-brand img{width:36px!important;height:36px!important;flex-basis:36px!important}
+  body.ainf-nav-open{overflow:hidden}
 }
 
 /*
@@ -292,4 +481,167 @@ body.ainf-projects-skin span,
 body.ainf-projects-skin button,
 body.ainf-projects-skin li{
   font-family:Onest,Inter,system-ui,sans-serif!important;
+}
+
+/* Full-bleed campaign bar at the very top (not a second floating pill).
+   Nav drops below it when live so chrome stays one stack.
+   Stays one slim line — long copy truncates; dismiss clears annoyance. */
+html.ainf-has-support{
+  --ainf-support-h:44px;
+  scroll-padding-top:calc(var(--ainf-support-h) + 96px);
+}
+html.ainf-has-support #ainf-global-nav{
+  top:calc(var(--ainf-support-h) + 14px)!important;
+}
+#ainf-support-banner{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  transform:none!important;
+  width:100%!important;
+  height:var(--ainf-support-h,44px);
+  min-height:44px;
+  max-height:44px;
+  z-index:2147482990!important;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:nowrap;
+  padding:0 12px 0 20px;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#1a3d2e!important;
+  box-shadow:none!important;
+  font-family:Onest,Inter,system-ui,sans-serif;
+  font-weight:400;
+  box-sizing:border-box;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  overflow:hidden;
+}
+.ainf-support-copy{
+  min-width:0;
+  flex:1 1 auto;
+  max-width:560px;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:baseline;
+  gap:8px;
+  overflow:hidden;
+}
+.ainf-support-copy strong{
+  flex:0 1 auto;
+  font-size:13px;
+  font-weight:700;
+  color:#f4faf6;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:42%;
+}
+.ainf-support-copy span{
+  flex:1 1 0;
+  min-width:0;
+  font-size:13px;
+  font-weight:400;
+  color:#e8f5ee;
+  line-height:1.3;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.ainf-support-count{
+  display:inline-flex;
+  gap:4px;
+  flex:0 0 auto;
+}
+.ainf-support-count span{
+  min-width:32px;
+  padding:3px 4px;
+  border-radius:7px;
+  background:rgba(255,255,255,.1);
+  text-align:center;
+}
+.ainf-support-count b{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#e8f5ee;
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+.ainf-support-count i{
+  display:block;
+  margin-top:1px;
+  font-style:normal;
+  font-size:9px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:#e8f5ee;
+  font-weight:400;
+}
+.ainf-support-count.is-done{
+  font-size:12px;
+  font-weight:400;
+  color:#e8f5ee;
+}
+.ainf-support-cta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:28px;
+  padding:0 12px;
+  border-radius:999px;
+  background:#1c7d48;
+  color:#fff!important;
+  text-decoration:none!important;
+  font-size:12px;
+  font-weight:400;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+.ainf-support-cta:hover{background:#2f8f5c}
+.ainf-support-dismiss{
+  flex:0 0 auto;
+  width:28px;
+  height:28px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#e8f5ee;
+  cursor:pointer;
+  font-size:18px;
+  font-weight:400;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.ainf-support-dismiss:hover{
+  color:#f4faf6;
+  background:rgba(255,255,255,.08);
+}
+@media (max-width:860px){
+  #ainf-support-banner{
+    gap:8px;
+    padding:0 8px 0 14px;
+  }
+  .ainf-support-copy{max-width:none}
+  .ainf-support-copy strong{max-width:38%}
+  .ainf-support-count span:nth-child(1){display:none} /* drop Days on narrow */
+  html.ainf-has-support #ainf-global-nav{top:calc(var(--ainf-support-h,44px) + 10px)!important}
+}
+@media (max-width:560px){
+  .ainf-support-copy span{display:none} /* headline + timer + CTA only */
+  .ainf-support-copy strong{max-width:100%}
+  .ainf-support-count span{min-width:28px;padding:2px 3px}
+  .ainf-support-count b{font-size:12px}
 }

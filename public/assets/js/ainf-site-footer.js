@@ -8,7 +8,7 @@
   if (!isProjects) return;
 
   var FOOTER_ID = "ainf-site-footer";
-  var FOOTER_VER = "5";
+  var FOOTER_VER = "6";
 
   function pathNorm() {
     return (location.pathname || "/").replace(/\/$/, "") || "/";
@@ -73,6 +73,16 @@
         el.style.setProperty("display", "none", "important");
       });
     });
+
+    document.querySelectorAll("footer, [data-framer-name]").forEach(function (el) {
+      if (el.id === FOOTER_ID || (el.closest && el.closest("#" + FOOTER_ID))) return;
+      if (el.querySelector && el.querySelector("#main, h1")) return;
+      var t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (t.length > 1800) return;
+      if (!/Through Ostra|@Oxira|X \/ Twitter/i.test(t)) return;
+      el.setAttribute("data-ainf-oxira-footer", "1");
+      el.style.setProperty("display", "none", "important");
+    });
   }
 
   function ensureFooter() {
@@ -108,24 +118,26 @@
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", tick);
   }
-  window.addEventListener("load", tick);
-
-  var i = 0;
-  var timer = setInterval(function () {
-    tick();
-    i += 1;
-    if (i > 40) clearInterval(timer);
-  }, 250);
-
-  var mo = new MutationObserver(function () {
-    hideNativeFooters();
-    ensureFooter();
+  [400, 1200, 2400].forEach(function (ms) {
+    setTimeout(tick, ms);
   });
-  if (document.body) mo.observe(document.body, { childList: true, subtree: true });
-  else
-    document.addEventListener("DOMContentLoaded", function () {
-      mo.observe(document.body, { childList: true, subtree: true });
-    });
+
+  var moTimer = 0;
+  var mo = new MutationObserver(function () {
+    if (moTimer) return;
+    moTimer = setTimeout(function () {
+      moTimer = 0;
+      ensureFooter();
+    }, 220);
+  });
+  function observeBody() {
+    if (document.body) mo.observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.body) observeBody();
+  else document.addEventListener("DOMContentLoaded", observeBody);
+  setTimeout(function () {
+    mo.disconnect();
+  }, 20000);
 
   window.__ainfEnsureSiteFooter = ensureFooter;
 })();

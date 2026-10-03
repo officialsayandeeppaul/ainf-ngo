@@ -38,12 +38,27 @@
   function shouldSkipNode(node) {
     if (!node || !node.parentElement) return true;
     if (inSwitcher(node)) return true;
+    if (node.parentElement.closest && node.parentElement.closest(".ainf-hero-ghost")) return true;
     var tag = node.parentElement.tagName;
     return tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT" || tag === "SVG";
   }
 
+  function isLetterLeaf(span) {
+    if (!span || span.nodeType !== 1) return false;
+    if (span.classList && span.classList.contains("ainf-hero-ghost")) return false;
+    if (span.querySelector("span")) return false;
+    var style = span.getAttribute("style") || "";
+    if (!style) return false;
+    var motion =
+      /inline-block/i.test(style) ||
+      (/transform/i.test(style) && (/opacity/i.test(style) || /blur\(/i.test(style)));
+    if (!motion) return false;
+    var t = span.textContent || "";
+    return t.length <= 8;
+  }
+
   function hasLetterAnimation(el) {
-    return !!el.querySelector('span[style*="inline-block"]');
+    return letterLeaves(el).length >= 4;
   }
 
   function buildReverseMaps(strings) {
@@ -93,7 +108,12 @@
 
   function translateKey(key, lang) {
     if (!key) return null;
-    if (lang === "en") return key;
+    if (key === "theainfAINF" || key === "theainf") return "AINF";
+    if (lang === "en") {
+      if (key === "Ghar Pahunch") return "Youth Supported";
+      if (key === "Zila Sahyog") return "District Support";
+      return key;
+    }
     var entry = state.dict.strings[key];
     if (!entry) return key;
     return entry[lang] || key;
@@ -158,15 +178,383 @@
     document.documentElement.lang = lang === "bn" ? "bn" : lang === "hi" ? "hi" : "en";
   }
 
+  function graphemes(text) {
+    var str = String(text || "");
+    try {
+      if (window.Intl && Intl.Segmenter) {
+        var seg = new Intl.Segmenter(state.lang === "bn" ? "bn" : state.lang === "hi" ? "hi" : "en", {
+          granularity: "grapheme",
+        });
+        return Array.from(seg.segment(str), function (part) {
+          return part.segment;
+        });
+      }
+    } catch (_) {}
+    return Array.from(str);
+  }
+
+  function letterLeaves(el) {
+    if (!el || !el.querySelectorAll) return [];
+    var all = el.querySelectorAll("span[style]");
+    var leaves = [];
+    for (var i = 0; i < all.length; i++) {
+      if (isLetterLeaf(all[i])) leaves.push(all[i]);
+    }
+    return leaves;
+  }
+
+  function fillLetterSpans(el, text) {
+    if (!el || !text) return false;
+    var leaves = letterLeaves(el);
+    if (leaves.length < 4) return false;
+    var chars = graphemes(text).filter(function (ch) {
+      return ch !== "\n" && ch !== "\r";
+    });
+    var i;
+    for (i = 0; i < leaves.length; i++) {
+      if (i < chars.length) {
+        var glyph = chars[i] === " " ? "\u00a0" : chars[i];
+        if (leaves[i].textContent !== glyph) leaves[i].textContent = glyph;
+        leaves[i].style.removeProperty("display");
+        leaves[i].style.removeProperty("width");
+        leaves[i].style.removeProperty("visibility");
+        leaves[i].removeAttribute("aria-hidden");
+      } else {
+        leaves[i].textContent = "";
+        leaves[i].style.setProperty("display", "none", "important");
+        leaves[i].setAttribute("aria-hidden", "true");
+      }
+    }
+    if (chars.length > leaves.length) {
+      var last = leaves[leaves.length - 1];
+      var parent = last.parentNode;
+      for (i = leaves.length; i < chars.length; i++) {
+        var clone = last.cloneNode(false);
+        clone.textContent = chars[i] === " " ? "\u00a0" : chars[i];
+        clone.style.removeProperty("display");
+        clone.style.removeProperty("width");
+        clone.style.removeProperty("visibility");
+        clone.style.removeProperty("opacity");
+        clone.removeAttribute("aria-hidden");
+        parent.appendChild(clone);
+      }
+    }
+    return true;
+  }
+
+  function letterEase() {
+    return "cubic-bezier(.16, 1, .3, 1)";
+  }
+
+  function letterEaseOut() {
+    return "cubic-bezier(.4, 0, .2, 1)";
+  }
+
+  function setLetterVisible(span, on, delay) {
+    if (!span) return;
+    var reduced =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var ms = reduced ? 0 : typeof delay === "number" ? delay : 0;
+    window.setTimeout(function () {
+      if (reduced) {
+        span.style.transition = "none";
+        span.style.opacity = on ? "1" : "0.001";
+        span.style.filter = "none";
+        span.style.transform = "none";
+        span.classList.toggle("is-in", on);
+        span.classList.toggle("is-out", !on);
+        return;
+      }
+      var dur = on ? ".72s" : ".55s";
+      var ease = on ? letterEase() : letterEaseOut();
+      span.style.willChange = "transform, opacity, filter";
+      span.style.transition =
+        "opacity " + dur + " " + ease + ", filter " + dur + " " + ease + ", transform " + dur + " " + ease;
+      if (on) {
+        span.classList.add("is-in");
+        span.classList.remove("is-out");
+        span.style.opacity = "1";
+        span.style.filter = "blur(0px)";
+        span.style.transform = "translate3d(0,0,0)";
+      } else {
+        span.classList.add("is-out");
+        span.classList.remove("is-in");
+        span.style.opacity = "0.001";
+        span.style.filter = "blur(7px)";
+        span.style.transform = "translate3d(0,8px,0)";
+      }
+      var clear = function () {
+        span.style.willChange = "auto";
+        span.removeEventListener("transitionend", clear);
+      };
+      span.addEventListener("transitionend", clear);
+      window.setTimeout(clear, on ? 900 : 700);
+    }, ms);
+  }
+
+  function runLetterWave(spans, show, reverse) {
+    var list = Array.prototype.slice.call(spans || []);
+    if (!list.length) return 0;
+    var n = list.length;
+    var step = show ? 18 : 12;
+    var start = show ? 24 : 10;
+    for (var i = 0; i < n; i++) {
+      var idx = reverse ? n - 1 - i : i;
+      var t = i / Math.max(1, n - 1);
+      var delay = start + i * step * (0.82 + 0.28 * (1 - t));
+      setLetterVisible(list[idx], show, delay);
+    }
+    return start + n * step + (show ? 760 : 600);
+  }
+
+  var letterScrollBound = false;
+  var letterScrollState = new WeakMap();
+
+  function bootOwnsHeading(el) {
+    if (!el) return false;
+    if (el.getAttribute && (el.getAttribute("data-ainf-letters") || el.getAttribute("data-ainf-ready"))) return true;
+    if (el.querySelector && el.querySelector("[data-ainf-word], .ainf-letter")) return true;
+    if (
+      el.tagName === "H1" &&
+      el.closest &&
+      el.closest('[data-framer-name="Hero Sectiion"], [data-framer-name="Hero Section"], [data-framer-name="Hero Description"]')
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  function playLetterIn(el, text) {
+    if (!el || !text) return;
+    if (bootOwnsHeading(el) && state.lang === "en") return;
+    if (hasLetterAnimation(el) && !looksLatinLetters(el) && normalize(textIgnoringGhost(el)) === normalize(text)) {
+      watchLetterOut(el);
+      return;
+    }
+    var wrapExisting = el.querySelector("[data-ainf-letter-wrap]");
+    if (
+      wrapExisting &&
+      normalize(wrapExisting.textContent) === normalize(text) &&
+      !looksLatinLetters(wrapExisting)
+    ) {
+      watchLetterOut(el);
+      return;
+    }
+    var playKey = (location.pathname || "") + ":" + state.lang + ":" + normalize(text);
+    window.__ainfLetterPlayed = window.__ainfLetterPlayed || {};
+    var alreadyPlayed = !!window.__ainfLetterPlayed[playKey];
+    window.__ainfLetterPlayed[playKey] = true;
+    var chars = graphemes(text).filter(function (ch) {
+      return ch !== "\n" && ch !== "\r";
+    });
+    if (!chars.length) return;
+    var keepGhost = el.querySelector(".ainf-hero-ghost");
+    var wrap = document.createElement("span");
+    wrap.setAttribute("data-ainf-letter-wrap", "1");
+    wrap.className = "ainf-letter-wrap";
+    wrap.style.whiteSpace = "pre-wrap";
+    el.textContent = "";
+    if (keepGhost) {
+      keepGhost.textContent = text;
+      el.appendChild(keepGhost);
+    }
+    el.appendChild(wrap);
+    if (!el.style.position || el.style.position === "static") el.style.position = "relative";
+    chars.forEach(function (ch) {
+      var s = document.createElement("span");
+      s.className = "ainf-letter is-out";
+      s.style.display = "inline-block";
+      s.style.whiteSpace = "pre";
+      s.textContent = ch === " " ? "\u00a0" : ch;
+      if (alreadyPlayed) {
+        s.className = "ainf-letter is-in";
+        s.style.opacity = "1";
+        s.style.filter = "blur(0px)";
+        s.style.transform = "translate3d(0,0,0)";
+      } else {
+        s.style.opacity = "0.001";
+        s.style.filter = "blur(8px)";
+        s.style.transform = "translate3d(0,10px,0)";
+      }
+      wrap.appendChild(s);
+    });
+    if (!alreadyPlayed) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          runLetterWave(wrap.children, true, false);
+          if (keepGhost) {
+            window.setTimeout(function () {
+              keepGhost.classList.add("is-out");
+              window.setTimeout(function () {
+                if (keepGhost.parentNode) keepGhost.parentNode.removeChild(keepGhost);
+              }, 380);
+            }, 420);
+          }
+        });
+      });
+    } else if (keepGhost && keepGhost.parentNode) {
+      keepGhost.parentNode.removeChild(keepGhost);
+    }
+    el.setAttribute("data-ainf-letter-armed", "1");
+    ensureLetterScroll();
+    requestAnimationFrame(function () {
+      var r = el.getBoundingClientRect();
+      var vh = window.innerHeight || 800;
+      var show = r.height > 4 && r.bottom > vh * 0.1 && r.top < vh * 0.82;
+      letterScrollState.set(el, show);
+      if (!show && wrap.children.length >= 4) {
+        runLetterWave(wrap.children, false, true);
+      }
+    });
+    watchLetterOut(el);
+  }
+
+  function ensureLetterScroll() {
+    if (letterScrollBound) return;
+    letterScrollBound = true;
+    var busyEls = new WeakMap();
+    var raf = 0;
+
+    function headingVisible(el) {
+      var r = el.getBoundingClientRect();
+      var vh = window.innerHeight || 800;
+      if (r.height < 4) return false;
+      return r.bottom > vh * 0.1 && r.top < vh * 0.82;
+    }
+
+    function spansFor(el) {
+      var wrap = el.querySelector("[data-ainf-letter-wrap]");
+      if (wrap) return wrap.querySelectorAll(".ainf-letter");
+      return letterLeaves(el);
+    }
+
+    function tick() {
+      raf = 0;
+      document.querySelectorAll("h1, h2, h3").forEach(function (el) {
+        if (!document.contains(el)) return;
+        if (bootOwnsHeading(el)) return;
+        var wrap = el.querySelector("[data-ainf-letter-wrap]");
+        if (!wrap && !hasLetterAnimation(el)) return;
+        var spans = spansFor(el);
+        if (!spans || spans.length < 4) return;
+        if (el.getAttribute("data-ainf-letter-armed") !== "1") {
+          // Auto-arm live headings so remounts never miss scroll out
+          var shown = 0;
+          for (var s = 0; s < spans.length; s++) {
+            try {
+              if (parseFloat(getComputedStyle(spans[s]).opacity) > 0.35) shown += 1;
+            } catch (_) {}
+          }
+          if (shown < 3 && !wrap) return;
+          el.setAttribute("data-ainf-letter-armed", "1");
+        }
+        if (busyEls.get(el)) return;
+        var show = headingVisible(el);
+        var prev = letterScrollState.get(el);
+        if (typeof prev !== "boolean") {
+          var shown0 = 0;
+          for (var v = 0; v < spans.length; v++) {
+            try {
+              if (parseFloat(getComputedStyle(spans[v]).opacity) > 0.35) shown0 += 1;
+            } catch (_) {}
+          }
+          // Remount while scrolled away: letters are on but heading is off — play out once
+          if (!show && shown0 >= Math.max(4, Math.floor(spans.length * 0.35))) {
+            letterScrollState.set(el, false);
+            busyEls.set(el, true);
+            var wait0 = runLetterWave(spans, false, true);
+            window.setTimeout(function () {
+              busyEls.set(el, false);
+            }, wait0);
+            return;
+          }
+          letterScrollState.set(el, show);
+          return;
+        }
+        if (prev === show) return;
+        letterScrollState.set(el, show);
+        busyEls.set(el, true);
+        var wait = runLetterWave(spans, show, !show);
+        window.setTimeout(function () {
+          busyEls.set(el, false);
+        }, wait);
+      });
+    }
+
+    function onScroll() {
+      if (raf) return;
+      raf = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+  }
+
+  function watchLetterOut(el) {
+    if (!el || bootOwnsHeading(el)) return;
+    ensureLetterScroll();
+    var tries = 0;
+    function arm() {
+      tries += 1;
+      var wrap = el.querySelector("[data-ainf-letter-wrap]");
+      var spans = wrap ? wrap.querySelectorAll(".ainf-letter") : letterLeaves(el);
+      var shown = 0;
+      for (var i = 0; i < spans.length; i++) {
+        try {
+          if (parseFloat(getComputedStyle(spans[i]).opacity) > 0.35) shown += 1;
+        } catch (_) {}
+      }
+      if (spans.length >= 4 && shown >= Math.min(6, Math.max(3, Math.floor(spans.length * 0.4)))) {
+        el.setAttribute("data-ainf-letter-armed", "1");
+        letterScrollState.set(el, true);
+        return;
+      }
+      if (tries < 48) window.setTimeout(arm, 90);
+      else {
+        el.setAttribute("data-ainf-letter-armed", "1");
+        letterScrollState.set(el, true);
+      }
+    }
+    window.setTimeout(arm, 160);
+  }
+
+  function watchEnglishLetterOut() {
+    if (state.lang !== "en") return;
+    document.querySelectorAll("h1, h2").forEach(function (el) {
+      if (!hasLetterAnimation(el)) return;
+      if (bootOwnsHeading(el)) return;
+      if (el.querySelector("[data-ainf-letter-wrap]")) return;
+      watchLetterOut(el);
+    });
+  }
+
   function replaceAnimatedHeading(el, text) {
-    if (!el || normalize(el.textContent) === normalize(text)) return;
-    var colorSpan =
-      el.querySelector('span[style*="--framer-text-color"]') ||
-      el.querySelector("span.framer-text");
-    if (!colorSpan) {
+    if (!el || !text) return;
+    if (el.closest && el.closest("#ainf-site-footer")) {
       el.textContent = text;
       return;
     }
+    if (
+      normalize(textIgnoringGhost(el)) === normalize(text) &&
+      hasLetterAnimation(el) &&
+      (state.lang === "en" || !looksLatinLetters(el))
+    ) {
+      return;
+    }
+    if (state.lang !== "en" && /^H[1-4]$/.test(el.tagName)) {
+      playLetterIn(el, text);
+      return;
+    }
+    if (fillLetterSpans(el, text)) return;
+    if (/^H[1-4]$/.test(el.tagName)) return;
+    if (state.lang === "en") {
+      var now = normalize(el.textContent);
+      if (now !== "Ghar Pahunch" && now !== "Zila Sahyog") return;
+    }
+    var colorSpan =
+      el.querySelector('span[style*="--framer-text-color"]') ||
+      el.querySelector("span.framer-text");
+    if (!colorSpan) return;
     var wrapper = colorSpan.cloneNode(false);
     wrapper.textContent = text;
     el.textContent = "";
@@ -195,6 +583,30 @@
     el.textContent = next;
   }
 
+  function textIgnoringGhost(el) {
+    if (!el) return "";
+    var out = "";
+    function walk(node) {
+      if (!node) return;
+      if (node.nodeType === 1 && node.classList && node.classList.contains("ainf-hero-ghost")) return;
+      if (node.nodeType === 3) {
+        out += node.nodeValue || "";
+        return;
+      }
+      var kids = node.childNodes || [];
+      for (var i = 0; i < kids.length; i++) walk(kids[i]);
+    }
+    walk(el);
+    return out.replace(/[\u200b]/g, "");
+  }
+
+  function looksLatinLetters(el) {
+    var leaves = letterLeaves(el);
+    var sample = "";
+    for (var i = 0; i < Math.min(10, leaves.length); i++) sample += leaves[i].textContent || "";
+    return /[A-Za-z]/.test(sample);
+  }
+
   function stampKey(el, text) {
     var stamped = el.getAttribute("data-ainf-i18n");
     if (stamped) return stamped;
@@ -206,10 +618,10 @@
   function applyHeadings(lang) {
     document.querySelectorAll("h1, h2, h3, h4").forEach(function (el) {
       if (inSwitcher(el)) return;
-      var key = stampKey(el, el.textContent);
+      var key = stampKey(el, textIgnoringGhost(el) || el.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
-      if (normalize(el.textContent) === normalize(next)) return;
+      if (normalize(textIgnoringGhost(el)) === normalize(next)) return;
       replaceAnimatedHeading(el, next);
     });
   }
@@ -229,6 +641,7 @@
           else target = link;
         }
         if (!target) return;
+        if (container.querySelector("h1, h2, h3, h4")) return;
         var key = stampKey(target, target.textContent) || stampKey(container, container.textContent);
         if (!key) return;
         var next = translateKey(key, lang);
@@ -245,6 +658,9 @@
     document.querySelectorAll("a").forEach(function (anchor) {
       if (inSwitcher(anchor)) return;
       if (anchor.classList.contains("ainf-brand")) return;
+      if (anchor.classList.contains("ainf-ft-logo")) return;
+      if (anchor.classList.contains("ainf-cta")) return;
+      if (anchor.classList.contains("ainf-account") && anchor.classList.contains("is-in")) return;
       var key = stampKey(anchor, anchor.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
@@ -258,18 +674,29 @@
       var key = el.getAttribute("data-ainf-i18n");
       var next = translateKey(key, lang);
       if (!next) return;
-      if (el.classList.contains("ainf-cta")) setTextPreserveIcon(el, next);
-      else if (normalize(el.textContent) !== normalize(next)) el.textContent = next;
+      if (el.classList.contains("ainf-cta")) return;
+      if (el.classList.contains("ainf-account") && el.classList.contains("is-in")) return;
+      if (normalize(el.textContent) !== normalize(next)) el.textContent = next;
     });
     document.querySelectorAll("#ainf-global-nav .ainf-cta").forEach(function (el) {
       var key = stampKey(el, "Support AINF") || "Support AINF";
-      setTextPreserveIcon(el, translateKey(key, lang));
+      var next = translateKey(key, lang);
+      var full = el.querySelector(".ainf-cta-full");
+      var short = el.querySelector(".ainf-cta-short");
+      if (full) full.textContent = next || "Support AINF";
+      if (short) short.textContent = translateKey("Support", lang) || "Support";
+      else if (!full) setTextPreserveIcon(el, next);
     });
     document.querySelectorAll("#ainf-global-nav .ainf-links a").forEach(function (el) {
       var key = stampKey(el, el.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
       if (normalize(el.textContent) !== normalize(next)) el.textContent = next;
+    });
+    document.querySelectorAll(".ainf-desk-name[data-ainf-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-ainf-i18n");
+      var next = translateKey(key, lang);
+      if (next) el.textContent = next;
     });
   }
 
@@ -298,37 +725,43 @@
     return (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
   }
 
+  function opaqueRgb(el) {
+    if (!el) return null;
+    var bg = getComputedStyle(el).backgroundColor;
+    if (!bg || bg === "transparent" || /rgba?\([^)]+,\s*0\s*\)/.test(bg)) return null;
+    var rgb = parseRgb(bg);
+    if (!rgb) return null;
+    if (rgb.r < 8 && rgb.g < 8 && rgb.b < 8) return null;
+    return rgb;
+  }
+
+  function isTinyAccent(el) {
+    try {
+      var box = el.getBoundingClientRect();
+      if (box.width && box.height && box.width <= 18 && box.height <= 18) return true;
+    } catch (err) {}
+    return false;
+  }
+
   function buttonBgColor(anchor) {
-    var el = anchor;
-    for (var i = 0; i < 4 && el; i++) {
-      var bg = getComputedStyle(el).backgroundColor;
-      var rgb = parseRgb(bg);
-      if (rgb && !(rgb.r === 0 && rgb.g === 0 && rgb.b === 0 && /rgba\(/.test(bg) === false && bg.indexOf("0)") >= 0)) {
-        // skip fully transparent
-        if (/rgba?\([^)]+,\s*0\)/.test(bg)) {
-          el = el.parentElement;
-          continue;
-        }
-        if (rgb.r + rgb.g + rgb.b > 0 || bg.indexOf("255") >= 0 || bg.indexOf("57") >= 0) {
-          return rgb;
-        }
-      }
-      // also check first solid child overlay used by Framer buttons
-      var child = el.querySelector && el.querySelector(":scope > div");
-      if (child) {
-        var cbg = getComputedStyle(child).backgroundColor;
-        var crgb = parseRgb(cbg);
-        if (crgb && !/rgba?\([^)]+,\s*0\)/.test(cbg)) return crgb;
-      }
-      el = el.parentElement;
+    var own = opaqueRgb(anchor);
+    if (own) return own;
+    var kids = anchor.children || [];
+    for (var i = 0; i < kids.length; i++) {
+      if (isTinyAccent(kids[i])) continue;
+      var rgb = opaqueRgb(kids[i]);
+      if (rgb) return rgb;
     }
-    return parseRgb(getComputedStyle(anchor).backgroundColor);
+    return { r: 255, g: 255, b: 255 };
   }
 
   function paintCtaColor(el, color) {
     if (!el) return;
     el.style.setProperty("color", color, "important");
     el.style.setProperty("-webkit-text-fill-color", color, "important");
+    el.style.setProperty("font-weight", "400", "important");
+    el.style.setProperty("font-style", "normal", "important");
+    el.style.setProperty("--framer-font-weight", "400");
     el.style.setProperty("--framer-text-color", color);
     el.style.setProperty("--extracted-r6o4lv", color);
     el.style.setProperty("--framer-link-text-color", color);
@@ -361,22 +794,55 @@
       });
   }
 
-  function forceCtaContrast() {
+  function looksLikeGreenPill(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    if (el.closest && el.closest("#ainf-lang-switcher, #ainf-lang-switcher-mobile")) return false;
+    var h = el.offsetHeight;
+    var w = el.offsetWidth;
+    if (!h || !w || h < 28 || h > 88 || w < 48) return false;
+    var s = getComputedStyle(el);
+    var radius = parseFloat(s.borderTopLeftRadius) || 0;
+    if (radius < 14 && !/999|1000|50%/.test(s.borderRadius || "")) return false;
+    var rgb = opaqueRgb(el);
+    if (!rgb) return false;
+    return rgb.g >= 90 && rgb.g > rgb.r + 20 && rgb.g > rgb.b && rgb.r < 150;
+  }
+
+  function collectPillButtons() {
+    var list = [];
+    function add(el) {
+      if (!el || list.indexOf(el) >= 0) return;
+      list.push(el);
+    }
     document
-      .querySelectorAll('a[data-framer-name="Desktop"], a[data-framer-name="Tablet"], a[data-framer-name="Mobile-Close"]')
-      .forEach(function (anchor) {
-        var bg = buttonBgColor(anchor);
-        var isLight = !bg || luminance(bg) > 0.72;
-        var color = isLight ? "rgb(34, 34, 34)" : "#ffffff";
-        anchor.classList.toggle("ainf-cta-on-light", isLight);
-        anchor.classList.toggle("ainf-cta-on-dark", !isLight);
-        paintCtaColor(anchor, color);
-        anchor
-          .querySelectorAll('[data-framer-component-type="RichTextContainer"], p, span')
-          .forEach(function (el) {
-            paintCtaColor(el, color);
-          });
-      });
+      .querySelectorAll(
+        'a[data-framer-name="Desktop"], a[data-framer-name="Tablet"], a[data-framer-name="Mobile-Close"], [data-framer-name="Primary btn"], #ainf-global-nav .ainf-cta'
+      )
+      .forEach(add);
+    document.querySelectorAll("a, button").forEach(function (el) {
+      if (looksLikeGreenPill(el)) add(el);
+    });
+    return list;
+  }
+
+  function forceCtaContrast() {
+    collectPillButtons().forEach(function (anchor) {
+      var bg = buttonBgColor(anchor);
+      var isLight = !bg || luminance(bg) > 0.72;
+      if (looksLikeGreenPill(anchor) || (anchor.getAttribute && anchor.getAttribute("data-framer-name") === "Primary btn")) {
+        isLight = false;
+      }
+      if (anchor.classList && anchor.classList.contains("ainf-cta")) isLight = false;
+      var color = isLight ? "rgb(34, 34, 34)" : "#ffffff";
+      anchor.classList.toggle("ainf-cta-on-light", isLight);
+      anchor.classList.toggle("ainf-cta-on-dark", !isLight);
+      paintCtaColor(anchor, color);
+      anchor
+        .querySelectorAll('[data-framer-component-type="RichTextContainer"], p, span')
+        .forEach(function (el) {
+          paintCtaColor(el, color);
+        });
+    });
   }
 
   function applyLeafTextNodes(lang) {
@@ -385,14 +851,14 @@
         if (shouldSkipNode(node)) return NodeFilter.FILTER_REJECT;
         var parent = node.parentElement;
         if (!parent) return NodeFilter.FILTER_REJECT;
-        if (parent.closest("h1, h2, h3")) return NodeFilter.FILTER_REJECT;
+        if (parent.closest("h1, h2, h3, h4")) return NodeFilter.FILTER_REJECT;
         if (parent.closest('[data-framer-component-type="RichTextContainer"]')) {
           return NodeFilter.FILTER_REJECT;
         }
         if (parent.tagName === "A" && parent.children.length === 0) {
           return NodeFilter.FILTER_REJECT;
         }
-        if (parent.closest('span[style*="inline-block"]')) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('span[style*="inline-block"], [data-ainf-letter-wrap]')) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       },
     });
@@ -426,14 +892,22 @@
   function applyBlockCopy(lang) {
     document.querySelectorAll("p, li, h1, h2, h3, h4").forEach(function (el) {
       if (inSwitcher(el)) return;
-      if (el.closest && el.closest("#ainf-global-nav .ainf-brand")) return;
+      if (el.closest && el.closest("#ainf-global-nav .ainf-brand, a.ainf-brand, a.ainf-ft-logo, .ainf-brand-text")) return;
+      if (/^H[1-4]$/.test(el.tagName)) {
+        var headingKey = stampKey(el, textIgnoringGhost(el) || el.textContent);
+        if (!headingKey) return;
+        replaceAnimatedHeading(el, translateKey(headingKey, lang));
+        return;
+      }
       var key = stampKey(el, el.textContent);
       if (!key) return;
       var next = translateKey(key, lang);
       if (normalize(el.textContent) === normalize(next)) return;
-      if (hasLetterAnimation(el)) replaceAnimatedHeading(el, next);
-      else if (el.childElementCount && el.querySelector("p, span.framer-text")) {
+      if (hasLetterAnimation(el)) {
+        fillLetterSpans(el, next);
+      } else if (el.childElementCount && el.querySelector("p, span.framer-text")) {
         var inner = el.querySelector("p.framer-text, span.framer-text, p, span") || el;
+        if (hasLetterAnimation(inner) || inner.closest("h1, h2, h3, h4")) return;
         inner.textContent = next;
       } else {
         el.textContent = next;
@@ -441,26 +915,45 @@
     });
   }
 
+  function resetLetterMotion() {
+    window.__ainfLetterPlayed = {};
+    document.querySelectorAll("[data-ainf-letter-armed], [data-ainf-letter-io]").forEach(function (el) {
+      el.removeAttribute("data-ainf-letter-armed");
+      el.removeAttribute("data-ainf-letter-io");
+    });
+  }
+
   function applyLanguage(lang, fromObserver) {
-    if (!state.dict || state.applying) return;
+    if (!state.dict) {
+      state.lang = lang;
+      try {
+        localStorage.setItem(STORAGE_KEY, lang);
+      } catch (_) {}
+      return;
+    }
+    if (state.applying) return;
+    var switched = !fromObserver && state.lang && state.lang !== lang;
     if (!fromObserver) state.lang = lang;
+    if (switched) resetLetterMotion();
     state.applying = true;
     try {
       applyMeta(lang);
       applySharedChrome(lang);
       updateSwitcherButtons(lang);
-      var lettersPending = lang === "en" && !window.__ainfLettersDone;
-      if (!lettersPending) {
-        applyHeadings(lang);
-        applyRichTextContainers(lang);
-        applyBlockCopy(lang);
-        applyPlainAnchors(lang);
-        applyFramerButtons(lang);
-        applyDuplicateParagraphs(lang);
+      applyHeadings(lang);
+      applyRichTextContainers(lang);
+      applyBlockCopy(lang);
+      applyPlainAnchors(lang);
+      applyFramerButtons(lang);
+      applyDuplicateParagraphs(lang);
+      if (lang !== "en") {
         applyLeafTextNodes(lang);
         applyAttributes(lang);
       }
-      forceCtaContrast();
+      if (!fromObserver) forceCtaContrast();
+      if (lang === "en" && !fromObserver) {
+        window.setTimeout(watchEnglishLetterOut, 2100);
+      }
       try {
         localStorage.setItem(STORAGE_KEY, lang);
       } catch (_) {}
@@ -555,8 +1048,16 @@
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        applyLanguage(id, false);
         closeAllMenus();
+        if (id === "en" || state.dict) {
+          applyLanguage(id, false);
+          return;
+        }
+        state.lang = id;
+        try {
+          localStorage.setItem(STORAGE_KEY, id);
+        } catch (_) {}
+        loadTranslations();
       });
       menu.appendChild(btn);
     });
@@ -719,14 +1220,22 @@
     state.observer = new MutationObserver(function () {
       if (state.applying || menuIsOpen()) return;
       if (!document.getElementById(SWITCHER_ID)) mountSwitchers();
-      hideFramerBadge();
+      if (state.lang === "en") return;
+      var heading = document.querySelector("h1, h2");
+      if (heading && looksLatinLetters(heading)) {
+        applyHeadings(state.lang);
+        return;
+      }
       scheduleApply(true);
     });
     state.observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
-      characterData: true,
     });
+    setTimeout(function () {
+      if (state.observer) state.observer.disconnect();
+      state.observer = null;
+    }, state.lang === "en" ? 4200 : 9000);
   }
 
   function readQueryLang() {
@@ -753,8 +1262,8 @@
     return "en";
   }
 
-  function boot() {
-    fetch("/i18n/home-strings.json")
+  function loadTranslations() {
+    fetch("/i18n/home-strings.json?v=20260924e")
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load translations");
         return res.json();
@@ -772,37 +1281,48 @@
           attachObserver();
           applyLanguage(state.lang, false);
           document.documentElement.classList.remove("ainf-i18n-wait");
-          if (state.lang === "en") {
-            setTimeout(function () {
-              window.__ainfLettersDone = true;
-              applyLanguage(state.lang, true);
-            }, 1900);
-          } else {
+          setTimeout(function () {
             window.__ainfLettersDone = true;
-            setTimeout(function () {
-              applyLanguage(state.lang, true);
-            }, 200);
-            setTimeout(function () {
-              applyLanguage(state.lang, true);
-            }, 1200);
+            applyLanguage(state.lang, false);
+            if (state.lang === "en") watchEnglishLetterOut();
+          }, 2200);
+          if (state.lang !== "en") {
+            [900, 1600, 2500, 3400].forEach(function (ms) {
+              setTimeout(function () {
+                applyLanguage(state.lang, false);
+              }, ms);
+            });
           }
         };
         start();
-        window.addEventListener("load", function () {
-          applyMeta(state.lang);
-          applyLanguage(state.lang, true);
+        [400, 1400, 2800].forEach(function (ms) {
+          setTimeout(function () {
+            mountSwitchers();
+            applyMeta(state.lang);
+          }, ms);
         });
-        var keep = 0;
-        var keepTimer = setInterval(function () {
-          mountSwitchers();
-          applyMeta(state.lang);
-          keep += 1;
-          if (keep > 20) clearInterval(keepTimer);
-        }, 300);
       })
       .catch(function (err) {
         console.warn("[ainf-i18n]", err);
       });
+  }
+
+  window.__ainfReapplyLang = function () {
+    if (!state.dict || !state.lang || state.lang === "en" || state.applying) return;
+    applyLanguage(state.lang, true);
+  };
+
+  function boot() {
+    state.lang = readStoredLang();
+    mountSwitchers();
+    hideFramerBadge();
+    document.documentElement.classList.remove("ainf-i18n-wait");
+    if (state.lang === "en") {
+      window.__ainfLettersDone = true;
+      watchEnglishLetterOut();
+      return;
+    }
+    loadTranslations();
   }
 
   if (document.readyState === "loading") {

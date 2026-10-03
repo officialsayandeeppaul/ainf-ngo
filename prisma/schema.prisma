@@ -1,0 +1,497 @@
+// AINF auth platform data model.
+//
+// Postgres is the authority for roles. Clerk publicMetadata mirrors the role so
+// proxy.ts can gate requests from session claims without a database round trip,
+// but every mutation writes here first and every privileged action is audited.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7 moved connection URLs out of the schema: the CLI reads them from
+// prisma.config.ts and the runtime client gets them through a driver adapter.
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  VERIFIED_USER
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+/// Mirrors Didit session statuses plus a local NOT_STARTED default.
+enum KycStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  IN_REVIEW
+  APPROVED
+  DECLINED
+  ABANDONED
+  EXPIRED
+}
+
+enum PanStatus {
+  PENDING
+  VERIFIED
+  MISMATCH
+  FAILED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum MembershipOrderStatus {
+  CREATED
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id        String     @id @default(cuid())
+  clerkId   String     @unique
+  email     String     @unique
+  phone     String?
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  fatherName    String?
+  address       String?
+  cardPhotoPath String?
+  role      Role       @default(USER)
+  status    UserStatus @default(ACTIVE)
+
+  /// Denormalised from the newest KycVerification so lists avoid a join.
+  kycStatus   KycStatus @default(NOT_STARTED)
+  panVerified Boolean   @default(false)
+  mfaEnabled  Boolean   @default(false)
+
+  suspendedAt     DateTime?
+  suspendedReason String?
+  lastSeenAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  membershipTierId            String?
+  membershipTier              MembershipTier?  @relation("UserMembership", fields: [membershipTierId], references: [id], onDelete: SetNull)
+  membershipInterval          BillingInterval?
+  membershipExpiresAt         DateTime?
+  membershipSubscriptionId    String?
+  membershipCancelAtPeriodEnd Boolean          @default(false)
+  membershipPeriodStartedAt   DateTime?
+  membershipTermPaise         Int?
+
+  kycVerifications KycVerification[]
+  panVerifications PanVerification[]
+  auditLogs        AuditLog[]        @relation("AuditActor")
+  membershipOrders MembershipOrder[]
+  membershipCard   MembershipCard?
+
+  @@index([role])
+  @@index([kycStatus])
+  @@index([createdAt])
+  @@index([membershipTierId])
+}
+
+model KycVerification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Didit session_id. Unique so replayed webhooks cannot create duplicates.
+  diditSessionId String    @unique
+  workflowId     String
+  sessionNumber  Int?
+  status         KycStatus @default(NOT_STARTED)
+
+  /// Raw decision payload, retained for dispute resolution and manual review.
+  decision Json?
+
+  /// Which signature header authenticated the result that set this status.
+  /// SIMPLE means the decision body was not authenticated and was re-fetched.
+  signatureScheme String?
+
+  reviewedByUserId String?
+  reviewNote       String?
+  reviewedAt       DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PanVerification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// SHA-256 of (PAN + PAN_HASH_SALT). The raw PAN is never persisted.
+  panHash   String
+  panLast4  String
+  status    PanStatus @default(PENDING)
+  requestId String?
+
+  nameMatch            Boolean?
+  dobMatch             Boolean?
+  panStatusText        String?
+  category             String?
+  aadhaarSeedingStatus String?
+  failureCode          String?
+  failureMessage       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([panHash])
+  @@index([status])
+}
+
+/// Append-only. Nothing in the app updates or deletes rows here.
+model AuditLog {
+  id String @id @default(cuid())
+
+  /// Null for anonymous or pre-authentication events (failed bootstrap attempts).
+  actorUserId String?
+  actor       User?   @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  actorClerkId String?
+  actorRole    Role?
+  action       String
+  targetType   String?
+  targetId     String?
+  success      Boolean @default(true)
+  ip           String?
+  userAgent    String?
+  metadata     Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorUserId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([success])
+}
+
+/// Idempotency ledger for inbound webhooks.
+model WebhookEvent {
+  id       String @id @default(cuid())
+  provider String
+
+  /// Provider-side identifier (Didit session_id, Clerk svix id).
+  externalId String
+  eventType  String?
+  payload    Json?
+
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  error       String?
+
+  @@unique([provider, externalId, eventType])
+  @@index([provider, receivedAt])
+}
+
+enum YearlyDiscountKind {
+  NONE
+  PERCENT
+  FLAT
+}
+
+/// Admin-configured member types. Checkout comes later; this table is the price list.
+model MembershipTier {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  badge       String
+  badgeColor  String @default("#39a46b")
+  description String @default("")
+  /// Ordered list of { label, included }. Shown as a stacked include/exclude list.
+  benefits    Json   @default("[]")
+
+  /// Amounts in paise (INR × 100). Yearly is derived from monthly + discount.
+  monthlyPaise          Int
+  yearlyDiscountKind    YearlyDiscountKind @default(PERCENT)
+  yearlyDiscountValue   Int                @default(0)
+
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  razorpayPlanMonthlyId String?
+  razorpayPlanYearlyId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members User[]             @relation("UserMembership")
+  orders  MembershipOrder[]
+  offers  MembershipOfferOnTier[]
+
+  @@index([active, sortOrder])
+}
+
+enum OfferKind {
+  PERCENT
+  FLAT
+}
+
+enum MembershipChangeKind {
+  NEW
+  RENEWAL
+  UPGRADE
+  DOWNGRADE
+  INTERVAL_CHANGE
+}
+
+/// Admin campaign attached to one or more plans (first-month cut, launch price, etc.).
+model MembershipOffer {
+  id          String    @id @default(cuid())
+  name        String
+  kind        OfferKind
+  /// PERCENT: 1–90. FLAT: paise off the listed price.
+  value       Int
+  /// Null means the offer applies to monthly and yearly.
+  interval    BillingInterval?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  active      Boolean   @default(true)
+  firstCycleOnly Boolean @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  plans  MembershipOfferOnTier[]
+  orders MembershipOrder[]
+
+  @@index([active, startsAt, endsAt])
+}
+
+model MembershipOfferOnTier {
+  offerId String
+  offer   MembershipOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  tierId  String
+  tier    MembershipTier  @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@id([offerId, tierId])
+  @@index([tierId])
+}
+
+/// One Razorpay order for a member picking monthly or yearly on a tier.
+model MembershipOrder {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierId String
+  tier   MembershipTier @relation(fields: [tierId], references: [id], onDelete: Restrict)
+
+  interval    BillingInterval
+  amountPaise Int
+  currency    String                  @default("INR")
+  status      MembershipOrderStatus   @default(CREATED)
+  recurring   Boolean                 @default(false)
+  changeKind  MembershipChangeKind    @default(NEW)
+  restartTerm Boolean                 @default(false)
+  listPaise   Int?
+  creditPaise Int                     @default(0)
+  previousTierId String?
+  offerId     String?
+  offer       MembershipOffer?        @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  razorpayOrderId        String?  @unique
+  razorpaySubscriptionId String?
+  razorpayPlanId         String?
+  razorpayPaymentId      String?  @unique
+  razorpaySignature      String?
+
+  cancelAtPeriodEnd Boolean   @default(false)
+  cancelledAt       DateTime?
+
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([razorpaySubscriptionId])
+}
+
+/// Printed membership ID. Issued only while a badge is live; verify uses `token`.
+model MembershipCard {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Human number printed on the card, e.g. AINF-2026-0001.
+  regNo String @unique
+  /// Unguessable scan token. The public QR points at /card/verify?c=token.
+  token String @unique
+
+  frontPath String
+  backPath  String
+  tierName  String
+  badge     String
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+/// Singleton row (id = "singleton") for defaults used when creating a new tier.
+model MembershipSettings {
+  id                    String             @id @default("singleton")
+  yearlyDiscountKind    YearlyDiscountKind @default(PERCENT)
+  yearlyDiscountValue   Int                @default(10)
+  updatedAt             DateTime           @updatedAt
+}
+
+/// Singleton (id = "singleton") — support campaign message + countdown for the site/portal.
+model SupportBanner {
+  id        String  @id @default("singleton")
+  enabled   Boolean @default(false)
+  headline  String  @default("")
+  message   String  @default("")
+  ctaLabel  String  @default("Support AINF")
+  ctaHref   String  @default("/donate-now")
+  /// When set, a live countdown runs until this instant (UTC).
+  endsAt    DateTime?
+  updatedAt DateTime @updatedAt
+  updatedByUserId String?
+}
+
+/// Field projects shown on /projects. Admin edits these; the public page reads them.
+model FieldProject {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  summary     String
+  raisedLabel String
+  goalLabel   String
+  imageUrl    String
+  detail      Json?
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(true)
+  /// When on, this project can be chosen on the public gift page.
+  acceptDonations Boolean @default(false)
+  /// Own floor in paise. Empty uses the global gift minimum.
+  donateMinPaise  Int?
+  updatedAt   DateTime @updatedAt
+  updatedByUserId String?
+  donations   Donation[]
+
+  @@index([published, sortOrder])
+}
+
+enum DonationKind {
+  GENERAL
+  MISSION
+  PROJECT
+}
+
+enum DonationStatus {
+  CREATED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+/// Singleton (id = "singleton") — floors and suggested amounts for open gifts.
+model DonationSettings {
+  id              String   @id @default("singleton")
+  minPaise        Int      @default(20000)
+  maxPaise        Int      @default(10000000)
+  suggestedPaise  Int[]    @default([20000, 50000, 100000, 250000])
+  updatedAt       DateTime @updatedAt
+  updatedByUserId String?
+}
+
+/// A mission a giver can support. Separate from a field project.
+model DonationMission {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  published       Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  minPaise        Int?
+  updatedAt       DateTime @updatedAt
+  updatedByUserId String?
+  donations       Donation[]
+
+  @@index([published, sortOrder])
+}
+
+/// One-time public gift. Not a membership and not tied to a user account.
+model Donation {
+  id                String         @id @default(cuid())
+  kind              DonationKind
+  missionId         String?
+  mission           DonationMission? @relation(fields: [missionId], references: [id], onDelete: SetNull)
+  projectId         String?
+  project           FieldProject?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  /// Title captured when the gift was created, so a later rename does not rewrite the receipt.
+  targetTitle       String
+  amountPaise       Int
+  donorName         String
+  donorEmail        String
+  donorPhone        String
+  receiptToken      String         @unique
+  razorpayOrderId   String?        @unique
+  razorpayPaymentId String?        @unique
+  razorpayRefundId  String?
+  status            DonationStatus @default(CREATED)
+  receiptEmailedAt  DateTime?
+  refundEmailedAt   DateTime?
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([kind])
+}
+
+
+enum ContactMessageStatus {
+  NEW
+  REVIEWED
+  REPLIED
+  ARCHIVED
+}
+
+/// Public contact-us form submissions for the admin inbox.
+model ContactMessage {
+  id      String               @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  body    String
+  status  ContactMessageStatus @default(NEW)
+
+  reviewedAt       DateTime?
+  reviewedByUserId String?
+
+  replyBody      String?
+  replySentEmail Boolean   @default(false)
+  replyEmailId   String?
+  repliedAt      DateTime?
+  repliedByUserId String?
+
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([email])
+}

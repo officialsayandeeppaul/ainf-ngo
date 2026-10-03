@@ -33,6 +33,10 @@
       "bn": "যোগাযোগ",
       "hi": "संपर्क करें"
     },
+    "Support": {
+      "bn": "সাহায্য",
+      "hi": "सहायता"
+    },
     "Support AINF": {
       "bn": "AINF সহায়তা",
       "hi": "AINF समर्थन"
@@ -192,6 +196,10 @@
     "Rozgar": {
       "bn": "রোজগার",
       "hi": "रोज़गार"
+    },
+    "Nari": {
+      "bn": "নারী",
+      "hi": "नारी"
     },
     "Nari Suraksha": {
       "bn": "নারী সুরক্ষা",
@@ -2212,6 +2220,214 @@
     "Gifts allow us to organize health awareness programs, provide medical support, and connect communities with essential healthcare services. These efforts help improve overall well-being and ensure individuals receive the care they need.": {
       "bn": "উপহার দিয়ে স্বাস্থ্য সচেতনতা কর্মসূচি, চিকিৎসা সহায়তা ও প্রয়োজনীয় সেবার সাথে সম্প্রদায়কে যুক্ত করি। এতে সামগ্রিক সুস্থতা বাড়ে এবং মানুষ প্রয়োজনীয় সেবা পায়।",
       "hi": "उपहारों से स्वास्थ्य जागरूकता कार्यक्रम, चिकित्सा सहायता और ज़रूरी सेवाओं से समुदायों को जोड़ते हैं। इससे समग्र स्वास्थ्य सुधरता है और लोगों को ज़रूरी देखभाल मिलती है।"
+    },
+    "Projects on the Ground": {
+      "bn": "মাঠের প্রকল্প",
+      "hi": "ज़मीन पर प्रोजेक्ट"
+    },
+    "Live work across Jharkhand and West Bengal — swasthya camps, shiksha kits, meals for batches, winter warmth, and safe water in our hamlets.": {
+      "bn": "ঝাড়খণ্ড ও পশ্চিমবঙ্গ জুড়ে চলতি কাজ — স্বাস্থ্য ক্যাম্প, শিক্ষা কিট, ব্যাচের খাবার, শীতের উষ্ণতা, আর আমাদের পাড়ায় নিরাপদ জল।",
+      "hi": "झारखंड और पश्चिम बंगाल में चल रहा काम — स्वास्थ्य कैंप, शिक्षा किट, बैच का भोजन, सर्दी की गर्माहट, और हमारे टोलों में सुरक्षित पानी।"
+    },
+    "Swasthya Camps": {
+      "bn": "স্বাস্থ্য ক্যাম্প",
+      "hi": "स्वास्थ्य कैंप"
+    },
+    "Meals for Coaching Batches": {
+      "bn": "কোচিং ব্যাচের খাবার",
+      "hi": "कोचिंग बैच का भोजन"
+    },
+    "Shiksha Kits & Fees": {
+      "bn": "শিক্ষা কিট ও ফি",
+      "hi": "शिक्षा किट और फीस"
+    },
+    "Winter Kits for Our Blocks": {
+      "bn": "আমাদের ব্লকের শীতের কিট",
+      "hi": "हमारे ब्लॉक के लिए सर्दी के किट"
+    },
+    "Safe Water in Our Hamlets": {
+      "bn": "আমাদের পাড়ায় নিরাপদ জল",
+      "hi": "हमारे टोलों में सुरक्षित पानी"
+    },
+    "Checkups, referrals, and medicines for families in Nala, Jamtara, and nearby blocks.": {
+      "bn": "নালা, জামতাড়া ও আশপাশের ব্লকের পরিবারের জন্য পরীক্ষা, রেফার ও ওষুধ।",
+      "hi": "नाला, जामताड़ा और आसपास के ब्लॉक के परिवारों के लिए जाँच, रेफरल और दवा।"
+    },
+    "A meal with the coaching batch, so hunger never sends a student home before class ends.": {
+      "bn": "কোচিং ব্যাচের সঙ্গে একটি খাবার, যাতে ক্ষুধা ক্লাস শেষের আগে ছাত্রকে বাড়ি পাঠাতে না পারে।",
+      "hi": "कोचिंग बैच के साथ एक भोजन, ताकि भूख कक्षा खत्म होने से पहले छात्र को घर न भेज दे।"
+    },
+    "Books, uniforms, and fees so a child in our blocks does not have to leave class.": {
+      "bn": "বই, ইউনিফর্ম ও ফি, যাতে আমাদের ব্লকের একটি শিশুকে ক্লাস ছাড়তে না হয়।",
+      "hi": "किताबें, यूनिफॉर्म और फीस, ताकि हमारे ब्लॉक के बच्चे को कक्षा छोड़नी न पड़े।"
+    },
+    "Blankets and warm sets for families in our blocks when the cold sets in.": {
+      "bn": "ঠান্ডা নামলে আমাদের ব্লকের পরিবারের জন্য কম্বল ও গরম জামা।",
+      "hi": "ठंड पड़ने पर हमारे ब्लॉक के परिवारों के लिए कंबल और गर्म कपड़े।"
+    },
+    "Safe drinking water for hamlets where the source turns bad after the rains.": {
+      "bn": "যে পাড়ায় বৃষ্টির পর জলের উৎস খারাপ হয়ে যায়, সেখানে নিরাপদ পানীয় জল।",
+      "hi": "जिन टोलों में बारिश के बाद पानी का स्रोत खराब हो जाता है, वहाँ सुरक्षित पेयजल।"
+    },
+    "About this work": {
+      "bn": "এই কাজ সম্পর্কে",
+      "hi": "इस काम के बारे में"
+    },
+    "What this work does in our blocks, and who it is for.": {
+      "bn": "আমাদের ব্লকে এই কাজ কী করে, এবং কাদের জন্য।",
+      "hi": "हमारे ब्लॉक में यह काम क्या करता है, और किसके लिए है।"
+    },
+    "On the ground": {
+      "bn": "মাঠে",
+      "hi": "ज़मीन पर"
+    },
+    "How this runs": {
+      "bn": "এটা কীভাবে চলে",
+      "hi": "यह कैसे चलता है"
+    },
+    "How a gift becomes work on the ground — with the panchayat, field sevaks, and families in the block.": {
+      "bn": "একটি দান কীভাবে মাঠের কাজে বদলায় — পঞ্চায়েত, ফিল্ড সেবক ও ব্লকের পরিবারের সঙ্গে।",
+      "hi": "एक दान कैसे ज़मीन के काम में बदलता है — पंचायत, फील्ड सेवक और ब्लॉक के परिवारों के साथ।"
+    },
+    "On the ground : Live": {
+      "bn": "মাঠে : চলছে",
+      "hi": "ज़मीन पर : चालू"
+    },
+    "Every rupee stays on this work": {
+      "bn": "প্রতিটি টাকা এই কাজেই থাকে",
+      "hi": "हर रुपया इसी काम में रहता है"
+    },
+    "From families, sevaks, and partners in our blocks.": {
+      "bn": "আমাদের ব্লকের পরিবার, সেবক ও সহযোগীদের কাছ থেকে।",
+      "hi": "हमारे ब्लॉक के परिवारों, सेवकों और साथियों से।"
+    },
+    "They work with respect and consistency. Support reaches the right students and families in our blocks, without delays.": {
+      "bn": "তারা সম্মান ও নিয়মিতভাবে কাজ করে। সহায়তা আমাদের ব্লকের ঠিক ছাত্র ও পরিবারের কাছে পৌঁছায়, দেরি ছাড়া।",
+      "hi": "वे सम्मान और नियमितता से काम करते हैं। सहायता हमारे ब्लॉक के सही छात्रों और परिवारों तक बिना देर पहुँचती है।"
+    },
+    "Swasthya Desk takes checkups and essential medicines to hamlets where the primary health centre is a long ride away. In Nala, Jamtara, and nearby blocks, families often wait until a fever becomes an emergency. A camp, a referral, and a medicine they can actually collect changes that.": {
+      "bn": "স্বাস্থ্য ডেস্ক পরীক্ষা ও জরুরি ওষুধ সেই পাড়ায় নিয়ে যায় যেখানে প্রাথমিক স্বাস্থ্যকেন্দ্র অনেক দূর। নালা, জামতাড়া ও আশপাশের ব্লকে পরিবার প্রায়ই জ্বর জরুরি না হওয়া পর্যন্ত অপেক্ষা করে। একটি ক্যাম্প, একটি রেফার, আর হাতে পাওয়া ওষুধ সেটা বদলায়।",
+      "hi": "स्वास्थ्य डेस्क जाँच और ज़रूरी दवा उन टोलों तक ले जाता है जहाँ प्राथमिक स्वास्थ्य केंद्र बहुत दूर है। नाला, जामताड़ा और आसपास के ब्लॉक में परिवार अक्सर तब तक रुकते हैं जब तक बुखार इमरजेंसी न बन जाए। एक कैंप, एक रेफरल, और हाथ में मिलने वाली दवा इसे बदल देती है।"
+    },
+    "Camp dates are fixed with the panchayat, the ANM, and the ASHA, then announced in the hamlet so families know which morning to come.": {
+      "bn": "ক্যাম্পের তারিখ পঞ্চায়েত, এএনএম ও আশার সঙ্গে ঠিক হয়, তারপর পাড়ায় জানানো হয় যাতে পরিবার জানে কোন সকালে আসতে হবে।",
+      "hi": "कैंप की तारीख पंचायत, एएनएम और आशा के साथ तय होती है, फिर टोले में बता दी जाती है ताकि परिवार जानें किस सुबह आना है।"
+    },
+    "Field sevaks register families, check vitals, and flag anyone who needs a referral the same day — a child with fever, or a mother late in pregnancy, is not left in the queue.": {
+      "bn": "ফিল্ড সেবক পরিবারের নাম লেখে, নাড়ি দেখে, আর যাদের সেদিনই রেফার দরকার তাদের চিহ্নিত করে — জ্বরের শিশু বা গর্ভাবস্থার শেষ দিকের মা লাইনে পড়ে থাকেন না।",
+      "hi": "फील्ड सेवक परिवारों का नाम लिखते हैं, नब्ज़ देखते हैं, और जिन्हें उसी दिन रेफरल चाहिए उन्हें चिह्नित करते हैं — बुखार वाला बच्चा या गर्भावस्था के आखिरी दिनों की माँ कतार में नहीं रहती।"
+    },
+    "Doctors and nurses see patients. Essential medicines go home with a simple note. Follow-up cases are linked to the nearest PHC or district hospital, so the camp is not a one-off drop.": {
+      "bn": "ডাক্তার ও নার্স রোগী দেখেন। জরুরি ওষুধ একটি সহজ নোটের সঙ্গে বাড়ি যায়। ফলো-আপ নিকটস্থ পিএইচসি বা জেলা হাসপাতালে জোড়া হয়, যাতে ক্যাম্প একবারের ফোঁটা না হয়।",
+      "hi": "डॉक्टर और नर्स मरीज़ देखते हैं। ज़रूरी दवा एक साधारण नोट के साथ घर जाती है। फॉलो-अप नज़दीकी पीएचसी या ज़िला अस्पताल से जुड़ता है, ताकि कैंप एक बार की बूँद न रह जाए।"
+    },
+    "1,800+ patients seen at camps": {
+      "bn": "ক্যাম্পে ১,৮০০+ রোগী দেখা",
+      "hi": "कैंप में 1,800+ मरीज़ देखे"
+    },
+    "25+ camps in our blocks": {
+      "bn": "আমাদের ব্লকে ২৫+ ক্যাম্প",
+      "hi": "हमारे ब्लॉक में 25+ कैंप"
+    },
+    "120 field sevaks and local volunteers": {
+      "bn": "১২০ ফিল্ড সেবক ও স্থানীয় স্বেচ্ছাসেবক",
+      "hi": "120 फील्ड सेवक और स्थानीय स्वयंसेवक"
+    },
+    "This desk keeps coaching-batch students fed and present in Jamtara and nearby blocks, so hunger never ends a class before the exam.": {
+      "bn": "এই ডেস্ক জামতাড়া ও আশপাশের ব্লকে কোচিং ব্যাচের ছাত্রদের খাইয়ে ক্লাসে রাখে, যাতে ক্ষুধা পরীক্ষার আগে ক্লাস শেষ না করে।",
+      "hi": "यह डेस्क जामताड़ा और आसपास के ब्लॉक में कोचिंग बैच के छात्रों को खिलाकर कक्षा में रखता है, ताकि भूख परीक्षा से पहले कक्षा खत्म न कर दे।"
+    },
+    "Teachers and field sevaks name the students who leave class hungry. We check that list with the school and the panchayat before a single meal is cooked.": {
+      "bn": "শিক্ষক ও ফিল্ড সেবক তাদের নাম বলেন যারা ক্ষুধার্ত হয়ে ক্লাস ছাড়ে। একটি খাবার রান্নার আগে আমরা সেই তালিকা স্কুল ও পঞ্চায়েতের সঙ্গে মিলাই।",
+      "hi": "शिक्षक और फील्ड सेवक उन छात्रों का नाम बताते हैं जो भूखे कक्षा छोड़ते हैं। एक भी भोजन बनने से पहले हम वह सूची स्कूल और पंचायत से मिलाते हैं।"
+    },
+    "A local kitchen cooks the batch meal the same morning. Portions are simple, hot, and enough for the students sitting that class — not a photo, a plate.": {
+      "bn": "একটি স্থানীয় রান্নাঘর সেই সকালেই ব্যাচের খাবার রান্না করে। পরিমাণ সহজ, গরম, এবং সেই ক্লাসে বসা ছাত্রদের জন্য যথেষ্ট — ছবি নয়, একটা থালা।",
+      "hi": "एक स्थानीय रसोई उसी सुबह बैच का भोजन पकाती है। हिस्सा सादा, गरम, और उस कक्षा में बैठे छात्रों के लिए काफ़ी — फ़ोटो नहीं, एक थाली।"
+    },
+    "Sevaks serve the meal at the batch, then note who was absent. A missed meal is a missed class, and someone follows up at the home the same day.": {
+      "bn": "সেবক ব্যাচে খাবার দেয়, তারপর কে অনুপস্থিত তা নোট করে। একটি বাদ পড়া খাবার মানে বাদ পড়া ক্লাস, আর কেউ সেই দিনই বাড়িতে খোঁজ নেয়।",
+      "hi": "सेवक बैच में भोजन परोसते हैं, फिर नोट करते हैं कौन नहीं आया। छूटा भोजन छूटी कक्षा है, और कोई उसी दिन घर पर पता करता है।"
+    },
+    "600+ students in our batches": {
+      "bn": "আমাদের ব্যাচে ৬০০+ ছাত্র",
+      "hi": "हमारे बैच में 600+ छात्र"
+    },
+    "Active in 4 blocks": {
+      "bn": "৪টি ব্লকে সক্রিয়",
+      "hi": "4 ब्लॉक में सक्रिय"
+    },
+    "Shiksha Desk keeps students in class when fees, a uniform, or a set of books would have sent them home. The work sits in our blocks — scholarships, kits, and coaching, not a distant sponsorship.": {
+      "bn": "ফি, ইউনিফর্ম বা এক সেট বই যখন ছাত্রকে বাড়ি পাঠাত, শিক্ষা ডেস্ক তাকে ক্লাসে রাখে। কাজ আমাদের ব্লকে — বৃত্তি, কিট ও কোচিং, দূরের স্পনসরশিপ নয়।",
+      "hi": "फीस, यूनिफॉर्म या किताबों का एक सेट जब छात्र को घर भेज देता, शिक्षा डेस्क उसे कक्षा में रखता है। काम हमारे ब्लॉक में है — छात्रवृत्ति, किट और कोचिंग, दूर की स्पॉन्सरशिप नहीं।"
+    },
+    "We sit with the school and the teacher to see who is about to drop out, and why — fees, a uniform, books, or the bus fare to the coaching batch.": {
+      "bn": "আমরা স্কুল ও শিক্ষকের সঙ্গে বসি দেখতে কে ছাড়তে চলেছে, এবং কেন — ফি, ইউনিফর্ম, বই, নাকি কোচিং ব্যাচের বাস ভাড়া।",
+      "hi": "हम स्कूल और शिक्षक के साथ बैठकर देखते हैं कौन छोड़ने वाला है, और क्यों — फीस, यूनिफॉर्म, किताबें, या कोचिंग बैच का बस किराया।"
+    },
+    "The kit matches that student’s class: books, copies, uniform, and the fee that was blocking admission. It is handed over at the school, with the family present.": {
+      "bn": "কিট সেই ছাত্রের ক্লাসের মতো: বই, খাতা, ইউনিফর্ম, আর যে ফি ভর্তি আটকেছিল। স্কুলে, পরিবারের সামনে, হাতে দেওয়া হয়।",
+      "hi": "किट उस छात्र की कक्षा के हिसाब से है: किताबें, कापियाँ, यूनिफॉर्म, और वह फीस जो दाखिला रोक रही थी। स्कूल में, परिवार के सामने, सौंपी जाती है।"
+    },
+    "90% stayed in class": {
+      "bn": "৯০% ক্লাসে থেকেছে",
+      "hi": "90% कक्षा में रहे"
+    },
+    "Nights in our blocks get cold enough to stop a child reaching school and an elder sleeping. This desk packs blankets and warm sets before that week arrives.": {
+      "bn": "আমাদের ব্লকের রাত এত ঠান্ডা হয় যে শিশু স্কুলে পৌঁছাতে পারে না, বড়রা ঘুমোতে পারে না। সেই সপ্তাহ আসার আগে এই ডেস্ক কম্বল ও গরম জামা গোছায়।",
+      "hi": "हमारे ब्लॉक की रातें इतनी ठंडी हो जाती हैं कि बच्चा स्कूल नहीं पहुँच पाता और बुज़ुर्ग सो नहीं पाते। वह हफ्ता आने से पहले यह डेस्क कंबल और गर्म कपड़े बाँधता है।"
+    },
+    "Gifts are pooled early, then spent on blankets and warm sets bought for the blocks we already work in — not a general appeal with no address.": {
+      "bn": "দান আগে জমা হয়, তারপর সেই ব্লকের কম্বল ও গরম জামায় খরচ হয় যেখানে আমরা ইতিমধ্যে কাজ করি — ঠিকানাহীন সাধারণ আবেদন নয়।",
+      "hi": "दान पहले जमा होता है, फिर उन ब्लॉक के कंबल और गर्म कपड़ों पर खर्च होता है जहाँ हम पहले से काम करते हैं — बिना पते की सामान्य अपील नहीं।"
+    },
+    "Each set is a blanket, a warm layer, and socks a family can use through the season. Field sevaks deliver them house to house with the panchayat list.": {
+      "bn": "প্রতিটি সেটে একটি কম্বল, একটি গরম জামা, আর মোজা — পরিবার সারা মরসুম ব্যবহার করতে পারে। ফিল্ড সেবক পঞ্চায়েতের তালিকা ধরে বাড়ি বাড়ি দেয়।",
+      "hi": "हर सेट में एक कंबल, एक गर्म परत, और मोजे हैं जिन्हें परिवार पूरे मौसम इस्तेमाल कर सकता है। फील्ड सेवक पंचायत की सूची के साथ घर-घर पहुँचाते हैं।"
+    },
+    "700+ people in our blocks": {
+      "bn": "আমাদের ব্লকে ৭০০+ মানুষ",
+      "hi": "हमारे ब्लॉक में 700+ लोग"
+    },
+    "Covered 6 blocks through the cold": {
+      "bn": "ঠান্ডার মধ্যে ৬টি ব্লক",
+      "hi": "ठंड के दौरान 6 ब्लॉक"
+    },
+    "After the rains, several hamlets in our blocks drink from a source that makes children sick. This desk repairs or filters that source so the illness does not become the season’s habit.": {
+      "bn": "বৃষ্টির পর আমাদের কয়েকটি পাড়া এমন উৎস থেকে জল খায় যা শিশুদের অসুস্থ করে। এই ডেস্ক সেই উৎস সারাই বা ফিল্টার করে, যাতে অসুখ মরসুমের অভ্যাস না হয়।",
+      "hi": "बारिश के बाद हमारे कई टोले ऐसे स्रोत से पानी पीते हैं जो बच्चों को बीमार करता है। यह डेस्क उस स्रोत की मरम्मत या फ़िल्टर करता है, ताकि बीमारी मौसम की आदत न बन जाए।"
+    },
+    "We walk the source with the hamlet — the well, the handpump, the pond — and see what fails in summer and what turns bad after the monsoon.": {
+      "bn": "আমরা পাড়ার সঙ্গে উৎস ঘুরে দেখি — কুয়ো, হ্যান্ডপাম্প, পুকুর — গরমে কী বন্ধ হয় আর বর্ষার পর কী খারাপ হয়।",
+      "hi": "हम टोले के साथ स्रोत चलकर देखते हैं — कुआँ, हैंडपंप, तालाब — गर्मी में क्या रुकता है और मानसून के बाद क्या खराब होता है।"
+    },
+    "The fix is the one the hamlet can run: a filter, a repaired handpump, or a tank they already know how to clean. A sevak checks it through the season.": {
+      "bn": "সমাধান সেটাই যা পাড়া নিজে চালাতে পারে: একটি ফিল্টার, সারাই করা হ্যান্ডপাম্প, বা যে ট্যাঙ্ক তারা পরিষ্কার করতে জানে। একজন সেবক সারা মরসুম দেখে।",
+      "hi": "हल वही है जिसे टोला खुद चला सके: एक फ़िल्टर, ठीक किया हैंडपंप, या वह टंकी जिसे वे साफ़ करना जानते हैं। एक सेवक पूरे मौसम जाँचता रहता है।"
+    },
+    "8 hamlets served": {
+      "bn": "৮টি পাড়ায় সেবা",
+      "hi": "8 टोलों में सेवा"
+    },
+    "2,500+ people in these hamlets": {
+      "bn": "এই পাড়াগুলোতে ২,৫০০+ মানুষ",
+      "hi": "इन टोलों में 2,500+ लोग"
+    },
+    "Fewer children falling ill from the water": {
+      "bn": "জল থেকে অসুস্থ হওয়া শিশু কমেছে",
+      "hi": "पानी से बीमार पड़ने वाले बच्चे कम हुए"
+    },
+    "We sit with the panchayat, the school, the ASHA, and the ANM so the work arrives directly and stays accountable.": {
+      "bn": "আমরা পঞ্চায়েত, স্কুল, আশা ও এএনএমের সঙ্গে বসি, যাতে কাজ সরাসরি পৌঁছায় এবং জবাবদিহি থাকে।",
+      "hi": "हम पंचायत, स्कूल, आशा और एएनएम के साथ बैठते हैं, ताकि काम सीधे पहुँचे और जवाबदेह रहे।"
+    },
+    "A fever, a child about to leave school, or a cold night without a blanket goes first. Nobody waits for a campaign photo.": {
+      "bn": "জ্বর, স্কুল ছাড়তে চলা একটি শিশু, বা কম্বল ছাড়া একটি ঠান্ডা রাত আগে যায়। কেউ প্রচারের ছবির জন্য অপেক্ষা করে না।",
+      "hi": "बुखार, स्कूल छोड़ने वाला बच्चा, या बिना कंबल की ठंडी रात पहले आती है। कोई कैंपेन की फ़ोटो का इंतज़ार नहीं करता।"
+    },
+    "Help is given with dignity. No one in the hamlet is made to feel small for needing it.": {
+      "bn": "সহায়তা সম্মানের সঙ্গে দেওয়া হয়। পাড়ার কেউ প্রয়োজনের জন্য ছোট বোধ করে না।",
+      "hi": "सहायता सम्मान के साथ दी जाती है। टोले में किसी को ज़रूरत के लिए छोटा नहीं महसूस कराया जाता।"
     }
   },
   "pages": {

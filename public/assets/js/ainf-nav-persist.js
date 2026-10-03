@@ -98,28 +98,39 @@
   }
 
   function start() {
+    if (
+      document.getElementById("ainf-global-nav") ||
+      document.documentElement.classList.contains("ainf-shared-nav")
+    ) {
+      return;
+    }
     sync();
-    var i = 0;
-    var timer = setInterval(function () {
-      sync();
-      i += 1;
-      if (i > 50) clearInterval(timer); // ~10s covers Framer hydrate
-    }, 200);
+    [400, 1200, 2400].forEach(function (ms) {
+      setTimeout(sync, ms);
+    });
 
+    var quiet = false;
     var mo = new MutationObserver(function () {
-      if (window.__ainfNavPersistQuiet) return;
-      window.__ainfNavPersistQuiet = true;
+      if (quiet) return;
+      if (document.getElementById("ainf-global-nav")) {
+        mo.disconnect();
+        return;
+      }
+      quiet = true;
       try {
         sync();
       } finally {
         setTimeout(function () {
-          window.__ainfNavPersistQuiet = false;
-        }, 50);
+          quiet = false;
+        }, 180);
       }
     });
     if (document.body) {
-      mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+      mo.observe(document.body, { childList: true, subtree: true });
     }
+    setTimeout(function () {
+      mo.disconnect();
+    }, 4500);
   }
 
   if (document.readyState === "loading") {

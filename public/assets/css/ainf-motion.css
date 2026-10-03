@@ -1,17 +1,12 @@
 /* Design-matched motion — complements Framer letter reveals, does not replace them */
 @keyframes ainf-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -7px, 0); }
 }
 
 @keyframes ainf-fade-up {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-html.ainf-ready [data-framer-name="Hero Sectiion"] h1,
-html.ainf-ready [data-framer-name="Hero Section"] h1 {
-  animation: ainf-fade-up 0.7s ease both;
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 html.ainf-ready [data-framer-name="Short Description"],
@@ -26,13 +21,15 @@ html.ainf-ready [data-framer-name="Statastic"] [data-framer-name="Card"] {
 
 .ainf-reveal {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translate3d(0, 22px, 0);
   transition: opacity 0.65s ease, transform 0.65s ease;
+  will-change: opacity, transform;
 }
 
 .ainf-reveal.is-in {
   opacity: 1;
   transform: none;
+  will-change: auto;
 }
 
 .ainf-lift {
@@ -40,7 +37,7 @@ html.ainf-ready [data-framer-name="Statastic"] [data-framer-name="Card"] {
 }
 
 .ainf-lift:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, -4px, 0);
 }
 
 #ainf-global-nav .ainf-cta,
@@ -52,8 +49,126 @@ html.ainf-ready [data-framer-name="Statastic"] [data-framer-name="Card"] {
   transform: translateY(-1px);
 }
 
+/* Dummy partner logos (Acme / LOGO / letter-flicker) never paint */
+[data-framer-name="Clients"] {
+  overflow: hidden !important;
+}
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] > :not(.ainf-desk-mark),
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] img,
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] svg:not(.ainf-desk-ico),
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] [data-framer-component-type="SVG"],
+[data-framer-name="Clients"] [data-framer-name^="Client Logo"] .svgContainer {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+[data-framer-name="Clients"] svg:not(.ainf-desk-ico),
+[data-framer-name="Clients"] img,
+[data-framer-name="Clients"] [data-framer-component-type="SVG"] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.ainf-desk-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+.ainf-desk-card > :not(.ainf-desk-mark) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  animation: none !important;
+}
+.ainf-desk-mark {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 6px;
+  background: #fff;
+  text-decoration: none !important;
+  color: #163428 !important;
+  box-sizing: border-box;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.ainf-desk-mark:hover {
+  background: #f4faf6;
+}
+.ainf-desk-ico {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 2px;
+}
+.ainf-desk-name {
+  font-family: Onest, Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-align: center;
+  color: #163428;
+}
+.ainf-desk-sub {
+  font-family: Onest, Inter, system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #39a46b;
+  line-height: 1;
+}
+@media (max-width: 809px) {
+  .ainf-desk-ico { width: 22px; height: 22px; }
+  .ainf-desk-name { font-size: 9px; }
+  .ainf-desk-sub { font-size: 8px; letter-spacing: 0.04em; }
+}
+
 html.ainf-i18n-wait #main {
-  opacity: 0;
+  opacity: 1;
+}
+
+[data-framer-name="Gallery Section"],
+[data-framer-name="Meet the team Section"],
+[data-framer-name="Testimonials Section"],
+[data-framer-name="How you can help Section"],
+[data-framer-name="Blog Section"],
+[data-framer-name="Blogs Section"],
+[data-framer-name="Causes Section"],
+[data-framer-name="Projects Section"],
+[data-framer-name="FAQ Section"],
+[data-framer-name="Join as Field Sevak"],
+[data-framer-name="Support AINF CTA"],
+footer, #ainf-site-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 640px;
+}
+
+/* Fit: never let page chrome spill sideways; keep heading in/out unclipped */
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+h1, h2, h3, h4,
+[data-framer-appear-id] {
+  overflow: visible;
 }
 
 @media (prefers-reduced-motion: reduce) {

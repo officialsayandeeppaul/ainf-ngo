@@ -1,0 +1,147 @@
+{
+  "/": {
+    "status": 200,
+    "hash": "0761276b661ca1d0bb3f29a7f64e527a4ab12436e705fee3b5b100d24b665ab0",
+    "bytes": 2022406
+  },
+  "/about-us": {
+    "status": 200,
+    "hash": "7621201022ed5f0eabf7bb8fa47ddacdf367e7c8fd8759f30afd42a2f245b546",
+    "bytes": 1461187
+  },
+  "/blogs": {
+    "status": 200,
+    "hash": "2ea0a552bbbdd8989caefa9136a00ee3f1902a75a15ecec42cb5af10f3c1b598",
+    "bytes": 667811
+  },
+  "/blogs/a-day-in-the-life-of-our-volunteers": {
+    "status": 200,
+    "hash": "536a839f7acf5afec06383a73cec9c0ceddffd983c1758e10b16acebd7874efd",
+    "bytes": 853571
+  },
+  "/blogs/building-stronger-communities-together": {
+    "status": 200,
+    "hash": "21bffab584bc49d0f3bc4e5cc32a3d1addadf229a7520af060d5ce7328333877",
+    "bytes": 851989
+  },
+  "/blogs/education-can-break-poverty": {
+    "status": 200,
+    "hash": "401acce50ed25278b77d5ce325a9164f6a0a4ef2536540468e3c7d4fcf64c937",
+    "bytes": 853101
+  },
+  "/blogs/how-your-donations-are-changing-lives-every-day": {
+    "status": 200,
+    "hash": "bba02573a304665449d6152da918d69cd501461cc2c3e4140979db95c5f7ccab",
+    "bytes": 856810
+  },
+  "/blogs/simple-ways-to-make-impact-on-community": {
+    "status": 200,
+    "hash": "d51a9d4ce83b89d414e81198cd35790491dd5413294243ef8e5b08191fe0809f",
+    "bytes": 853802
+  },
+  "/blogs/why-every-volunteer-matters": {
+    "status": 200,
+    "hash": "9184c2ed7e85053882bb517eda2c0f778bea1ac08dd193cba6134fce3e971b28",
+    "bytes": 852717
+  },
+  "/causes": {
+    "status": 200,
+    "hash": "7570c2c96354e88d57b1998b9e863447efb04b4d35dfa0a04b9b315a88cb55b2",
+    "bytes": 1341097
+  },
+  "/causes/education-for-every-child": {
+    "status": 200,
+    "hash": "048230d7f2cff9273c547b3a1f3a2856d0b06ea99837169dd38c790bbaeb8dec",
+    "bytes": 1021112
+  },
+  "/causes/food-nutrition-for-families": {
+    "status": 200,
+    "hash": "49a19bd6a186b613e39e2143a2b36f629bd6a07ccbbb58e9f4cbdb162ca887f2",
+    "bytes": 1016077
+  },
+  "/causes/healthcare-for-all": {
+    "status": 200,
+    "hash": "5573e2de984edfcaced751e856227f278f1250e11161ac609afe776eed2647aa",
+    "bytes": 1015609
+  },
+  "/causes/water-sanitation-for-health": {
+    "status": 200,
+    "hash": "c1c0d7146e1961364bb6972fe2d124c8751ae5147c0d68a39878de3caa80e826",
+    "bytes": 1013231
+  },
+  "/causes/women-empowerment-for-rise": {
+    "status": 200,
+    "hash": "a571b38376a84525649b9fd7d69178d785b891acb1c736183fa61860c4d94eab",
+    "bytes": 1017396
+  },
+  "/contact-us": {
+    "status": 200,
+    "hash": "39447428f86818e7f4066d0e726b56bea444daa459aae618af54a2c2c991e9f6",
+    "bytes": 665116
+  },
+  "/donate-now": {
+    "status": 200,
+    "hash": "a20dd06d1be08420957262c5ef5d53d852223db85f28fb855a0c397fed93f0c4",
+    "bytes": 656295
+  },
+  "/join-as-volunteer": {
+    "status": 200,
+    "hash": "96a9f2b1bdc36ad43bb8045692db65283725e01be7f2de4423e1364fda1594ef",
+    "bytes": 1263969
+  },
+  "/legal-pages/terms-conditions": {
+    "status": 200,
+    "hash": "8d8b7e301f76093adca64ee37d68f95dd7efc9a81a929f4ece10766426682f44",
+    "bytes": 649339
+  },
+  "/projects": {
+    "status": 200,
+    "hash": "d6d1c0c9d28dbead4a0ec842780666cd9cb4d7dbdaa98e33187932414d455195",
+    "bytes": 437336
+  },
+  "/projects/clean-water-initiative": {
+    "status": 200,
+    "hash": "2f7d8c5ec8347f8259749fb8b2ab05a32ff6afdfe0592bd1bc3b664d1d7c5330",
+    "bytes": 478671
+  },
+  "/projects/daily-meal-program": {
+    "status": 200,
+    "hash": "38aad24f5a1924132b6fdcd20f8629b0b43938d065ce70ceae8273a9b9fe816f",
+    "bytes": 480037
+  },
+  "/projects/education-support-drive": {
+    "status": 200,
+    "hash": "8441185926e73b102a6334ef684d4864bc8957deb3af5381b5a4a95da056a4cd",
+    "bytes": 479618
+  },
+  "/projects/medical-aid-health-camps": {
+    "status": 200,
+    "hash": "9cecf1f8e4739a543983a87c27f8ebab6af83781e60dbe239d38d90bbad97db4",
+    "bytes": 477711
+  },
+  "/projects/winter-relief-program": {
+    "status": 200,
+    "hash": "5244fb3928f1c1e1f0bd7a326760a054bb8bcad1322e743a4d77df03f4b27883",
+    "bytes": 478108
+  },
+  "redirect:/about%20us": {
+    "status": 308,
+    "location": "/about-us"
+  },
+  "redirect:/contact": {
+    "status": 308,
+    "location": "/contact-us"
+  },
+  "redirect:/privacy": {
+    "status": 308,
+    "location": "/legal-pages/terms-conditions"
+  },
+  "redirect:/terms-of-use": {
+    "status": 308,
+    "location": "/legal-pages/terms-conditions"
+  },
+  "redirect:/terms-conditions": {
+    "status": 308,
+    "location": "/legal-pages/terms-conditions"
+  }
+}

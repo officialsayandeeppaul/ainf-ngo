@@ -2,6 +2,9 @@
 (function () {
   if (window.__ainfProjectsNavBooted) return;
   window.__ainfProjectsNavBooted = true;
+  // Shared AINF pill owns chrome on every page — this file is a leftover
+  // and must never hide Framer "Top" (the projects content wrapper).
+  if (window.__ainfSiteNavBooted || document.getElementById("ainf-global-nav")) return;
 
   var NAV_ID = "ainf-global-nav";
   var path = (location.pathname || "/").replace(/\/$/, "") || "/";
@@ -32,8 +35,8 @@
     var img = document.createElement("img");
     img.src = "/assets/img/theainf-logo.webp";
     img.alt = "AINF";
-    img.width = 36;
-    img.height = 36;
+    img.width = 40;
+    img.height = 40;
     var name = document.createElement("span");
     name.className = "ainf-brand-text";
     name.textContent = "AINF";
@@ -85,7 +88,7 @@
   }
 
   function killOxiraNav() {
-    var names = ["Navigation", "Navbar", "Nav Items", "Top", "Header", "Banner"];
+    var names = ["Navigation", "Navbar", "Nav Items", "Header", "Banner"];
     names.forEach(function (n) {
       document.querySelectorAll('[data-framer-name="' + n + '"]').forEach(function (el) {
         if (el.id === NAV_ID || (el.closest && el.closest("#" + NAV_ID))) return;
@@ -105,22 +108,7 @@
     });
   }
 
-  function paintBrand() {
-    var GREEN = "#39a46b";
-    var BAD = {
-      "rgb(4, 63, 45)": 1,
-      "rgb(4, 64, 46)": 1,
-      "rgb(29, 82, 66)": 1,
-      "rgb(17, 115, 69)": 1,
-    };
-    document.querySelectorAll("a,button,div,span").forEach(function (el) {
-      if (el.closest && el.closest("#" + NAV_ID)) return;
-      try {
-        var bg = getComputedStyle(el).backgroundColor;
-        if (BAD[bg]) el.style.setProperty("background-color", GREEN, "important");
-      } catch (e) {}
-    });
-  }
+  function paintBrand() {}
 
   function tick() {
     document.documentElement.classList.add("ainf-projects-skin");
@@ -133,24 +121,22 @@
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", tick);
   }
-  window.addEventListener("load", tick);
+  [600, 1600, 2800].forEach(function (ms) {
+    setTimeout(tick, ms);
+  });
 
-  // Framer hydrates ~0.5–2s later and may wipe body; keep restoring
-  var i = 0;
-  var timer = setInterval(function () {
-    tick();
-    i += 1;
-    if (i > 40) clearInterval(timer); // ~8s
-  }, 200);
-
+  var moTimer = 0;
   var mo = new MutationObserver(function () {
-    if (!document.getElementById(NAV_ID) || document.getElementById(NAV_ID).parentNode !== document.documentElement) {
-      ensureNav();
-    }
-    killOxiraNav();
+    if (moTimer) return;
+    moTimer = setTimeout(function () {
+      moTimer = 0;
+      if (!document.getElementById(NAV_ID) || document.getElementById(NAV_ID).parentNode !== document.documentElement) {
+        ensureNav();
+      }
+    }, 220);
   });
   mo.observe(document.documentElement, { childList: true, subtree: true });
-
-  setTimeout(paintBrand, 600);
-  setTimeout(paintBrand, 1800);
+  setTimeout(function () {
+    mo.disconnect();
+  }, 4500);
 })();

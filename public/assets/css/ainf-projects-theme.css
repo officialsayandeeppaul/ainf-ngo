@@ -14,42 +14,77 @@ body.ainf-projects-skin footer[data-framer-name="Bottom"]:not(#ainf-site-footer)
   padding:0!important;
 }
 
-/* Kill Oxira glass buttons → solid AINF pills (ONLY Primary btn — never "Primary" sections/cards) */
+/* Kill Oxira glass (white→green gradient + pale inset glow) → solid nav green */
+html.ainf-projects-skin [data-framer-name="Primary btn"],
+html.ainf-projects-skin a[data-framer-name="Primary btn"],
+html.ainf-projects-skin [data-framer-name="btn hover variation"],
 body.ainf-projects-skin [data-framer-name="Primary btn"],
-body.ainf-projects-skin a[data-framer-name="Primary btn"]{
+body.ainf-projects-skin a[data-framer-name="Primary btn"],
+body.ainf-projects-skin [data-framer-name="btn hover variation"]{
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
-  background:#39a46b!important;
+  background:#1c7d48!important;
   background-image:none!important;
-  background-color:#39a46b!important;
+  background-color:#1c7d48!important;
   box-shadow:none!important;
   border-radius:999px!important;
   border:none!important;
   filter:none!important;
+  box-sizing:border-box!important;
+  padding:14px 22px!important;
+  width:max-content!important;
+  min-width:max-content!important;
+  max-width:none!important;
+  height:52px!important;
+  overflow:visible!important;
+  flex-shrink:0!important;
 }
-body.ainf-projects-skin [data-framer-name="Primary btn"] *,
-body.ainf-projects-skin a[data-framer-name="Primary btn"] *{
+html.ainf-projects-skin [data-framer-name="Primary btn"] *,
+body.ainf-projects-skin [data-framer-name="Primary btn"] *{
   box-shadow:none!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
   text-shadow:none!important;
 }
-body.ainf-projects-skin [data-framer-name="Primary btn"] > div,
-body.ainf-projects-skin [data-framer-name="Primary btn"] [style*="inset"],
-body.ainf-projects-skin [data-framer-name="Primary btn"] [style*="box-shadow"]{
+html.ainf-projects-skin [data-framer-name="Primary btn"] > div,
+body.ainf-projects-skin [data-framer-name="Primary btn"] > div{
   background:transparent!important;
   background-image:none!important;
   box-shadow:none!important;
   border:none!important;
   opacity:1!important;
 }
+html.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="content"],
+body.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="content"],
+html.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="Join Us On Discord"],
+body.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="Join Us On Discord"],
+html.ainf-projects-skin [data-framer-name="btn hover variation"] p,
+body.ainf-projects-skin [data-framer-name="btn hover variation"] p{
+  width:auto!important;
+  min-width:max-content!important;
+  max-width:none!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+}
+html.ainf-projects-skin [data-framer-name="Primary btn"] [data-framer-name="Icon"],
+html.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="Icon"],
+html.ainf-projects-skin [data-framer-name="Primary btn"]:hover [data-framer-name="Icon"],
+html.ainf-projects-skin [data-framer-name="Primary btn"].hover [data-framer-name="Icon"],
+body.ainf-projects-skin [data-framer-name="Primary btn"] [data-framer-name="Icon"],
+body.ainf-projects-skin [data-framer-name="btn hover variation"] [data-framer-name="Icon"]{
+  display:none!important;
+}
+html.ainf-projects-skin [data-framer-name="Primary btn"] p,
+html.ainf-projects-skin [data-framer-name="Primary btn"] span,
 body.ainf-projects-skin [data-framer-name="Primary btn"] p,
-body.ainf-projects-skin [data-framer-name="Primary btn"] span,
-body.ainf-projects-skin [data-framer-name="Primary btn"] a{
+body.ainf-projects-skin [data-framer-name="Primary btn"] span{
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
   font-family:Onest,Inter,system-ui,sans-serif!important;
-  font-weight:600!important;
+  font-weight:400!important;
+  font-style:normal!important;
+  line-height:1.2!important;
+  letter-spacing:0!important;
 }
 
 /* Green Icon Sphere ONLY on raised-amount piggy badges — never status live dots */
@@ -61,7 +96,13 @@ body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"]{
   border-radius:999px!important;
 }
 
-/* Do not force every "arrow" solid green — leave Framer testimonial/hero arrows alone */
+/* Our Mission block: keep the copy off the screen edges */
+@media (min-width: 810px) {
+  body.ainf-projects-skin [data-framer-name="Our Mission"] {
+    padding-left: 80px !important;
+    padding-right: 80px !important;
+  }
+}
 
 body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"]{
   display:inline-flex!important;
