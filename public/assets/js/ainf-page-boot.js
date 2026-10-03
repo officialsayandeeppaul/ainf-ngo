@@ -426,6 +426,12 @@
         clearGiftFieldError(this);
         markGiftChips(root);
       });
+      form.querySelector('[name="phone"]').addEventListener("input", function () {
+        var v = this.value;
+        var cleaned = v.replace(/[^\d]/g, "").slice(0, 10);
+        if (cleaned !== v) this.value = cleaned;
+        clearGiftFieldError(this);
+      });
       form.addEventListener("input", function (event) {
         if (event.target && event.target.name) {
           event.target.setAttribute("data-ainf-touched", "1");
