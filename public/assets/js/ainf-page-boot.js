@@ -173,7 +173,9 @@
     if (!document.getElementById("ainf-razorpay-layer")) {
       var layer = document.createElement("style");
       layer.id = "ainf-razorpay-layer";
-      layer.textContent = ".razorpay-container,.razorpay-backdrop{z-index:2147483647!important}" +
+      // Never raise .razorpay-backdrop: Razorpay nests it beside the checkout
+      // iframe, so a max z-index puts the dim layer over the form and eats clicks.
+      layer.textContent = ".razorpay-container{z-index:2147483647!important}" +
         "html.ainf-rzp-open body>*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}";
       document.head.appendChild(layer);
     }

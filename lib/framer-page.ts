@@ -223,7 +223,7 @@ function withEarlyBlogClass(buf: Buffer): Buffer {
   );
   next = next.replace(
     'src="/assets/js/ainf-page-boot.js"',
-    'src="/assets/js/ainf-page-boot.js?v=20261004b"'
+    'src="/assets/js/ainf-page-boot.js?v=20261004c"'
   );
   next = next.replace(
     'src="/assets/js/ainf-site-nav.js"',
