@@ -1699,6 +1699,11 @@ body.ainf-portal b {
   font-weight: 400;
   white-space: nowrap;
   max-width: 100%;
+  /* Table cells set overflow-wrap:anywhere for long free text; without this,
+     that inherits into short status words like "Received" and breaks them
+     one letter per line when the cell is narrow (table-layout:fixed). */
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .pt-badge--neutral {
@@ -2406,8 +2411,10 @@ body.ainf-portal b {
 /* --- Tables ------------------------------------------------------------- */
 
 .pt-table-wrap {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pt-table {
@@ -2415,6 +2422,16 @@ body.ainf-portal b {
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 13.5px;
+}
+
+/* Fixed layout always splits 100% evenly across columns, so on a narrow
+   phone a 5-column table crushes short labels like "Received" into a
+   single letter per line. Give it a floor width and let the wrap scroll
+   instead, unless a variant below sets its own explicit column widths. */
+@media (max-width: 640px) {
+  .pt-table:not(.pt-table--users):not(.pt-table--payments):not(.pt-table--crm):not(.pt-table--inbox):not(.pt-table--dossier) {
+    min-width: 560px;
+  }
 }
 
 .pt-table th {
@@ -2446,7 +2463,11 @@ body.ainf-portal b {
   background: var(--surface-alt);
 }
 
-.pt-table td .pt-badge {
+/* Scoped to --users: that table's Role column is narrow by design, so its
+   badge is allowed to wrap. Other tables (e.g. gift history) must not
+   inherit this — it breaks short status words like "Received" into single
+   letters per line on mobile. */
+.pt-table--users td .pt-badge {
   white-space: normal;
 }
 

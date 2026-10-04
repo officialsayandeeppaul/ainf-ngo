@@ -5,6 +5,16 @@
 
   document.documentElement.classList.add("ainf-ready");
 
+  // Appends a human countdown to a 429 "too many attempts" message so the
+  // user knows when they can retry, instead of guessing.
+  function ainfWithRetryWait(message, body) {
+    var secs = body && Number(body.retryAfter);
+    if (!secs || secs <= 0) return message;
+    var mins = Math.ceil(secs / 60);
+    var wait = mins >= 1 ? mins + " minute" + (mins === 1 ? "" : "s") : secs + " second" + (secs === 1 ? "" : "s");
+    return message + " You can try again in about " + wait + ".";
+  }
+
   document.addEventListener(
     "click",
     function (event) {
@@ -790,7 +800,7 @@
         if (!result.ok) {
           giftBusy = false;
           if (button) button.disabled = false;
-          giftNote(root, (result.body && result.body.message) || "The gift could not be started.", true);
+          giftNote(root, ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);
           return;
         }
         whenRazorpay(function () {
@@ -3258,7 +3268,7 @@
         if (!result.ok) {
           form.removeAttribute("data-ainf-paying");
           if (button) button.disabled = false;
-          projectPayNote(form, (result.body && result.body.message) || "The gift could not be started.");
+          projectPayNote(form, ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body));
           return;
         }
         whenRazorpay(function () {
@@ -3489,7 +3499,7 @@
         .then(function (result) {
           if (!result.ok || !window.Razorpay) {
             busy = false;
-            note((result.body && result.body.message) || "The gift could not be started.", true);
+            note(ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);
             return;
           }
           var checkoutBox = new window.Razorpay({
