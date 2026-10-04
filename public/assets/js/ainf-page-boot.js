@@ -174,11 +174,7 @@
       var layer = document.createElement("style");
       layer.id = "ainf-razorpay-layer";
       layer.textContent = ".razorpay-container,.razorpay-backdrop{z-index:2147483647!important}" +
-        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop):not(script):not(style):not(link)," +
-        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop):not(script):not(style):not(link) *" +
-        "{pointer-events:none!important}" +
-        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop)" +
-        "{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}";
+        "html.ainf-rzp-open body>*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}";
       document.head.appendChild(layer);
     }
     if (document.querySelector('script[data-ainf-razorpay="1"]')) return;
@@ -187,6 +183,24 @@
     checkout.async = true;
     checkout.setAttribute("data-ainf-razorpay", "1");
     document.head.appendChild(checkout);
+  }
+
+  function ainfRzpFreeze() {
+    document.documentElement.classList.add("ainf-rzp-open");
+    var kids = document.body.children;
+    for (var i = 0; i < kids.length; i++) {
+      kids[i].setAttribute("inert", "");
+      kids[i].setAttribute("data-ainf-rzp-inert", "1");
+    }
+  }
+
+  function ainfRzpThaw() {
+    document.documentElement.classList.remove("ainf-rzp-open");
+    var marked = document.querySelectorAll("[data-ainf-rzp-inert]");
+    for (var i = 0; i < marked.length; i++) {
+      marked[i].removeAttribute("inert");
+      marked[i].removeAttribute("data-ainf-rzp-inert");
+    }
   }
 
   function giftRupees(paise) {
@@ -778,7 +792,7 @@
             order_id: result.body.razorpayOrderId,
             prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
             handler: function (response) {
-              document.documentElement.classList.remove("ainf-rzp-open");
+              ainfRzpThaw();
               fetch("/api/donations/confirm", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
@@ -801,14 +815,14 @@
             },
             modal: {
               ondismiss: function () {
-                document.documentElement.classList.remove("ainf-rzp-open");
+                ainfRzpThaw();
                 giftBusy = false;
                 if (button) button.disabled = false;
                 giftNote(root, "The gift was not taken.", false);
               }
             }
           });
-          document.documentElement.classList.add("ainf-rzp-open");
+          ainfRzpFreeze();
           checkoutBox.open();
         }, function () {
           giftBusy = false;
@@ -3248,7 +3262,7 @@
               prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
               theme: { color: "#1c7d48" },
               handler: function (response) {
-                document.documentElement.classList.remove("ainf-rzp-open");
+                ainfRzpThaw();
                 fetch("/api/donations/confirm", {
                   method: "POST",
                   headers: { "content-type": "application/json" },
@@ -3269,22 +3283,22 @@
               },
               modal: {
                 ondismiss: function () {
-                  document.documentElement.classList.remove("ainf-rzp-open");
+                  ainfRzpThaw();
                   releaseProjectPay(form);
                   projectPayNote(form, "");
                 }
               }
             });
             checkoutBox.on("payment.failed", function () {
-              document.documentElement.classList.remove("ainf-rzp-open");
+              ainfRzpThaw();
               releaseProjectPay(form);
               projectPayNote(form, "The payment did not go through. You can try again.");
             });
-            document.documentElement.classList.add("ainf-rzp-open");
+            ainfRzpFreeze();
             checkoutBox.open();
             projectPayNote(form, "");
           } catch (error) {
-            document.documentElement.classList.remove("ainf-rzp-open");
+            ainfRzpThaw();
             releaseProjectPay(form);
             projectPayNote(form, "Payment could not be opened. Try again.");
           }
