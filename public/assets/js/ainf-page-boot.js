@@ -764,6 +764,8 @@
           return;
         }
         whenRazorpay(function () {
+          root.style.setProperty("backdrop-filter", "none", "important");
+          root.style.setProperty("-webkit-backdrop-filter", "none", "important");
           var checkoutBox = new window.Razorpay({
             key: result.body.keyId,
             amount: result.body.amountPaise,
@@ -795,6 +797,8 @@
             },
             modal: {
               ondismiss: function () {
+                root.style.removeProperty("backdrop-filter");
+                root.style.removeProperty("-webkit-backdrop-filter");
                 giftBusy = false;
                 if (button) button.disabled = false;
                 giftNote(root, "The gift was not taken.", false);
@@ -3230,6 +3234,29 @@
         }
         whenRazorpay(function () {
           try {
+            var rzpSheet = document.querySelector(".ainf-pay-sheet");
+            var rzpBackdrop = projectBackdrop(rzpSheet);
+            var rzpShield = document.getElementById("ainf-pay-shield");
+            function clearRzpBlur() {
+              if (rzpBackdrop) {
+                rzpBackdrop.style.removeProperty("backdrop-filter");
+                rzpBackdrop.style.removeProperty("-webkit-backdrop-filter");
+              }
+              if (rzpShield && !rzpShield.hidden) {
+                rzpShield.style.setProperty("backdrop-filter", "none", "important");
+                rzpShield.style.setProperty("-webkit-backdrop-filter", "none", "important");
+              }
+            }
+            function restoreRzpBlur() {
+              if (rzpBackdrop) {
+                rzpBackdrop.style.setProperty("backdrop-filter", "blur(16px)", "important");
+                rzpBackdrop.style.setProperty("-webkit-backdrop-filter", "blur(16px)", "important");
+              }
+              if (rzpShield && !rzpShield.hidden) {
+                rzpShield.style.removeProperty("backdrop-filter");
+                rzpShield.style.removeProperty("-webkit-backdrop-filter");
+              }
+            }
             var checkoutBox = new window.Razorpay({
               key: result.body.keyId,
               amount: result.body.amountPaise,
@@ -3260,15 +3287,18 @@
               },
               modal: {
                 ondismiss: function () {
+                  restoreRzpBlur();
                   releaseProjectPay(form);
                   projectPayNote(form, "");
                 }
               }
             });
             checkoutBox.on("payment.failed", function () {
+              restoreRzpBlur();
               releaseProjectPay(form);
               projectPayNote(form, "The payment did not go through. You can try again.");
             });
+            clearRzpBlur();
             checkoutBox.open();
             projectPayNote(form, "");
           } catch (error) {
