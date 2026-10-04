@@ -173,7 +173,12 @@
     if (!document.getElementById("ainf-razorpay-layer")) {
       var layer = document.createElement("style");
       layer.id = "ainf-razorpay-layer";
-      layer.textContent = ".razorpay-container,.razorpay-backdrop{z-index:2147483647!important}";
+      layer.textContent = ".razorpay-container,.razorpay-backdrop{z-index:2147483647!important}" +
+        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop):not(script):not(style):not(link)," +
+        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop):not(script):not(style):not(link) *" +
+        "{pointer-events:none!important}" +
+        "html.ainf-rzp-open body>*:not(.razorpay-container):not(.razorpay-backdrop)" +
+        "{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}";
       document.head.appendChild(layer);
     }
     if (document.querySelector('script[data-ainf-razorpay="1"]')) return;
@@ -764,9 +769,6 @@
           return;
         }
         whenRazorpay(function () {
-          root.style.setProperty("backdrop-filter", "none", "important");
-          root.style.setProperty("-webkit-backdrop-filter", "none", "important");
-          root.style.setProperty("pointer-events", "none", "important");
           var checkoutBox = new window.Razorpay({
             key: result.body.keyId,
             amount: result.body.amountPaise,
@@ -776,6 +778,7 @@
             order_id: result.body.razorpayOrderId,
             prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
             handler: function (response) {
+              document.documentElement.classList.remove("ainf-rzp-open");
               fetch("/api/donations/confirm", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
@@ -798,15 +801,14 @@
             },
             modal: {
               ondismiss: function () {
-                root.style.removeProperty("backdrop-filter");
-                root.style.removeProperty("-webkit-backdrop-filter");
-                root.style.removeProperty("pointer-events");
+                document.documentElement.classList.remove("ainf-rzp-open");
                 giftBusy = false;
                 if (button) button.disabled = false;
                 giftNote(root, "The gift was not taken.", false);
               }
             }
           });
+          document.documentElement.classList.add("ainf-rzp-open");
           checkoutBox.open();
         }, function () {
           giftBusy = false;
@@ -3236,35 +3238,6 @@
         }
         whenRazorpay(function () {
           try {
-            var rzpSheet = document.querySelector(".ainf-pay-sheet");
-            var rzpBackdrop = projectBackdrop(rzpSheet);
-            var rzpShield = document.getElementById("ainf-pay-shield");
-            function freezeForRzp() {
-              if (rzpBackdrop) {
-                rzpBackdrop.style.removeProperty("backdrop-filter");
-                rzpBackdrop.style.removeProperty("-webkit-backdrop-filter");
-                rzpBackdrop.style.setProperty("pointer-events", "none", "important");
-              }
-              if (rzpShield && !rzpShield.hidden) {
-                rzpShield.style.setProperty("backdrop-filter", "none", "important");
-                rzpShield.style.setProperty("-webkit-backdrop-filter", "none", "important");
-                rzpShield.style.setProperty("pointer-events", "none", "important");
-              }
-              if (rzpSheet) rzpSheet.style.setProperty("pointer-events", "none", "important");
-            }
-            function thawAfterRzp() {
-              if (rzpBackdrop) {
-                rzpBackdrop.style.setProperty("backdrop-filter", "blur(16px)", "important");
-                rzpBackdrop.style.setProperty("-webkit-backdrop-filter", "blur(16px)", "important");
-                rzpBackdrop.style.removeProperty("pointer-events");
-              }
-              if (rzpShield && !rzpShield.hidden) {
-                rzpShield.style.removeProperty("backdrop-filter");
-                rzpShield.style.removeProperty("-webkit-backdrop-filter");
-                rzpShield.style.removeProperty("pointer-events");
-              }
-              if (rzpSheet) rzpSheet.style.removeProperty("pointer-events");
-            }
             var checkoutBox = new window.Razorpay({
               key: result.body.keyId,
               amount: result.body.amountPaise,
@@ -3275,6 +3248,7 @@
               prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
               theme: { color: "#1c7d48" },
               handler: function (response) {
+                document.documentElement.classList.remove("ainf-rzp-open");
                 fetch("/api/donations/confirm", {
                   method: "POST",
                   headers: { "content-type": "application/json" },
@@ -3295,21 +3269,22 @@
               },
               modal: {
                 ondismiss: function () {
-                  thawAfterRzp();
+                  document.documentElement.classList.remove("ainf-rzp-open");
                   releaseProjectPay(form);
                   projectPayNote(form, "");
                 }
               }
             });
             checkoutBox.on("payment.failed", function () {
-              thawAfterRzp();
+              document.documentElement.classList.remove("ainf-rzp-open");
               releaseProjectPay(form);
               projectPayNote(form, "The payment did not go through. You can try again.");
             });
-            freezeForRzp();
+            document.documentElement.classList.add("ainf-rzp-open");
             checkoutBox.open();
             projectPayNote(form, "");
           } catch (error) {
+            document.documentElement.classList.remove("ainf-rzp-open");
             releaseProjectPay(form);
             projectPayNote(form, "Payment could not be opened. Try again.");
           }
