@@ -703,14 +703,16 @@
     if (location.pathname.indexOf("/projects/") < 0) return;
 
     // "Our mission" button → open the Support AINF donation modal
-    document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"]').forEach(function (el) {
-      var text = (el.textContent || "").trim();
+    // The section CTA is a Framer link named "btn hover variation", not "Primary".
+    document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"],[data-framer-name="btn hover variation"]').forEach(function (el) {
+      var text = (el.textContent || "").replace(/\s+/g, " ").trim();
       if (!/^our mission$/i.test(text)) return;
       if (el.getAttribute("data-ainf-wired")) return;
       el.setAttribute("data-ainf-wired", "1");
       el.style.cursor = "pointer";
       el.addEventListener("click", function (e) {
         e.preventDefault();
+        e.stopPropagation();
         // openGiftModal is defined in ainf-page-boot.js via window.__ainfOpenGiftModal
         if (typeof window.__ainfOpenGiftModal === "function") {
           window.__ainfOpenGiftModal();
@@ -719,7 +721,7 @@
           var cta = document.querySelector('[data-ainf-gift-trigger],[data-ainf-donate],.ainf-cta');
           if (cta) cta.click();
         }
-      });
+      }, true);
     });
 
     // "Image Gallery" button → hide it (removed per design decision)

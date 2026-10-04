@@ -239,7 +239,7 @@ function withEarlyBlogClass(buf: Buffer): Buffer {
   );
   next = next.replace(
     'src="/assets/js/ainf-projects-theme.js"',
-    'src="/assets/js/ainf-projects-theme.js?v=17"'
+    'src="/assets/js/ainf-projects-theme.js?v=18"'
   );
   next = next.replace(
     'src="/i18n/home-i18n.js"',
