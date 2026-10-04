@@ -185,50 +185,22 @@
     document.head.appendChild(checkout);
   }
 
-  // Razorpay's checkout container is a direct child of <body>. It may be
-  // pre-created by `new Razorpay()` before the modal opens, so we must never
-  // freeze it — doing so leaves the iframe visible but dead to clicks.
-  function ainfRzpIsOwn(el) {
-    if (!el || !el.tagName) return true;
-    var tag = el.tagName;
-    if (tag === "SCRIPT" || tag === "STYLE" || tag === "LINK" || tag === "NOSCRIPT") return true;
-    var cls = typeof el.className === "string" ? el.className : "";
-    if (cls.indexOf("razorpay") !== -1) return true;
-    if (tag === "IFRAME" && (el.getAttribute("src") || "").indexOf("razorpay") !== -1) return true;
-    try {
-      if (el.querySelector && el.querySelector('iframe[src*="razorpay"]')) return true;
-    } catch (err) { /* cross-origin guard */ }
-    return false;
-  }
-
-  function ainfRzpApplyInert() {
-    if (!document.documentElement.classList.contains("ainf-rzp-open")) return;
-    var kids = document.body.children;
-    for (var i = 0; i < kids.length; i++) {
-      var el = kids[i];
-      if (ainfRzpIsOwn(el)) {
-        // If we froze it earlier before it was recognisable as Razorpay's, free it now.
-        if (el.hasAttribute("data-ainf-rzp-inert")) {
-          el.removeAttribute("inert");
-          el.removeAttribute("data-ainf-rzp-inert");
-        }
-        continue;
-      }
-      if (!el.hasAttribute("data-ainf-rzp-inert")) {
-        el.setAttribute("inert", "");
-        el.setAttribute("data-ainf-rzp-inert", "1");
-      }
-    }
-  }
+  // Freeze ONLY our own page containers, by name. We never iterate over
+  // Razorpay's elements, so its checkout (classic OR modern v2) can never be
+  // frozen by mistake — that was the bug that left the modal visible but dead.
+  var AINF_RZP_PAGE_SELECTOR =
+    "#__next,#main,#overlay,#template-overlay," +
+    "#ainf-global-nav,#ainf-site-footer," +
+    "#ainf-gift-modal,.ainf-gift-modal,#ainf-join-modal,.ainf-join-modal," +
+    "#ainf-pay-shield,.ainf-pay-sheet,#ainf-gift-menu-drawer";
 
   function ainfRzpFreeze() {
     document.documentElement.classList.add("ainf-rzp-open");
-    ainfRzpApplyInert();
-    // Razorpay may create or reveal its iframe a tick after open(); re-run so
-    // we never leave its container frozen and never miss a late page element.
-    if (typeof requestAnimationFrame === "function") requestAnimationFrame(ainfRzpApplyInert);
-    setTimeout(ainfRzpApplyInert, 80);
-    setTimeout(ainfRzpApplyInert, 300);
+    var nodes = document.querySelectorAll(AINF_RZP_PAGE_SELECTOR);
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].setAttribute("inert", "");
+      nodes[i].setAttribute("data-ainf-rzp-inert", "1");
+    }
   }
 
   function ainfRzpThaw() {
