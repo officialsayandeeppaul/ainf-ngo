@@ -766,6 +766,7 @@
         whenRazorpay(function () {
           root.style.setProperty("backdrop-filter", "none", "important");
           root.style.setProperty("-webkit-backdrop-filter", "none", "important");
+          root.style.setProperty("pointer-events", "none", "important");
           var checkoutBox = new window.Razorpay({
             key: result.body.keyId,
             amount: result.body.amountPaise,
@@ -799,6 +800,7 @@
               ondismiss: function () {
                 root.style.removeProperty("backdrop-filter");
                 root.style.removeProperty("-webkit-backdrop-filter");
+                root.style.removeProperty("pointer-events");
                 giftBusy = false;
                 if (button) button.disabled = false;
                 giftNote(root, "The gift was not taken.", false);
@@ -3237,25 +3239,31 @@
             var rzpSheet = document.querySelector(".ainf-pay-sheet");
             var rzpBackdrop = projectBackdrop(rzpSheet);
             var rzpShield = document.getElementById("ainf-pay-shield");
-            function clearRzpBlur() {
+            function freezeForRzp() {
               if (rzpBackdrop) {
                 rzpBackdrop.style.removeProperty("backdrop-filter");
                 rzpBackdrop.style.removeProperty("-webkit-backdrop-filter");
+                rzpBackdrop.style.setProperty("pointer-events", "none", "important");
               }
               if (rzpShield && !rzpShield.hidden) {
                 rzpShield.style.setProperty("backdrop-filter", "none", "important");
                 rzpShield.style.setProperty("-webkit-backdrop-filter", "none", "important");
+                rzpShield.style.setProperty("pointer-events", "none", "important");
               }
+              if (rzpSheet) rzpSheet.style.setProperty("pointer-events", "none", "important");
             }
-            function restoreRzpBlur() {
+            function thawAfterRzp() {
               if (rzpBackdrop) {
                 rzpBackdrop.style.setProperty("backdrop-filter", "blur(16px)", "important");
                 rzpBackdrop.style.setProperty("-webkit-backdrop-filter", "blur(16px)", "important");
+                rzpBackdrop.style.removeProperty("pointer-events");
               }
               if (rzpShield && !rzpShield.hidden) {
                 rzpShield.style.removeProperty("backdrop-filter");
                 rzpShield.style.removeProperty("-webkit-backdrop-filter");
+                rzpShield.style.removeProperty("pointer-events");
               }
+              if (rzpSheet) rzpSheet.style.removeProperty("pointer-events");
             }
             var checkoutBox = new window.Razorpay({
               key: result.body.keyId,
@@ -3287,18 +3295,18 @@
               },
               modal: {
                 ondismiss: function () {
-                  restoreRzpBlur();
+                  thawAfterRzp();
                   releaseProjectPay(form);
                   projectPayNote(form, "");
                 }
               }
             });
             checkoutBox.on("payment.failed", function () {
-              restoreRzpBlur();
+              thawAfterRzp();
               releaseProjectPay(form);
               projectPayNote(form, "The payment did not go through. You can try again.");
             });
-            clearRzpBlur();
+            freezeForRzp();
             checkoutBox.open();
             projectPayNote(form, "");
           } catch (error) {
