@@ -205,6 +205,15 @@
     function (event) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       if (event.target.closest && event.target.closest("#ainf-gift-modal, #ainf-join-modal, #ainf-gift-menu-drawer")) return;
+      // A project's "Our mission" CTA reads on to the foundation's mission; it is not a gift button.
+      var mission = location.pathname.indexOf("/projects/") === 0 && event.target.closest && event.target.closest('[data-framer-name="btn hover variation"], [data-framer-name="Primary btn"], [data-framer-name="Primary"]');
+      if (mission && missionLabel(mission)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        window.location.assign("/about-us#our-mission");
+        return;
+      }
       var link = event.target && event.target.closest && event.target.closest("a[href]");
       var url = null;
       var path = "";
@@ -273,6 +282,38 @@
     var text = (link.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
     return text.indexOf("support ainf") !== -1;
   }
+
+  function missionLabel(el) {
+    return /^our mission$/i.test((el.textContent || "").replace(/\s+/g, " ").trim());
+  }
+
+  // /about-us#our-mission: the Mission & Vision block has no id in the Framer
+  // export, so it is given one and brought into view under the fixed nav.
+  // Framer hydration and lazy photos shift the layout after load, so the jump
+  // is repeated until the visitor scrolls on their own.
+  function bootMissionAnchor() {
+    if (location.pathname.replace(/\/$/, "") !== "/about-us" || location.hash !== "#our-mission") return;
+    var moved = false;
+    function stop() { moved = true; }
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach(function (type) {
+      window.addEventListener(type, stop, { once: true, passive: true });
+    });
+    function jump() {
+      if (moved) return;
+      var block = document.getElementById("our-mission") || document.querySelector('[data-framer-name="Mission & Vission"]');
+      if (!block) return;
+      if (!block.id) block.id = "our-mission";
+      var nav = document.getElementById("ainf-global-nav");
+      var offset = (nav ? Math.min(140, Math.max(0, nav.getBoundingClientRect().bottom)) : 80) + 20;
+      window.scrollTo(0, Math.max(0, block.getBoundingClientRect().top + window.pageYOffset - offset));
+    }
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    jump();
+    [120, 600, 1400, 2600].forEach(function (ms) { setTimeout(jump, ms); });
+    window.addEventListener("load", jump, { once: true });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootMissionAnchor);
+  else bootMissionAnchor();
 
   function lockScroll(on) {
     if (on) {

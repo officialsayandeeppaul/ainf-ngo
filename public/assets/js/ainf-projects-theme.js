@@ -760,26 +760,26 @@
   function wireProjectButtons() {
     if (location.pathname.indexOf("/projects/") < 0) return;
 
-    // "Our mission" button → open the Support AINF donation modal
-    // The section CTA is a Framer link named "btn hover variation", not "Primary".
+    // "Our mission" → the foundation's Mission & Vision on About. It sits at the
+    // foot of this project's own mission section, so it reads on, not to a gift
+    // ("Support AINF" opens the gift window). The CTA is a Framer span named
+    // "btn hover variation", so it is given link semantics here.
     document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"],[data-framer-name="btn hover variation"]').forEach(function (el) {
       var text = (el.textContent || "").replace(/\s+/g, " ").trim();
       if (!/^our mission$/i.test(text)) return;
       if (el.getAttribute("data-ainf-wired")) return;
       el.setAttribute("data-ainf-wired", "1");
+      el.setAttribute("data-ainf-mission", "1");
+      el.setAttribute("role", "link");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", "Our mission, on About AINF");
       el.style.cursor = "pointer";
-      el.addEventListener("click", function (e) {
+      // The click itself is routed by the document handler in ainf-page-boot.js.
+      el.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
         e.preventDefault();
-        e.stopPropagation();
-        // openGiftModal is defined in ainf-page-boot.js via window.__ainfOpenGiftModal
-        if (typeof window.__ainfOpenGiftModal === "function") {
-          window.__ainfOpenGiftModal();
-        } else {
-          // fallback: click any "Support AINF" button on the page
-          var cta = document.querySelector('[data-ainf-gift-trigger],[data-ainf-donate],.ainf-cta');
-          if (cta) cta.click();
-        }
-      }, true);
+        el.click();
+      });
     });
 
     // "Image Gallery" button → hide it (removed per design decision)
