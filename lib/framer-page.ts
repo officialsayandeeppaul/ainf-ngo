@@ -1,15 +1,22 @@
 import { readFileSync, statSync } from "node:fs";
 import { gunzipSync, gzipSync } from "node:zlib";
 import path from "node:path";
+import { runtimeAssetScript, versionAssetRefs } from "./asset-version";
+import { FIELD_OK, FIELD_PHOTOS, FIELD_POOL } from "./field-photos";
+import { imageGuardScript } from "./image-guard";
 
-const gzCache = new Map<string, { mtime: number; buf: Buffer }>();
+const pageCache = new Map<string, { mtime: number; buf: Buffer }>();
+// Pages are rebuilt from source on every request in development, so edits to
+// the HTML or to the scripts it versions show up without a restart.
+const cachePages = process.env.NODE_ENV === "production";
 
 const PAGE_ID = /^[a-z0-9/_-]+$/i;
 
+// No cache-control: Next derives it from each route's segment config (static
+// or ISR), and vercel.json pins the static pages' browser/CDN policy.
 const HEADERS: Record<string, string> = {
   "content-type": "text/html; charset=utf-8",
   "content-encoding": "gzip",
-  "cache-control": "no-cache, must-revalidate",
   "netlify-cdn-cache-control": "public, durable, max-age=31536000, stale-while-revalidate=86400",
   vary: "accept-encoding",
 };
@@ -17,67 +24,6 @@ const HEADERS: Record<string, string> = {
 const BLOG_BOOT =
   'classList.add("ainf-shared-nav","ainf-booting");if(/\\/blogs\\/[^/?#]+/.test(location.pathname))document.documentElement.classList.add("ainf-blog-title")';
 
-/** Hopper stock and green placeholder textures. First paint must be field photos. */
-const FIELD_PHOTOS: Record<string, string> = {
-  "/assets/img/0487bff6130e818d.webp": "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/d192de88013602fb.webp": "/assets/img/hero-third/4a27119994acc349.webp",
-  "/assets/img/b5b56d9dac67f37b.webp": "/assets/img/hero-third/1b892b571234582c.webp",
-  "/assets/img/0a0f47967bab9e6d.webp": "/assets/img/hero-third/97kub697kub697ku.webp",
-  "/assets/img/44e14d52cea980eb.webp": "/assets/img/hero-third/9fzzlw9fzzlw9fzz.webp",
-  "/assets/img/0857298f70c123c5.webp": "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/6c95afd2aa3c890c.webp": "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/e2a751b041c6c192.webp": "/assets/img/home-sixth/83d7f3cef733d28c.webp",
-  "/assets/img/78ea5a23abe80a75.webp": "/assets/img/home-sixth/ce25dc676c029d0e.webp",
-  "/assets/img/352a75abd7f4e260.webp": "/assets/img/home-sixth/395d6ceebb97e0ae.webp",
-  "/assets/img/b1b56374785c59d9.webp": "/assets/img/7d52ebcc5c881e07.webp",
-  "/assets/img/7d66b1c9fbde3d23.webp": "/assets/img/46ca7b057fe54d13.webp",
-  "/assets/img/e8fe459b69dfaec5.webp": "/assets/img/1d477190300d27a6.webp",
-  "/assets/img/1bbfd4c5ea913fd5.webp": "/assets/img/7fb7552621c79350.webp",
-  "/assets/img/83d7f3cef733d28c.webp": "/assets/img/hero-third/571e61ddc71daaf0.webp",
-  "/assets/img/9a7dcfc123be0a1d.webp": "/assets/img/people/imran-ansari.webp",
-  "/assets/img/bfbb8033078ef4ec.webp": "/assets/img/people/amit-hazra.webp",
-  "/assets/img/5d4f22904b272be4.webp": "/assets/img/people/birsa-murmu.webp",
-  "/assets/img/76cc0f24d728b77e.webp": "/assets/img/people/ravi-hembram.webp",
-  "/assets/img/36be58b3f0aa6698.webp": "/assets/img/people/imran-ansari.webp",
-  "/assets/img/479af4ed1ca6b4fe.webp": "/assets/img/people/amit-hazra.webp",
-  "/assets/img/home-sixth/1fd7ff27ace510a1.webp": "/assets/img/home-sixth/ce25dc676c029d0e.webp",
-  "/assets/img/f425f98d63a816cb.webp": "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/e04b2b629278096d.webp": "/assets/img/hero-third/4a27119994acc349.webp",
-  "/assets/img/bd505e9df8be5ad6.webp": "/assets/img/hero-third/1b892b571234582c.webp",
-  "/assets/img/044b758cc6c7b6ed.webp": "/assets/img/hero-third/97kub697kub697ku.webp",
-  "/assets/img/f4fba5e30fcc3d0e.webp": "/assets/img/hero-third/9fzzlw9fzzlw9fzz.webp",
-  "/assets/img/f7bb1c851e6c3805.webp": "/assets/img/hero-third/1b0ac308d87a6dbd.webp",
-  "/assets/img/b101906ab3a6b5c6.webp": "/assets/img/7d52ebcc5c881e07.webp",
-  "/assets/img/ca7ebd72f33229a1.webp": "/assets/img/home-sixth/395d6ceebb97e0ae.webp",
-  "/assets/img/155118808d02a13b.webp": "/assets/img/home-sixth/83d7f3cef733d28c.webp",
-  "/assets/img/58ddd402fa0fc24e.webp": "/assets/img/people/birsa-murmu.webp",
-  "/assets/img/667a7de97aa3c5df.webp": "/assets/img/people/ravi-hembram.webp",
-  "/assets/img/0cb36a2e191493c5.webp": "/assets/img/people/imran-ansari.webp",
-  "/assets/img/124a9e9812a2f717.webp": "/assets/img/people/amit-hazra.webp",
-  "/assets/img/home-fifth/667a7de97aa3c5df.webp": "/assets/img/people/birsa-murmu.webp",
-  "/assets/img/home-fifth/0cb36a2e191493c5.webp": "/assets/img/people/ravi-hembram.webp",
-  "/assets/img/home-fifth/58ddd402fa0fc24e.webp": "/assets/img/people/imran-ansari.webp",
-  "/assets/img/home-fifth/74f91bf4bd093efb.webp": "/assets/img/people/amit-hazra.webp",
-};
-
-const FIELD_POOL = [
-  "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/hero-third/4a27119994acc349.webp",
-  "/assets/img/hero-third/1b892b571234582c.webp",
-  "/assets/img/hero-third/97kub697kub697ku.webp",
-  "/assets/img/hero-third/9fzzlw9fzzlw9fzz.webp",
-  "/assets/img/hero-third/1b0ac308d87a6dbd.webp",
-  "/assets/img/hero-third/571e61ddc71daaf0.webp",
-  "/assets/img/home-sixth/ce25dc676c029d0e.webp",
-  "/assets/img/home-sixth/395d6ceebb97e0ae.webp",
-  "/assets/img/home-sixth/83d7f3cef733d28c.webp",
-  "/assets/img/7d52ebcc5c881e07.webp",
-  "/assets/img/46ca7b057fe54d13.webp",
-  "/assets/img/1d477190300d27a6.webp",
-  "/assets/img/7fb7552621c79350.webp",
-];
-const FIELD_OK =
-  /518fb7f61a5e6510|4a27119994acc349|ce25dc676c029d0e|1b892b571234582c|97kub697kub697ku|9fzzlw9fzzlw9fzz|1b0ac308d87a6dbd|571e61ddc71daaf0|395d6ceebb97e0ae|home-sixth\/83d7f3cef733d28c|7d52ebcc5c881e07|46ca7b057fe54d13|1d477190300d27a6|7fb7552621c79350|\/people\/(?:imran-ansari|amit-hazra|birsa-murmu|ravi-hembram)/;
 const CONTENT_ALT =
   /(?:Cause Image|Missions Image|Blog Image|Gallery Image|Team Image|Ticker Image|CTA Image|About Image|About Hero Image|Testimonial Image|Join as Field Sevak Image|How you can help image|Statastic Image Left|Statastic Image Right|man in black and white adidas hoodie|shallow focus photography of woman outdoor during day|woman in blue crew neck shirt|two men wearing masks and holding a bag of food)/;
 
@@ -95,9 +41,8 @@ function pinContentPhotos(html: string): string {
       use = FIELD_POOL[n % FIELD_POOL.length];
       n += 1;
     }
-    const busted = `${use}?ainf=20260927b`;
-    if (/\ssrc="/i.test(next)) next = next.replace(/\ssrc="[^"]*"/i, ` src="${busted}"`);
-    else next = next.replace(/<img\b/i, `<img src="${busted}"`);
+    if (/\ssrc="/i.test(next)) next = next.replace(/\ssrc="[^"]*"/i, ` src="${use}"`);
+    else next = next.replace(/<img\b/i, `<img src="${use}"`);
     return next;
   });
 }
@@ -137,20 +82,63 @@ function speedPass(html: string): string {
     /(<img\b[^>]*alt="(?:About Hero Image|Gallery Image|Testimonial Image|Team Image)"[^>]*)\sloading="lazy"/gi,
     "$1"
   );
-  if (!next.includes('id="ainf-stock-guard"')) {
+  if (!next.includes('id="ainf-stock-guard"') && next.includes('ainf-blog-title");</script>')) {
+    // The CSS half hides any stock photo the guard has not reached yet.
     const guard =
-      '</script><style id="ainf-stock-guard">img[src*="0487bff6130e818d"],img[src*="d192de88013602fb"],img[src*="b5b56d9dac67f37b"],img[src*="0a0f47967bab9e6d"],img[src*="44e14d52cea980eb"],img[src*="9a7dcfc123be0a1d"],img[src*="bfbb8033078ef4ec"],img[src*="5d4f22904b272be4"],img[src*="76cc0f24d728b77e"],img[src*="36be58b3f0aa6698"],img[src*="479af4ed1ca6b4fe"],img[src*="e2a751b041c6c192"]{visibility:hidden!important}</style><script id="ainf-stock-guard-js">' +
-      STOCK_GUARD_JS +
-      "</script>";
-    if (next.includes('ainf-blog-title");</script>')) {
-      next = next.replace('ainf-blog-title");</script>', 'ainf-blog-title");' + guard);
-    }
+      '</script><style id="ainf-stock-guard">img[src*="0487bff6130e818d"],img[src*="d192de88013602fb"],img[src*="b5b56d9dac67f37b"],img[src*="0a0f47967bab9e6d"],img[src*="44e14d52cea980eb"],img[src*="9a7dcfc123be0a1d"],img[src*="bfbb8033078ef4ec"],img[src*="5d4f22904b272be4"],img[src*="76cc0f24d728b77e"],img[src*="36be58b3f0aa6698"],img[src*="479af4ed1ca6b4fe"],img[src*="e2a751b041c6c192"]{visibility:hidden!important}</style>';
+    next = next.replace('ainf-blog-title");</script>', 'ainf-blog-title");' + guard);
   }
   return next;
 }
 
-const STOCK_GUARD_JS =
-  '(function(){var m={"0487bff6130e818d":"/assets/img/hero-third/518fb7f61a5e6510.webp","d192de88013602fb":"/assets/img/hero-third/4a27119994acc349.webp","b5b56d9dac67f37b":"/assets/img/hero-third/1b892b571234582c.webp","0a0f47967bab9e6d":"/assets/img/hero-third/97kub697kub697ku.webp","44e14d52cea980eb":"/assets/img/hero-third/9fzzlw9fzzlw9fzz.webp","9a7dcfc123be0a1d":"/assets/img/people/imran-ansari.webp","bfbb8033078ef4ec":"/assets/img/people/amit-hazra.webp","5d4f22904b272be4":"/assets/img/people/birsa-murmu.webp","76cc0f24d728b77e":"/assets/img/people/ravi-hembram.webp","36be58b3f0aa6698":"/assets/img/people/imran-ansari.webp","479af4ed1ca6b4fe":"/assets/img/people/amit-hazra.webp","e2a751b041c6c192":"/assets/img/home-sixth/83d7f3cef733d28c.webp"};var re=/0487bff6130e818d|d192de88013602fb|b5b56d9dac67f37b|0a0f47967bab9e6d|44e14d52cea980eb|9a7dcfc123be0a1d|bfbb8033078ef4ec|5d4f22904b272be4|76cc0f24d728b77e|36be58b3f0aa6698|479af4ed1ca6b4fe|e2a751b041c6c192/;function fix(img){var s=(img.getAttribute("src")||"")+(img.getAttribute("srcset")||"");if(!re.test(s))return;for(var k in m){if(s.indexOf(k)<0)continue;img.removeAttribute("srcset");img.setAttribute("src",m[k]+"?ainf=20260927b");var w=img.parentElement;if(w&&w.style)w.style.backgroundImage="none";break;}}function scan(n){if(!n)return;if(n.tagName==="IMG")fix(n);if(!n.querySelectorAll)return;var list=n.querySelectorAll("img");for(var i=0;i<list.length;i++)fix(list[i]);}new MutationObserver(function(rs){for(var i=0;i<rs.length;i++){var r=rs[i];if(r.type==="attributes"&&r.target&&r.target.tagName==="IMG")fix(r.target);var a=r.addedNodes;for(var j=0;j<a.length;j++)scan(a[j]);}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["src","srcset"]});})();';
+/**
+ * The hero photo is full-bleed at every width, but most pages declared
+ * sizes="calc(100vw - 40px)", so phones picked a file narrower than they show
+ * (blurry, and when Framer re-rendered the hero Chrome swapped in the sharper
+ * cached file and logged a second, late LCP). The <head> preload also named
+ * one fixed file, which most phones then never used. Declare the real width
+ * and preload the same srcset the image will choose from.
+ */
+function alignHeroImage(html: string): string {
+  let heroSrcset = "";
+  let next = html.replace(/<img\b[^>]*\balt="Hero BG"[^>]*>/gi, (tag) => {
+    if (!heroSrcset) heroSrcset = (/\ssrcset="([^"]+)"/i.exec(tag) || [])[1] || "";
+    return /\ssizes="/i.test(tag) ? tag.replace(/\ssizes="[^"]*"/i, ' sizes="100vw"') : tag;
+  });
+  if (!heroSrcset) return next;
+  next = next.replace(
+    /<link rel="preload" as="image" href="([^"]+)" fetchpriority="high">/i,
+    (link, href: string) =>
+      heroSrcset.includes(href)
+        ? `<link rel="preload" as="image" href="${href}" imagesrcset="${heroSrcset}" imagesizes="100vw" fetchpriority="high">`
+        : link
+  );
+  return next;
+}
+
+/**
+ * Onest (400 and 700) is declared font-display: optional, so it must be in hand
+ * by the first layout: a page that paints in the fallback keeps it, and when
+ * Framer re-renders a section in Onest the text reflows. The marketing pages
+ * already preload both files; the project pages did not.
+ */
+const ONEST_FILES = ["/assets/fonts/0b532b340381e255.woff2", "/assets/fonts/98a11855328341d1.woff2"];
+
+function preloadBrandFont(html: string): string {
+  const missing = ONEST_FILES.filter((file) => !html.includes(`rel="preload" as="font" type="font/woff2" href="${file}"`));
+  if (!missing.length) return html;
+  const links = missing.map((file) => `<link rel="preload" as="font" type="font/woff2" href="${file}" crossorigin>`).join("");
+  return html.replace(/<meta charset="utf-8">/i, (tag) => tag + links);
+}
+
+/** First thing in <head>: nothing may set an <img> URL before the guard is in place. */
+function installImageGuard(html: string): string {
+  if (html.includes('id="ainf-img-guard"')) return html;
+  const guard = imageGuardScript();
+  const charset = /<meta charset="utf-8">/i;
+  if (charset.test(html)) return html.replace(charset, (tag) => tag + guard);
+  return html.replace(/<head>/i, (tag) => tag + guard);
+}
 
 /** Hero titles ship as one nowrap line of letters, so they slice through the photo until Framer runs. */
 function flattenSplitHeadings(html: string): string {
@@ -165,7 +153,7 @@ function flattenSplitHeadings(html: string): string {
       .replace(/<\/span>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/&nbsp;|&#160;|&amp;/g, (s: string) => (s === "&amp;" ? "&" : " "))
-      .replace(/\u00a0/g, " ")
+      .replace(/ /g, " ")
       .replace(/\s+/g, " ")
       .trim();
     const safe = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -187,15 +175,7 @@ function labelFormFields(html: string): string {
   });
 }
 
-function withEarlyBlogClass(buf: Buffer): Buffer {
-  let html = "";
-  let gzipped = true;
-  try {
-    html = gunzipSync(buf).toString("utf8");
-  } catch {
-    gzipped = false;
-    html = buf.toString("utf8");
-  }
+function withEarlyBlogClass(html: string): string {
   const needle = 'classList.add("ainf-shared-nav","ainf-booting")';
   let next = html;
   if (next.includes(needle) && !next.includes("ainf-blog-title")) {
@@ -206,74 +186,37 @@ function withEarlyBlogClass(buf: Buffer): Buffer {
     ""
   );
   next = next.replace(
-    'href="/assets/css/ainf-page-boot.css"',
-    'href="/assets/css/ainf-page-boot.css?v=20261003h"'
-  );
-  next = next.replace(
-    'href="/assets/css/ainf-site-nav.css"',
-    'href="/assets/css/ainf-site-nav.css?v=20261003a"'
-  );
-  next = next.replace(
     'id="ainf-page-boot-css">',
     'id="ainf-page-boot-css"><style id="ainf-hide-template-nav">body.ainf-shared-nav header.framer-V9hqN,body.ainf-shared-nav header[data-framer-name="Phone"],body.ainf-shared-nav header[data-framer-name="Tablet"],body.ainf-shared-nav header[data-framer-name="Desktop"]{display:none!important}</style>'
-  );
-  next = next.replace(
-    'href="/assets/css/ainf-motion.css"',
-    'href="/assets/css/ainf-motion.css?v=20260926k"'
-  );
-  next = next.replace(
-    'src="/assets/js/ainf-page-boot.js"',
-    'src="/assets/js/ainf-page-boot.js?v=20261004d"'
-  );
-  next = next.replace(
-    'src="/assets/js/ainf-site-nav.js"',
-    'src="/assets/js/ainf-site-nav.js?v=20261003d"'
   );
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
   if (/^pk_(test|live)_[A-Za-z0-9_+=/-]+$/.test(clerkKey)) {
     next = next.replace('id="ainf-site-nav-js"', `id="ainf-site-nav-js" data-clerk-key="${clerkKey}"`);
   }
-  next = next.replace(
-    'href="/assets/css/ainf-site-footer.css"',
-    'href="/assets/css/ainf-site-footer.css?v=20260926w"'
-  );
-  next = next.replace(
-    'src="/assets/js/ainf-projects-theme.js"',
-    'src="/assets/js/ainf-projects-theme.js?v=18"'
-  );
-  next = next.replace(
-    'src="/i18n/home-i18n.js"',
-    'src="/i18n/home-i18n.js?v=20261003c"'
-  );
   next = useFieldPhotos(next);
   next = pinContentPhotos(next);
   next = speedPass(next);
-  if (next === html) return gzipped ? buf : gzipSync(buf);
-  return gzipSync(Buffer.from(next));
+  next = alignHeroImage(next);
+  next = preloadBrandFont(next);
+  next = installImageGuard(next);
+  next = versionAssetRefs(next);
+  if (!next.includes('id="ainf-asset-v"')) {
+    next = next.replace(/<\/head>/i, (tag) => runtimeAssetScript() + tag);
+  }
+  return next;
 }
 
 export function serveFramerPage(pageId: string, transform?: (html: string) => string) {
   if (!PAGE_ID.test(pageId)) {
     return new Response("Not found", { status: 404 });
   }
-  const gzFile = path.join(process.cwd(), "framer-html", `${pageId}.html.gz`);
-  const htmlFile = path.join(process.cwd(), "framer-html", `${pageId}.html`);
-  let mtime = 0;
-  try {
-    mtime = statSync(gzFile).mtimeMs;
-  } catch {
-    mtime = statSync(htmlFile).mtimeMs;
-  }
-  const hit = gzCache.get(pageId);
+  const file = path.join(process.cwd(), "framer-html", `${pageId}.html`);
+  const mtime = statSync(file).mtimeMs;
+  const hit = cachePages ? pageCache.get(pageId) : undefined;
   let buf = hit && hit.mtime === mtime ? hit.buf : null;
   if (!buf) {
-    try {
-      buf = readFileSync(gzFile);
-    } catch {
-      buf = gzipSync(readFileSync(htmlFile));
-    }
-    buf = withEarlyBlogClass(buf);
-    gzCache.set(pageId, { mtime, buf });
+    buf = gzipSync(Buffer.from(withEarlyBlogClass(readFileSync(file, "utf8")), "utf8"));
+    if (cachePages) pageCache.set(pageId, { mtime, buf });
   }
   if (transform) {
     const html = gunzipSync(buf).toString("utf8");

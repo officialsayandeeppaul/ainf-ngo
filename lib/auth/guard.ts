@@ -72,7 +72,7 @@ export type ApiGuardSuccess = { ok: true; ctx: AuthContext };
 export type ApiGuardResult = ApiGuardSuccess | ApiGuardFailure;
 
 function jsonError(status: number, error: string, message: string): Response {
-  return Response.json({ error, message }, { status });
+  return Response.json({ error, message }, { status, headers: { "cache-control": "private, no-store" } });
 }
 
 /**

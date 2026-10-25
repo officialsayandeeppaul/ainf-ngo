@@ -1263,7 +1263,9 @@
   }
 
   function loadTranslations() {
-    fetch("/i18n/home-strings.json?v=20260924e")
+    // Content version from the server; a stale hand-kept ?v= would now be cached for a year.
+    var version = window.__ainfAssetV && window.__ainfAssetV["/i18n/home-strings.json"];
+    fetch("/i18n/home-strings.json" + (version ? "?v=" + version : ""))
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load translations");
         return res.json();

@@ -27,13 +27,18 @@ export async function GET(request: Request) {
     targets.find((target) => target.kind === "GENERAL") ??
     null;
 
-  return Response.json({
-    minPaise: settings.minPaise,
-    maxPaise: settings.maxPaise,
-    targets: targets.map((target) => ({
-      ...target,
-      suggestedPaise: suggestionsFor(settings, target.minPaise),
-    })),
-    selected: preferred ? { kind: preferred.kind, slug: preferred.slug } : null,
-  });
+  return Response.json(
+    {
+      minPaise: settings.minPaise,
+      maxPaise: settings.maxPaise,
+      targets: targets.map((target) => ({
+        ...target,
+        suggestedPaise: suggestionsFor(settings, target.minPaise),
+      })),
+      selected: preferred ? { kind: preferred.kind, slug: preferred.slug } : null,
+    },
+    // Shared by every visitor; a minute old at most. The order API re-checks
+    // floors against Postgres, so a stale list can never let a gift through.
+    { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+  );
 }

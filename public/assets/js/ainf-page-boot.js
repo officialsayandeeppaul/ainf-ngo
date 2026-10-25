@@ -3,6 +3,10 @@
   if (window.__ainfPageBootBooted) return;
   window.__ainfPageBootBooted = true;
 
+  // Record the served photos before anything here or in Framer touches them
+  // (the image guard in <head> replays them when Framer re-renders a section).
+  if (typeof window.__ainfImgSnap === "function") window.__ainfImgSnap();
+
   document.documentElement.classList.add("ainf-ready");
 
   // Appends a human countdown to a 429 "too many attempts" message so the
@@ -888,11 +892,18 @@
       document.head.appendChild(script);
     }
 
-    addCss("/assets/css/ainf-site-footer.css", "ainf-site-footer-css");
-    addCss("/assets/css/ainf-projects-theme.css?v=11", "ainf-projects-theme-css");
-        addJs("/assets/js/ainf-footer-template.js?v=20260926s", "ainf-footer-template-js", function () {
-      addJs("/assets/js/ainf-site-footer.js", "ainf-site-footer-js", function () {
-        addJs("/assets/js/ainf-projects-theme.js?v=17", "ainf-projects-theme-js");
+    // Content versions from the server (window.__ainfAssetV); unversioned
+    // URLs still work, they are just revalidated on every view.
+    function versioned(url) {
+      var v = window.__ainfAssetV && window.__ainfAssetV[url];
+      return v ? url + "?v=" + v : url;
+    }
+
+    addCss(versioned("/assets/css/ainf-site-footer.css"), "ainf-site-footer-css");
+    addCss(versioned("/assets/css/ainf-projects-theme.css"), "ainf-projects-theme-css");
+    addJs(versioned("/assets/js/ainf-footer-template.js"), "ainf-footer-template-js", function () {
+      addJs(versioned("/assets/js/ainf-site-footer.js"), "ainf-site-footer-js", function () {
+        addJs(versioned("/assets/js/ainf-projects-theme.js"), "ainf-projects-theme-js");
       });
     });
   })();
@@ -1186,67 +1197,53 @@
 
   function swapVillagePhoto(img, url) {
     if (!img || !url) return;
-    if (img.getAttribute("data-ainf-village") === url && (img.getAttribute("src") || "").indexOf(url) === 0) {
-      img.style.setProperty("object-fit", "cover", "important");
-      img.style.setProperty("object-position", "center 18%", "important");
-      return;
+    var current = (img.getAttribute("src") || "").split("?")[0];
+    if (img.getAttribute("data-ainf-village") !== url) img.setAttribute("data-ainf-village", url);
+    if (current !== url || img.getAttribute("srcset")) {
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+      var pic = img.closest && img.closest("picture");
+      if (pic) {
+        Array.prototype.forEach.call(pic.querySelectorAll("source"), function (source) {
+          source.remove();
+        });
+      }
+      // Same URL everywhere (server, guard, here), so a photo is fetched and decoded once.
+      if (current !== url) img.src = url;
     }
-    img.setAttribute("data-ainf-village", url);
-    img.removeAttribute("srcset");
-    img.removeAttribute("sizes");
-    var pic = img.closest && img.closest("picture");
-    if (pic) {
-      Array.prototype.forEach.call(pic.querySelectorAll("source"), function (source) {
-        source.remove();
-      });
-    }
-    img.src = url + (String(url).indexOf("ainf=") >= 0 ? "" : "?ainf=20260927b");
     img.style.setProperty("object-fit", "cover", "important");
     img.style.setProperty("object-position", "center 18%", "important");
   }
 
-  function nearestTitleOnly(el) {
-    var href = "";
+  /**
+   * Desk for a themed card, as deskFor() in the image guard decides it: the
+   * card's own link first, then a title inside that link (walking up past the
+   * card picked whichever heading had rendered first).
+   */
+  function deskForCard(el) {
     var link = el.closest && el.closest("a[href]");
-    if (link) href = link.getAttribute("href") || "";
-    var node = el;
+    var byLink = link ? deskFromText(link.getAttribute("href") || "") : "";
+    if (byLink) return byLink;
+    var node = link || el;
     for (var i = 0; i < 6 && node; i++) {
       var title = node.querySelector && node.querySelector('[data-framer-name="Cause Title"], h2, h3, h4');
-      if (title) return href + " " + (title.textContent || "");
+      if (title) return deskFromText(title.textContent || "");
+      if (node === link) break;
       node = node.parentElement;
     }
-    return href;
+    return "";
   }
 
   function isProtectedImg(img) {
     if (!img) return true;
-    if (img.closest && img.closest("#ainf-global-nav, #ainf-site-footer, [id^='ainf-lang-switcher']")) return true;
-    if (img.closest && img.closest(".ainf-brand, .ainf-ft-logo, [data-framer-name='Details Top'], [data-framer-name='Footer Top']")) return true;
     var alt = img.getAttribute("alt") || "";
     var src = img.getAttribute("src") || "";
     if (/Arrow|Logo|AINF home|^AINF$/i.test(alt)) return true;
     if (/theainf-logo|theainf-mark|ainf-seal|\.svg($|\?)/i.test(src)) return true;
     if (/Hero BG|CTA Bg|clouds/i.test(alt)) return true;
+    if (img.closest && img.closest("#ainf-global-nav, #ainf-site-footer, [id^='ainf-lang-switcher']")) return true;
+    if (img.closest && img.closest(".ainf-brand, .ainf-ft-logo, [data-framer-name='Details Top'], [data-framer-name='Footer Top']")) return true;
     return false;
-  }
-
-  function collectContentImgs() {
-    var list = [];
-    var seen = [];
-    function add(img) {
-      if (!img || isProtectedImg(img)) return;
-      if (seen.indexOf(img) >= 0) return;
-      seen.push(img);
-      list.push(img);
-    }
-    CONTENT_ALTS.forEach(function (alt) {
-      document.querySelectorAll('img[alt="' + alt + '"]').forEach(add);
-    });
-    document.querySelectorAll("img").forEach(function (img) {
-      var src = img.getAttribute("src") || img.currentSrc || "";
-      if (BANNED_SRC.test(src)) add(img);
-    });
-    return list;
   }
 
   var ABOUT_HERO = "/assets/img/home-sixth/83d7f3cef733d28c.webp";
@@ -1285,15 +1282,28 @@
     });
   }
 
-  function pickVillageUrl(img, index) {
+  function textHash(text) {
+    var h = 0;
+    for (var i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+    return h < 0 ? -h : h;
+  }
+
+  /**
+   * The field photo for a foreign image. Chosen from the image itself (its
+   * desk, or a hash of the stock photo it replaces), never from its position
+   * in a NodeList: positions shift whenever Framer clones a ticker or
+   * re-renders a section, which used to rotate every photo on screen.
+   */
+  function pickVillageUrl(img) {
     var alt = img.getAttribute("alt") || "";
     if (alt === "About Hero Image") return ABOUT_HERO;
-    if (alt === "Team Image") return TEAM_POOL[index % TEAM_POOL.length];
+    var key = (img.getAttribute("src") || img.getAttribute("srcset") || alt).split("?")[0];
+    if (alt === "Team Image") return TEAM_POOL[textHash(key) % TEAM_POOL.length];
     if (THEMED_ALTS.test(alt)) {
-      var desk = deskFromText(nearestTitleOnly(img));
+      var desk = deskForCard(img);
       if (desk && VILLAGE_PHOTOS[desk]) return VILLAGE_PHOTOS[desk];
     }
-    return UNIQUE_POOL[index % UNIQUE_POOL.length];
+    return UNIQUE_POOL[textHash(key) % UNIQUE_POOL.length];
   }
 
   var PEOPLE_PHOTOS = {
@@ -1303,127 +1313,97 @@
     "Ravi Hembram": "/assets/img/people/ravi-hembram.webp",
   };
 
-  function lockPeoplePhotos() {
-    document.querySelectorAll("h1, h2, h3, h4, h5, h6, p, span, div").forEach(function (el) {
-      if (el.closest && el.closest("#ainf-global-nav, #ainf-site-footer")) return;
-      if (el.children && el.children.length) return;
-      var name = (el.textContent || "").replace(/\s+/g, " ").trim();
-      var url = PEOPLE_PHOTOS[name];
-      if (!url) return;
-      var node = el;
-      var img = null;
-      for (var i = 0; i < 14 && node; i++) {
-        if (node.querySelectorAll) {
-          var found = node.querySelectorAll("img");
-          for (var k = 0; k < found.length; k++) {
-            if (found[k].closest && found[k].closest("#ainf-global-nav, #ainf-site-footer")) continue;
-            if ((found[k].getAttribute("alt") || "") === "Testimonial Image" || found[k].getAttribute("data-ainf-person") === name) {
-              img = found[k];
-              break;
-            }
+  function portraitNear(el, name) {
+    var node = el;
+    for (var i = 0; i < 14 && node; i++) {
+      if (node.querySelectorAll) {
+        var found = node.querySelectorAll("img");
+        for (var k = 0; k < found.length; k++) {
+          if (found[k].closest && found[k].closest("#ainf-global-nav, #ainf-site-footer")) continue;
+          if ((found[k].getAttribute("alt") || "") === "Testimonial Image" || found[k].getAttribute("data-ainf-person") === name) {
+            return found[k];
           }
-          if (img) break;
         }
-        node = node.parentElement;
       }
-      if (!img) return;
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  /** Each named card shows that person's portrait. Walks text nodes: the page has thousands of elements. */
+  function lockPeoplePhotos() {
+    if (!document.body || !document.createTreeWalker) return;
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      var value = node.nodeValue;
+      if (!value || value.length > 40) continue;
+      var name = value.replace(/\s+/g, " ").trim();
+      var url = PEOPLE_PHOTOS[name];
+      if (!url) continue;
+      var el = node.parentElement;
+      if (!el || el.children.length) continue;
+      if (el.closest && el.closest("#ainf-global-nav, #ainf-site-footer")) continue;
+      var img = portraitNear(el, name);
+      if (!img) continue;
       swapVillagePhoto(img, url);
-      img.setAttribute("data-ainf-person", name);
-      img.setAttribute("alt", name);
-      img.style.setProperty("object-fit", "cover", "important");
-      img.style.setProperty("object-position", "center 18%", "important");
-    });
+      if (img.getAttribute("data-ainf-person") !== name) img.setAttribute("data-ainf-person", name);
+      if (img.getAttribute("alt") !== name) img.setAttribute("alt", name);
+    }
   }
 
   function imgSrcBlob(img) {
     return (img.getAttribute("src") || "") + " " + (img.getAttribute("srcset") || "") + " " + (img.currentSrc || "");
   }
 
-  function needsIndianPhoto(img) {
-    if (isProtectedImg(img)) return false;
-    if (img.getAttribute("data-ainf-person")) return false;
-    var alt = img.getAttribute("alt") || "";
-    if (alt === "Testimonial Image" || alt === "About Hero Image") return false;
-    var blob = imgSrcBlob(img);
-    if (TEXTURE_SRC.test(blob) && !BANNED_SRC.test(blob)) return false;
-    if (BANNED_SRC.test(blob)) return true;
-    if (CONTENT_ALTS.indexOf(alt) >= 0 && !INDIAN_SRC.test(blob)) return true;
-    return false;
+  function isFieldPhoto(img) {
+    var src = (img.getAttribute("src") || "").split("?")[0];
+    if (!src || !INDIAN_SRC.test(src) || BANNED_SRC.test(src) || TEXTURE_SRC.test(src)) return false;
+    // home-sixth/83d7… is a field photo; the top-level file of that name is Hopper stock.
+    return !(src.indexOf("83d7f3cef733d28c") >= 0 && src.indexOf("home-sixth") < 0);
   }
 
+  function dropSrcset(img) {
+    if (img.getAttribute("srcset") == null && img.getAttribute("sizes") == null) return;
+    img.removeAttribute("srcset");
+    img.removeAttribute("sizes");
+  }
+
+  /** Gallery and ticker strips stay visible through Framer's entrance animation. */
   function lockGalleryStrip() {
     var nodes = document.querySelectorAll(
       '[data-framer-name="Gallery Image"] img, .ticker-item img, img[alt="Gallery Image"]'
     );
-    nodes.forEach(function (img, i) {
+    nodes.forEach(function (img) {
       if (isProtectedImg(img)) return;
-      var url = UNIQUE_POOL[i % UNIQUE_POOL.length] + "?ainf=20260927b";
-      if (img.getAttribute("data-ainf-field") === url && (img.getAttribute("src") || "").indexOf(UNIQUE_POOL[i % UNIQUE_POOL.length]) !== -1 && !BANNED_SRC.test(imgSrcBlob(img))) {
-        return;
-      }
-      img.setAttribute("data-ainf-field", url);
-      img.removeAttribute("srcset");
-      img.removeAttribute("sizes");
-      var pic = img.closest && img.closest("picture");
-      if (pic) {
-        Array.prototype.forEach.call(pic.querySelectorAll("source"), function (source) {
-          source.remove();
-        });
-      }
-      img.src = url;
+      // Portraits in a ticker belong to lockPeoplePhotos.
+      if ((img.getAttribute("alt") || "") === "Testimonial Image" || img.getAttribute("data-ainf-person")) return;
+      if (!isFieldPhoto(img)) swapVillagePhoto(img, pickVillageUrl(img));
+      else dropSrcset(img);
+      var src = (img.getAttribute("src") || "").split("?")[0];
+      if (img.getAttribute("data-ainf-field") !== src) img.setAttribute("data-ainf-field", src);
       img.style.setProperty("visibility", "visible", "important");
       img.style.setProperty("opacity", "1", "important");
       var wrap = img.closest && img.closest("[data-framer-background-image-wrapper]");
-      if (wrap && wrap.style) wrap.style.backgroundImage = "none";
-    });
-    document.querySelectorAll("img").forEach(function (img, i) {
-      if (isProtectedImg(img)) return;
-      if (img.getAttribute("data-ainf-person")) return;
-      if ((img.getAttribute("alt") || "") === "Testimonial Image") return;
-      if (!BANNED_SRC.test(imgSrcBlob(img))) return;
-      var url = UNIQUE_POOL[i % UNIQUE_POOL.length] + "?ainf=20260927b";
-      img.removeAttribute("srcset");
-      img.removeAttribute("sizes");
-      img.src = url;
-      img.setAttribute("data-ainf-field", url);
-      img.style.setProperty("visibility", "visible", "important");
+      if (wrap && wrap.style && wrap.style.backgroundImage) wrap.style.backgroundImage = "none";
     });
   }
 
+  /** Content photos that are still Hopper stock get a field photo; field photos are left exactly as they are. */
   function holdContentPhotos() {
-    document.querySelectorAll("img").forEach(function (img, i) {
+    document.querySelectorAll("img").forEach(function (img) {
       if (isProtectedImg(img)) return;
       if (img.closest && img.closest("[data-ainf-bound]")) return;
-      if (img.getAttribute("data-ainf-cms") === "1") {
-        img.removeAttribute("srcset");
-        img.removeAttribute("sizes");
-        return;
-      }
       var alt = img.getAttribute("alt") || "";
-      if (alt === "Testimonial Image") {
-        img.removeAttribute("srcset");
-        img.removeAttribute("sizes");
+      if (img.getAttribute("data-ainf-cms") === "1" || alt === "Testimonial Image" || img.getAttribute("data-ainf-person")) {
+        dropSrcset(img);
         return;
       }
-      if (CONTENT_ALTS.indexOf(alt) < 0) return;
-      img.removeAttribute("srcset");
-      img.removeAttribute("sizes");
-      var src = (img.getAttribute("src") || "").split("?")[0];
-      var pin = img.getAttribute("data-ainf-pin") || "";
-      var pinBase = pin.split("?")[0];
-      if (pinBase && src && src.indexOf(pinBase) !== 0) {
-        img.src = pin.indexOf("ainf=20260927b") >= 0 ? pin : pinBase + "?ainf=20260927b";
-        return;
-      }
-      var foreign = !INDIAN_SRC.test(src) || TEXTURE_SRC.test(src) || (src.indexOf("83d7f3cef733d28c") >= 0 && src.indexOf("home-sixth") < 0);
-      if (foreign || !src) {
-        var url = pickVillageUrl(img, i);
-        img.setAttribute("data-ainf-pin", url + "?ainf=20260927b");
-        swapVillagePhoto(img, url);
-        return;
-      }
-      if ((img.getAttribute("src") || "").indexOf("ainf=20260927b") < 0) img.src = src + "?ainf=20260927b";
-      if (!pin) img.setAttribute("data-ainf-pin", src + "?ainf=20260927b");
+      var content = CONTENT_ALTS.indexOf(alt) >= 0;
+      if (!content && !BANNED_SRC.test(imgSrcBlob(img))) return;
+      if (content) dropSrcset(img);
+      if (isFieldPhoto(img)) return;
+      swapVillagePhoto(img, pickVillageUrl(img));
     });
   }
 
@@ -1431,33 +1411,6 @@
     holdContentPhotos();
     lockGalleryStrip();
     lockAboutHero();
-    var imgs = collectContentImgs();
-    document.querySelectorAll("img").forEach(function (img) {
-      if (needsIndianPhoto(img) && imgs.indexOf(img) < 0) imgs.push(img);
-    });
-    imgs.forEach(function (img, i) {
-      if (img.getAttribute("data-ainf-cms") === "1") return;
-      if (img.closest && img.closest("[data-ainf-bound]")) return;
-      if ((img.getAttribute("alt") || "") === "Testimonial Image") return;
-      if ((img.getAttribute("alt") || "") === "How you can help image") return;
-      if (img.getAttribute("data-ainf-person")) return;
-      if (INDIAN_SRC.test(imgSrcBlob(img))) {
-        var pin = img.getAttribute("data-ainf-pin");
-        var current = (img.getAttribute("src") || "").split("?")[0];
-        if (!pin) img.setAttribute("data-ainf-pin", current);
-        else if (current && current.indexOf(pin) !== 0) img.src = pin;
-        img.removeAttribute("srcset");
-        img.removeAttribute("sizes");
-        return;
-      }
-      if (TEXTURE_SRC.test(imgSrcBlob(img))) return;
-      if (!needsIndianPhoto(img) && CONTENT_ALTS.indexOf(img.getAttribute("alt") || "") < 0) return;
-      if (INDIAN_SRC.test(imgSrcBlob(img)) && img.getAttribute("data-ainf-village")) return;
-      if (!img.getAttribute("data-ainf-slot")) img.setAttribute("data-ainf-slot", String(i));
-      var slot = parseInt(img.getAttribute("data-ainf-slot"), 10);
-      if (!isFinite(slot)) slot = i;
-      swapVillagePhoto(img, pickVillageUrl(img, slot));
-    });
     lockPeoplePhotos();
   }
 
@@ -1854,15 +1807,9 @@
     io.observe(h1);
   }
 
+  /** True when the heading or an ancestor is display:none (one layout read, not a style walk). */
   function heroHidden(h1) {
-    var node = h1;
-    while (node && node !== document.documentElement) {
-      try {
-        if (window.getComputedStyle(node).display === "none") return true;
-      } catch (e) {}
-      node = node.parentElement;
-    }
-    return false;
+    return !h1.isConnected || h1.getClientRects().length === 0;
   }
 
   function pageHeroes() {
@@ -2015,8 +1962,12 @@
     }
   }
 
+  // textContent, not innerText: innerText forces a style and layout pass per
+  // link, and this runs over every anchor on several passes.
   function fixLinksForLighthouse() {
     document.querySelectorAll("a").forEach(function (a) {
+      if (a.__ainfLinkChecked) return;
+      a.__ainfLinkChecked = true;
       if (a.closest && a.closest("#ainf-global-nav")) return;
       var href = a.getAttribute("href");
       if (href == null || href === "" || href === "#") {
@@ -2028,7 +1979,7 @@
         if (a.parentNode) a.parentNode.replaceChild(span, a);
         return;
       }
-      var label = (a.innerText || "").replace(/\s+/g, " ").trim();
+      var label = (a.textContent || "").replace(/\s+/g, " ").trim();
       if (!/^read more(\s+read more)*$/i.test(label)) return;
       var root = a.parentElement;
       var heading = null;
@@ -2039,7 +1990,7 @@
         else root = root.parentElement;
         depth += 1;
       }
-      var title = heading ? (heading.innerText || "").replace(/\s+/g, " ").trim() : "";
+      var title = heading ? (heading.textContent || "").replace(/\s+/g, " ").trim() : "";
       if (!title) return;
       a.setAttribute("aria-label", title);
       var leaves = a.querySelectorAll("p, span");
@@ -2073,18 +2024,12 @@
   }
 
   function run() {
-    lockGalleryStrip();
-    lockAboutHero();
-    lockPeoplePhotos();
     bootProjectPayForm();
     paintOnce();
     revealNow();
     lazyBelowFold();
   }
 
-  lockGalleryStrip();
-  lockAboutHero();
-  lockPeoplePhotos();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", run);
   } else {
@@ -2109,9 +2054,71 @@
     }, 180);
   });
   mo.observe(document.documentElement, { childList: true, subtree: true });
+  // Framer re-renders whole sections after load. Fixing the copy of each
+  // inserted subtree from the observer callback lands before the next paint;
+  // on timers alone the result depended on whether Framer had rendered yet,
+  // and on a slow phone the module copy (or an invisible hero title) stayed.
+  var TEXT_BLOCKS = "h1, h2, h3, h4, h5, h6, p, li";
+  function copyRoots(records) {
+    var roots = [];
+    for (var i = 0; i < records.length; i++) {
+      var added = records[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        var node = added[j];
+        if (node.nodeType !== 1 || !node.isConnected) continue;
+        if (node.closest && node.closest("#ainf-global-nav, #ainf-site-footer, [id^='ainf-lang-switcher'], .ainf-gift-modal")) continue;
+        if (node.matches(TEXT_BLOCKS) || (node.firstElementChild && node.querySelector(TEXT_BLOCKS))) roots.push(node);
+      }
+    }
+    return roots.filter(function (root) {
+      for (var k = 0; k < roots.length; k++) if (roots[k] !== root && roots[k].contains(root)) return false;
+      return true;
+    });
+  }
+  var copySettling = false;
+  var copyMo = new MutationObserver(function (records) {
+    if (copySettling) return;
+    var roots = copyRoots(records);
+    if (!roots.length) return;
+    copySettling = true;
+    try {
+      roots.forEach(function (root) {
+        fixCategoryLabels(root);
+        fixPlainHeadings(root);
+        fixPlainCopy(root, true);
+      });
+      lockBlogCards();
+      settleBlogHeroHeading();
+      mountHeroLetters();
+      fixLinksForLighthouse();
+      convertDollarsToRupees();
+    } finally {
+      copySettling = false;
+    }
+  });
+  copyMo.observe(document.documentElement, { childList: true, subtree: true });
+
+  // Only image changes matter here; text, letter, and style churn used to
+  // trigger a full rescan of every image and card on the page.
+  function touchesImages(records) {
+    for (var i = 0; i < records.length; i++) {
+      var record = records[i];
+      if (record.type === "attributes") {
+        if (record.target.tagName === "IMG") return true;
+        continue;
+      }
+      var added = record.addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        var node = added[j];
+        if (node.nodeType !== 1) continue;
+        if (node.tagName === "IMG" || (node.firstElementChild && node.querySelector("img"))) return true;
+      }
+    }
+    return false;
+  }
   var fieldTimer = 0;
-  var fieldMo = new MutationObserver(function () {
-    if (fieldTimer) return;
+  var fieldMo = new MutationObserver(function (records) {
+    if (fieldTimer || !touchesImages(records)) return;
     fieldTimer = setTimeout(function () {
       fieldTimer = 0;
       holdContentPhotos();

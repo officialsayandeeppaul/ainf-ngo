@@ -1,26 +1,8 @@
 import { serveFramerPage } from "@/lib/framer-page";
 import { listPublicFieldProjects, type FieldProjectView } from "@/lib/field-projects";
+import { FIELD_OK, FIELD_POOL } from "@/lib/field-photos";
+import { applyProjectCopy } from "@/lib/project-copy";
 import type { ProjectDetail } from "@/lib/project-detail";
-
-const FIELD_POOL = [
-  "/assets/img/hero-third/518fb7f61a5e6510.webp",
-  "/assets/img/hero-third/4a27119994acc349.webp",
-  "/assets/img/hero-third/1b892b571234582c.webp",
-  "/assets/img/hero-third/97kub697kub697ku.webp",
-  "/assets/img/hero-third/9fzzlw9fzzlw9fzz.webp",
-  "/assets/img/hero-third/1b0ac308d87a6dbd.webp",
-  "/assets/img/hero-third/571e61ddc71daaf0.webp",
-  "/assets/img/home-sixth/ce25dc676c029d0e.webp",
-  "/assets/img/home-sixth/395d6ceebb97e0ae.webp",
-  "/assets/img/home-sixth/83d7f3cef733d28c.webp",
-  "/assets/img/7d52ebcc5c881e07.webp",
-  "/assets/img/46ca7b057fe54d13.webp",
-  "/assets/img/1d477190300d27a6.webp",
-  "/assets/img/7fb7552621c79350.webp",
-];
-
-const FIELD_OK =
-  /518fb7f61a5e6510|4a27119994acc349|ce25dc676c029d0e|1b892b571234582c|97kub697kub697ku|9fzzlw9fzzlw9fzz|1b0ac308d87a6dbd|571e61ddc71daaf0|395d6ceebb97e0ae|home-sixth\/83d7f3cef733d28c|7d52ebcc5c881e07|46ca7b057fe54d13|1d477190300d27a6|7fb7552621c79350|\/people\/(?:imran-ansari|amit-hazra|birsa-murmu|ravi-hembram)/;
 
 const TEXTURE =
   /96690a270973a763|65e4fe3b71103bc2|f9ae4aecce078de6|2d263d6ae10cc7bd|a95af15c9096fc0a|50cf5ee624cdbe60|d0fdea8216d62e05|dedab43eef2285e1|a344bac9b35c5dea|2dd60ec5f37c748d|562ef86697f4a6b5|e0861057/;
@@ -81,17 +63,20 @@ function patchImages(html: string, hero: string, extras: string[]) {
     }
     const banner = /fetchpriority="high"/i.test(tag);
     if (banner) {
-      return tag.replace(/\s+srcset="[^"]*"/gi, "").replace(/\s+sizes="[^"]*"/gi, "");
+      // The project's own photo, as ainf-projects-theme.js paints it, so the
+      // largest image on the page is right in the first paint.
+      const next = tag.replace(/\s+srcset="[^"]*"/gi, "").replace(/\s+sizes="[^"]*"/gi, "");
+      return hero ? next.replace(/\ssrc="[^"]*"/i, ` src="${hero}"`) : next;
     }
     const indian = FIELD_OK.test(base);
     const srcset = /\ssrcset="/i.test(tag);
     if (indian && !srcset) return tag;
     const use = indian ? base : extras[card++ % extras.length];
     let next = tag.replace(/\s+srcset="[^"]*"/gi, "").replace(/\s+sizes="[^"]*"/gi, "");
-    const busted = `${use.split("?")[0]}?ainf=20260927c`;
+    const photo = use.split("?")[0];
     next = /\ssrc="/i.test(next)
-      ? next.replace(/\ssrc="[^"]*"/i, ` src="${busted}"`)
-      : next.replace(/<img\b/i, `<img src="${busted}"`);
+      ? next.replace(/\ssrc="[^"]*"/i, ` src="${photo}"`)
+      : next.replace(/<img\b/i, `<img src="${photo}"`);
     if (!/data-ainf-cms=/.test(next)) next = next.replace(/<img\b/i, `<img data-ainf-cms="1"`);
     return next;
   });
@@ -146,17 +131,32 @@ function patchCopy(html: string, detail: ProjectDetail) {
   return next;
 }
 
+/** [start, end) of the element carrying `id`, matched by balanced tags (sections nest ids of their own). */
+function elementRange(html: string, id: string): [number, number] | null {
+  const at = html.indexOf(`id="${id}"`);
+  if (at < 0) return null;
+  const start = html.lastIndexOf("<", at);
+  const name = /^<([a-z][a-z0-9-]*)/i.exec(html.slice(start))?.[1];
+  if (start < 0 || !name) return null;
+  const tags = new RegExp(`<(/?)${name}\\b[^>]*>`, "gi");
+  tags.lastIndex = start;
+  let depth = 0;
+  for (let m = tags.exec(html); m; m = tags.exec(html)) {
+    depth += m[1] ? -1 : 1;
+    if (depth === 0) return [start, m.index + m[0].length];
+  }
+  return [start, html.length];
+}
+
 function patchRegionImages(html: string, startId: string, image: string) {
-  const marker = `id="${startId}"`;
-  const start = html.indexOf(marker);
-  if (start < 0 || !image) return html;
-  const nextId = html.slice(start + marker.length).search(/\sid="[a-z0-9-]+"/i);
-  const end = nextId >= 0 ? start + marker.length + nextId : Math.min(html.length, start + 24000);
-  const busted = `${image.split("?")[0]}?ainf=20260927c`;
+  const range = elementRange(html, startId);
+  if (!range || !image) return html;
+  const [start, end] = range;
+  const photo = image.split("?")[0];
   const slice = html.slice(start, end).replace(/<img\b[^>]*>/gi, (tag) => {
     if (/\.svg(?:\?|")/i.test(tag) || /Arrow/i.test(tag)) return tag;
     let next = tag.replace(/\s+srcset="[^"]*"/gi, "").replace(/\s+sizes="[^"]*"/gi, "");
-    next = /\ssrc="/i.test(next) ? next.replace(/\ssrc="[^"]*"/i, ` src="${busted}"`) : next;
+    next = /\ssrc="/i.test(next) ? next.replace(/\ssrc="[^"]*"/i, ` src="${photo}"`) : next;
     if (!/data-ainf-cms=/.test(next)) next = next.replace(/<img\b/i, `<img data-ainf-cms="1"`);
     return next;
   });
@@ -172,7 +172,7 @@ function lockScript(project: FieldProjectView) {
     goalLabel: project.goalLabel,
     detail: project.detail,
   }).replace(/</g, "\\u003c");
-  return `<script id="ainf-project-lock">(function(){var p=${payload};var d=p.detail||{};function plain(el){return (el.textContent||"").replace(/\\s+/g," ").trim();}function setText(el,value){if(!el||!value)return;if(plain(el)!==value)el.textContent=value;el.setAttribute("data-ainf-cms","1");}function paintImages(root,url){if(!root||!url)return;root.querySelectorAll("img").forEach(function(img){var src=img.getAttribute("src")||"";if(/\\.svg($|\\?)/i.test(src)||/arrow/i.test(img.getAttribute("alt")||""))return;img.removeAttribute("srcset");img.removeAttribute("sizes");if(src.split("?")[0]!==url)img.src=url+"?ainf=20260927c";img.setAttribute("data-ainf-cms","1");});}function paint(){document.querySelectorAll("h1").forEach(function(h){if(h.closest&&h.closest("#ainf-global-nav,#ainf-site-footer"))return;setText(h,p.title);});var how=document.getElementById("how-this-work");if(how){var ps=[].slice.call(how.querySelectorAll("p"));if(ps.length>=7){setText(ps[0],d.howEyebrow);setText(ps[1],d.howIntro);setText(ps[2],d.howEyebrow);setText(ps[3],d.howIntro);setText(ps[4],d.howParagraphs[0]);setText(ps[5],d.howParagraphs[1]);setText(ps[6],d.howParagraphs[2]);}else if(ps.length>=5){setText(ps[0],d.howEyebrow);setText(ps[1],d.howIntro);setText(ps[2],d.howParagraphs[0]);setText(ps[3],d.howParagraphs[1]);setText(ps[4],d.howParagraphs[2]);}}var mission=document.getElementById("our-mission");if(mission){var head=mission.querySelector("h2,h3");setText(head,d.missionTitle);var point=0;[].slice.call(mission.querySelectorAll("p")).forEach(function(el){var t=plain(el);if(/^\\d{2}$/.test(t))return;if(t===d.missionEyebrow||t==="Our Mission"||(t.length<18&&(d.missionPoints||[]).indexOf(t)<0)){setText(el,d.missionEyebrow);return;}setText(el,(d.missionPoints||[])[point%3]);point++;if(point>3){var row=el.closest&&el.closest('[data-framer-name^="Point"]');if(row)row.style.setProperty("display","none","important");}});paintImages(mission,d.missionImage);}var impact=document.getElementById("impact");if(impact){var bullet=0;[].slice.call(impact.querySelectorAll("p")).forEach(function(el){var t=plain(el);if(!t||/image gallery/i.test(t))return;if((d.impactPoints||[]).indexOf(t)>=0){setText(el,(d.impactPoints||[])[bullet%4]);bullet++;return;}if(t===d.impactTitle||t==="Impact / Results"||t.length<22){setText(el,d.impactTitle);return;}setText(el,(d.impactPoints||[])[bullet%4]);bullet++;});paintImages(impact,d.galleryImage);}document.querySelectorAll('[data-framer-name="Hero Section"],[data-framer-name="Hero Sectiion"]').forEach(function(hero){var blurb=null;hero.querySelectorAll("p").forEach(function(el){if(blurb)return;if(el.closest&&el.closest('[data-framer-name="raised"],[data-framer-name="goal"]'))return;if(plain(el).length>24)blurb=el;});setText(blurb,p.summary);});}paint();var n=0;var timer=setInterval(function(){paint();if(++n>24)clearInterval(timer);},700);function arm(){if(!document.body)return;new MutationObserver(function(){paint();}).observe(document.body,{childList:true,subtree:true,characterData:true});}if(document.body)arm();else document.addEventListener("DOMContentLoaded",arm);})();</script>`;
+  return `<script id="ainf-project-lock">(function(){var p=${payload};var d=p.detail||{};if(window.__ainfImgRules)window.__ainfImgRules.own([p.imageUrl,d.missionImage,d.galleryImage]);function plain(el){return (el.textContent||"").replace(/\\s+/g," ").trim();}function setText(el,value){if(!el||!value)return;if(plain(el)!==value)el.textContent=value;el.setAttribute("data-ainf-cms","1");}function paintImages(root,url){if(!root||!url)return;root.querySelectorAll("img").forEach(function(img){var src=img.getAttribute("src")||"";if(/\\.svg($|\\?)/i.test(src)||/arrow/i.test(img.getAttribute("alt")||""))return;img.removeAttribute("srcset");img.removeAttribute("sizes");if(src.split("?")[0]!==url)img.src=url;img.setAttribute("data-ainf-cms","1");});}function paint(){document.querySelectorAll("h1").forEach(function(h){if(h.closest&&h.closest("#ainf-global-nav,#ainf-site-footer"))return;setText(h,p.title);});var how=document.getElementById("how-this-work");if(how){var ps=[].slice.call(how.querySelectorAll("p"));if(ps.length>=7){setText(ps[0],d.howEyebrow);setText(ps[1],d.howIntro);setText(ps[2],d.howEyebrow);setText(ps[3],d.howIntro);setText(ps[4],d.howParagraphs[0]);setText(ps[5],d.howParagraphs[1]);setText(ps[6],d.howParagraphs[2]);}else if(ps.length>=5){setText(ps[0],d.howEyebrow);setText(ps[1],d.howIntro);setText(ps[2],d.howParagraphs[0]);setText(ps[3],d.howParagraphs[1]);setText(ps[4],d.howParagraphs[2]);}}var mission=document.getElementById("our-mission");if(mission){var head=mission.querySelector("h2,h3");setText(head,d.missionTitle);var point=0;[].slice.call(mission.querySelectorAll("p")).forEach(function(el){var t=plain(el);if(/^\\d{2}$/.test(t))return;if(t===d.missionEyebrow||t==="Our Mission"||(t.length<18&&(d.missionPoints||[]).indexOf(t)<0)){setText(el,d.missionEyebrow);return;}setText(el,(d.missionPoints||[])[point%3]);point++;if(point>3){var row=el.closest&&el.closest('[data-framer-name^="Point"]');if(row)row.style.setProperty("display","none","important");}});paintImages(mission,d.missionImage);}var impact=document.getElementById("impact");if(impact){var bullet=0;[].slice.call(impact.querySelectorAll("p")).forEach(function(el){var t=plain(el);if(!t||/image gallery/i.test(t))return;if((d.impactPoints||[]).indexOf(t)>=0){setText(el,(d.impactPoints||[])[bullet%4]);bullet++;return;}if(t===d.impactTitle||t==="Impact / Results"||t.length<22){setText(el,d.impactTitle);return;}setText(el,(d.impactPoints||[])[bullet%4]);bullet++;});paintImages(impact,d.galleryImage);}document.querySelectorAll('[data-framer-name="Hero Section"],[data-framer-name="Hero Sectiion"]').forEach(function(hero){var blurb=null;hero.querySelectorAll("p").forEach(function(el){if(blurb)return;if(el.closest&&el.closest('[data-framer-name="raised"],[data-framer-name="goal"]'))return;if(plain(el).length>24)blurb=el;});setText(blurb,p.summary);});}paint();addEventListener("load",paint);function arm(){if(!document.body)return;new MutationObserver(function(){paint();}).observe(document.body,{childList:true,subtree:true,characterData:true});}if(document.body)arm();else document.addEventListener("DOMContentLoaded",arm);})();</script>`;
 }
 
 /** Title, summary, amounts, and photos from the saved project, including Framer's hydration data. */
@@ -245,6 +245,7 @@ export function patchProjectHtml(html: string, project: FieldProjectView) {
     next = patchRegionImages(next, "our-mission", project.detail.missionImage);
     next = patchRegionImages(next, "impact", project.detail.galleryImage);
   }
+  next = applyProjectCopy(next);
   if (next.includes("</body>")) next = next.replace("</body>", `${lockScript(project)}</body>`);
   return next;
 }
@@ -252,6 +253,6 @@ export function patchProjectHtml(html: string, project: FieldProjectView) {
 export async function serveProjectPage(pageId: string, slug: string) {
   const projects = await listPublicFieldProjects();
   const project = projects.find((row) => row.slug === slug);
-  if (!project) return serveFramerPage(pageId);
+  if (!project) return serveFramerPage(pageId, applyProjectCopy);
   return serveFramerPage(pageId, (html) => patchProjectHtml(html, project));
 }

@@ -120,7 +120,7 @@ img[alt="How you can help image"]{
   background-color:#143026 !important;
   background-image:
     linear-gradient(180deg, rgba(12,28,20,0.16) 0%, rgba(12,28,20,0.45) 48%, rgba(12,28,20,0.82) 100%),
-    url("/assets/img/hero-third/1b892b571234582c.webp?ainf=20260927b") !important;
+    url("/assets/img/hero-third/1b892b571234582c.webp") !important;
   background-position:center !important;
   background-size:cover !important;
   background-repeat:no-repeat !important;

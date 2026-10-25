@@ -342,16 +342,21 @@
     });
   }
 
+  // Also applied to the Framer modules themselves by
+  // scripts/apply-project-copy-to-modules.mjs (with PROJECT_COPY), so this
+  // pass only catches copy that arrives some other way.
+  var REBRAND_COPY = [
+    ["Ostra Supporter", "AINF Supporter"],
+    ["Volunteer at Ostra", "Volunteer at AINF"],
+    ["Ostra,", "AINF,"],
+    ["Ostra", "AINF"],
+    ["@Oxira 2026", "© 2026 theainf"],
+    ["Oxira", "AINF"],
+    ["Donate now", "Support AINF"],
+  ];
+
   function rebrandCopy() {
-    var map = [
-      ["Ostra Supporter", "AINF Supporter"],
-      ["Volunteer at Ostra", "Volunteer at AINF"],
-      ["Ostra,", "AINF,"],
-      ["Ostra", "AINF"],
-      ["@Oxira 2026", "© 2026 theainf"],
-      ["Oxira", "AINF"],
-      ["Donate now", "Support AINF"],
-    ];
+    var map = REBRAND_COPY;
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     var node;
     while ((node = walker.nextNode())) {
@@ -368,7 +373,9 @@
     }
   }
 
-  var fieldProjects = null;
+  // /projects ships the published list inline, so the cards are filled before
+  // first paint instead of after a round trip to /api/projects.
+  var fieldProjects = Array.isArray(window.__ainfFieldProjects) ? window.__ainfFieldProjects : null;
 
   function rupees(label) {
     var raw = String(label || "").replace(/[₹,\s]/g, "").toLowerCase();
@@ -511,13 +518,13 @@
       image = candidate;
     });
     if (image && project.imageUrl) {
-      var pinned = project.imageUrl.split("?")[0] + "?ainf=20260927c";
+      var pinned = project.imageUrl.split("?")[0];
       image.setAttribute("data-ainf-cms", "1");
       image.setAttribute("data-ainf-pin", pinned);
       image.setAttribute("alt", project.title);
       image.removeAttribute("srcset");
       image.removeAttribute("sizes");
-      if ((image.getAttribute("src") || "") !== pinned) image.src = pinned;
+      if ((image.getAttribute("src") || "").split("?")[0] !== pinned) image.src = pinned;
       image.style.setProperty("opacity", "1", "important");
       image.style.setProperty("visibility", "visible", "important");
       var frame = image.closest && image.closest("[data-framer-background-image-wrapper]");
@@ -648,14 +655,49 @@
       if (!use) return;
       img.setAttribute("data-ainf-cms", "1");
       img.setAttribute("data-ainf-pin", use);
-      if (src.split("?")[0] !== use) img.src = use + "?ainf=20260927c";
+      if (src.split("?")[0] !== use) img.src = use;
     });
+  }
+
+  // Framer re-renders the cards after load. Re-filling from the observer
+  // callback lands before the next paint, so the template copy never shows
+  // (a 700ms polling lock used to leave it on screen between passes).
+  // The copy tables run the same way, for slides and variants Framer renders
+  // late (the server and the modules already carry the copy, so this is a
+  // safety net that usually finds nothing to change).
+  var CARD_PARTS = '[data-framer-name="Title"], [data-framer-name="Raised"], [data-framer-name="Goal"]';
+  var COPY_BLOCKS = "h1, h2, h3, h4, p, li";
+  function watchProjectCards() {
+    if (window.__ainfProjectsWatch || !window.MutationObserver) return;
+    window.__ainfProjectsWatch = true;
+    new MutationObserver(function (records) {
+      var cards = false;
+      var copy = false;
+      for (var i = 0; i < records.length && !(cards && copy); i++) {
+        var added = records[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (node.nodeType !== 1 || !node.matches) continue;
+          if (!cards && (node.matches(CARD_PARTS) || node.querySelector(CARD_PARTS))) cards = true;
+          if (!copy && (node.matches(COPY_BLOCKS) || node.querySelector(COPY_BLOCKS))) copy = true;
+        }
+      }
+      if (copy) {
+        rebrandCopy();
+        indianizeCopy();
+      }
+      if (cards) {
+        applyFieldProjects();
+        applyProjectDetail();
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
   }
 
   function loadFieldProjects() {
     if (fieldProjects) {
       applyFieldProjects();
       applyProjectDetail();
+      watchProjectCards();
       return;
     }
     if (window.__ainfProjectsLoading) return;
@@ -667,13 +709,7 @@
         window.__ainfProjectsLoading = false;
         applyFieldProjects();
         applyProjectDetail();
-        if (!window.__ainfProjectsLock && (location.pathname || "").replace(/\/$/, "") === "/projects") {
-          var locks = 0;
-          window.__ainfProjectsLock = setInterval(function () {
-            applyFieldProjects();
-            if (++locks > 24) clearInterval(window.__ainfProjectsLock);
-          }, 700);
-        }
+        watchProjectCards();
       })
       .catch(function () {
         window.__ainfProjectsLoading = false;
@@ -681,6 +717,7 @@
   }
 
   function tick() {
+    watchProjectCards();
     hideOxiraFooterOnly();
     convertToInr();
     injectPiggyIcons();

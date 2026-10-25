@@ -43,6 +43,44 @@ test.describe("Framer marketing routes", () => {
   }
 });
 
+test.describe("images stay put once painted", () => {
+  // Framer re-renders most sections after load. The served photo in every
+  // slot (alt text or layer, position among visible images) must be the one
+  // the slot still shows afterwards, or visitors see photos swap.
+  const SLOTS = `(() => {
+    const counts = {};
+    const out = {};
+    for (const img of document.images) {
+      if (!img.getClientRects().length) continue;
+      const alt = img.getAttribute("alt") || "";
+      const layer = alt ? null : img.closest("[data-framer-name]");
+      const key = img.__ainfKey != null ? img.__ainfKey : alt || (layer ? "@" + layer.getAttribute("data-framer-name") : "");
+      if (!key || key === "AINF") continue;
+      const n = (counts[key] = (counts[key] || 0) + 1) - 1;
+      out[key + "#" + n] = (img.getAttribute("src") || "").split("?")[0];
+    }
+    return out;
+  })()`;
+
+  for (const route of ["/", "/about-us", "/causes", "/blogs", "/join-as-volunteer", "/blogs/why-every-volunteer-matters"]) {
+    test(`${route} keeps its photos`, async ({ page }) => {
+      await page.addInitScript(`document.addEventListener("readystatechange", () => {
+        if (document.readyState === "interactive") window.__firstSlots = ${SLOTS};
+      });`);
+      await visit(page, route);
+      await page.waitForLoadState("load");
+      const first = (await page.evaluate("window.__firstSlots")) as Record<string, string>;
+      // Framer starts after load (requestIdleCallback) and re-renders within a few seconds.
+      await page.waitForTimeout(6000);
+      const settled = (await page.evaluate(SLOTS)) as Record<string, string>;
+      const changed = Object.keys(first).filter((slot) => slot in settled && settled[slot] !== first[slot]);
+      expect(changed.map((slot) => `${slot}: ${first[slot]} -> ${settled[slot]}`)).toEqual([]);
+      const remote = Object.values(settled).filter((src) => src.includes("framerusercontent.com"));
+      expect(remote).toEqual([]);
+    });
+  }
+});
+
 test.describe("configured redirects", () => {
   const redirects: [string, string][] = [
     ["/contact", "/contact-us"],

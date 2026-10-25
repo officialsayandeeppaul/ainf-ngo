@@ -5,6 +5,8 @@ import { guardApi } from "@/lib/auth/guard";
 import { contextFromRequest } from "@/lib/request-context";
 import { listFieldProjects, projectsDelegate, toFieldProjectView } from "@/lib/field-projects";
 import { detailFor } from "@/lib/project-detail";
+import { revalidateProjectPages } from "@/lib/public-cache";
+import { noStore } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +54,7 @@ const createSchema = z.object({
   donateMinPaise: z.number().int().min(100).max(10_000_000).nullable().optional(),
 });
 
-export async function GET() {
+export const GET = noStore(async function GET() {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminRead" });
   if (!guard.ok) return guard.response;
   const projects = await listFieldProjects();
@@ -63,7 +65,7 @@ export async function GET() {
     );
   }
   return Response.json({ projects });
-}
+});
 
 export async function POST(request: Request) {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminMutation" });
@@ -102,6 +104,7 @@ export async function POST(request: Request) {
       context: contextFromRequest(request),
       metadata: { slug: row.slug, title: row.title.slice(0, 80) },
     });
+    revalidateProjectPages(row.slug);
     return Response.json({ ok: true, project: toFieldProjectView(row) });
   } catch {
     return Response.json(

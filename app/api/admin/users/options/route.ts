@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import { guardApi } from "@/lib/auth/guard";
 import { db } from "@/lib/db";
+import { noStore } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ function memberLabel(user: {
 }
 
 /** Lightweight member picker for admin filters — never returns more than 10 rows. */
-export async function GET(request: Request) {
+export const GET = noStore(async function GET(request: Request) {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminRead" });
   if (!guard.ok) return guard.response;
 
@@ -47,4 +48,4 @@ export async function GET(request: Request) {
       hint: user.email,
     })),
   });
-}
+});

@@ -13,7 +13,8 @@
 
 import { serveProjectPage } from "@/lib/project-page";
 
-export const dynamic = "force-dynamic";
+// Served from the CDN; admin project saves revalidate it (lib/public-cache.ts).
+export const revalidate = 3600;
 
 export async function GET() {
   return serveProjectPage("projects/clean-water-initiative", "clean-water-initiative");

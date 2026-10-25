@@ -5,6 +5,7 @@ import { guardApi } from "@/lib/auth/guard";
 import { contextFromRequest } from "@/lib/request-context";
 import { projectsDelegate, toFieldProjectView } from "@/lib/field-projects";
 import { detailFor } from "@/lib/project-detail";
+import { revalidateProjectPages } from "@/lib/public-cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -75,6 +76,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
   }
 
   try {
+    // The old slug's cached page must go too when the slug changes.
+    const [before] = await delegate.findMany({ where: { id }, take: 1 });
     const row = await delegate.update({
       where: { id },
       data: {
@@ -93,6 +96,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
       context: contextFromRequest(request),
       metadata: { slug: row.slug, title: row.title.slice(0, 80), published: row.published },
     });
+    revalidateProjectPages(before?.slug, row.slug);
     return Response.json({ ok: true, project: toFieldProjectView(row) });
   } catch {
     return Response.json(
@@ -125,6 +129,7 @@ export async function DELETE(request: Request, ctx: Ctx) {
       context: contextFromRequest(request),
       metadata: { slug: row.slug, deleted: true },
     });
+    revalidateProjectPages(row.slug);
     return Response.json({ ok: true });
   } catch {
     return Response.json({ error: "not_found", message: "That project is already gone." }, { status: 404 });

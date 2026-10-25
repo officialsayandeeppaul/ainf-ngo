@@ -2,7 +2,13 @@ import { serveFramerPage } from "@/lib/framer-page";
 import { listPublicFieldProjects } from "@/lib/field-projects";
 import { patchProjectHtml } from "@/lib/project-page";
 
-export const dynamic = "force-dynamic";
+// Built on first visit, then served from the CDN until an admin save or the hour is up.
+export const revalidate = 3600;
+export const dynamicParams = true;
+
+export function generateStaticParams() {
+  return [];
+}
 
 const KNOWN = new Set([
   "medical-aid-health-camps",

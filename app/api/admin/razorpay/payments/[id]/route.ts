@@ -3,6 +3,7 @@ import { guardApi } from "@/lib/auth/guard";
 import { isRazorpayConfigured } from "@/lib/env";
 import { formatDayTime } from "@/lib/format-date";
 import { getRazorpayPayment, razorpayPaymentDashboardUrl } from "@/lib/razorpay";
+import { noStore } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 const PAYMENT_ID = /^pay_[A-Za-z0-9]+$/;
 
 /** Super-admin live lookup of a Razorpay payment for testing / support. */
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export const GET = noStore(async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminRead" });
   if (!guard.ok) return guard.response;
 
@@ -56,4 +57,4 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const message = error instanceof Error ? error.message : "Razorpay lookup failed.";
     return Response.json({ error: "razorpay_failed", message }, { status: 502 });
   }
-}
+});

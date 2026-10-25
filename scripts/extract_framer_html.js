@@ -64,7 +64,6 @@ for (const file of routes) {
   const dest = path.join(OUT, id + ".html");
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, html);
-  fs.writeFileSync(dest + ".gz", require("zlib").gzipSync(html));
   fs.writeFileSync(file, thinRoute(id, headerComment(src)));
   n += 1;
   console.log(id, Math.round(html.length / 1024) + "kb");

@@ -11,10 +11,19 @@
 //   Nav: Impact (./#impact) · Why Us (./#why-us) · About (./about-us) · Projects (./projects) · Contact (./contact) · Medical Aid & Health Camps (./projects/medical-aid-health-camps) · Nutrition Support for Batches (./projects/daily-meal-program) · Shiksha Support Drive (./projects/education-support-drive) · Winter Relief Program (./projects/winter-relief-program) · FAQ (./#faq-s) · Terms & Conditions (./privacy) · Terms of Use (./terms-of-use) · How It Works (./#how-it-works)
 //   Sections: h1 "Projects That Create Real Change" · h1 "Projects That Create Real Change" · h2 "We’ve seen lives change when people come together, One meal, one family, one ste" · h2 "We’ve seen lives change when people come together, One meal, one family, one ste" · h2 "We’ve seen lives change when people come together, One meal, one family, one ste" · h3 "100k+" · h3 "100k+" · h3 "100k+"
 
+import { listPublicFieldProjects } from "@/lib/field-projects";
 import { serveFramerPage } from "@/lib/framer-page";
+import { fillProjectCards } from "@/lib/project-cards";
+import { applyProjectCopy } from "@/lib/project-copy";
+import { inlineFieldProjects } from "@/lib/public-cache";
 
-export const dynamic = "force-static";
+// Cards are filled from Postgres here (and inline for the browser pass);
+// admin project saves revalidate this page.
+export const revalidate = 3600;
 
-export function GET() {
-  return serveFramerPage("projects");
+export async function GET() {
+  const projects = await listPublicFieldProjects();
+  return serveFramerPage("projects", (html) =>
+    inlineFieldProjects(applyProjectCopy(fillProjectCards(html, projects)), projects)
+  );
 }

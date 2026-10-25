@@ -12,7 +12,14 @@ const nextConfig = {
   // portal is the only part of the app that renders React.
   poweredByHeader: false,
   outputFileTracingIncludes: {
-    "/*": ["./framer-html/**/*"],
+    // Project pages are rebuilt at runtime (ISR) and version their scripts
+    // from file contents (lib/asset-version.ts), so those folders ship too.
+    "/*": [
+      "./framer-html/**/*.html",
+      "./public/assets/js/*.js",
+      "./public/assets/css/*.css",
+      "./public/i18n/*",
+    ],
   },
   webpack(config, { dev }) {
     // This project lives on an exFAT volume, where readlink() on a regular file
@@ -44,28 +51,40 @@ const nextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
         ],
       },
+      // Same policy as vercel.json, which takes precedence on Vercel. Image and
+      // script names are not all content-hashed, so only fonts and ?v=
+      // references (lib/asset-version.ts derives them from file contents) are
+      // immutable. Framer bundles carry hashes but their copy is edited in
+      // place, so they get a day, then stale-while-revalidate.
       {
-        source: "/assets/:path*",
+        source: "/assets/img/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=31536000" },
+        ],
+      },
+      {
+        source: "/assets/fonts/:path*",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
       {
-        source: "/framer-site/:path*",
+        source: "/:dir(assets/js|assets/css|i18n|framer-site|framer-site-axinn)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/:dir(assets/js|assets/css|i18n)/:path*",
+        has: [{ type: "query", key: "v" }],
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
       {
-        source: "/framer-site-axinn/:path*",
+        source: "/:dir(framer-site|framer-site-axinn)/:file([^/]+\\.[A-Za-z0-9_-]{8}\\.mjs)",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/i18n/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=31536000" },
         ],
       },
     ];

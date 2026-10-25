@@ -1,3 +1,5 @@
+import { versionedUrl } from "./asset-version";
+
 function page(title: string, body: string): string {
   return `<!doctype html>
 <html lang="en">
@@ -203,7 +205,7 @@ function receiptDocument(title: string, body: string): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(title)}</title>
-  <link rel="stylesheet" href="/assets/css/ainf-site-nav.css?v=20261003a">
+  <link rel="stylesheet" href="${versionedUrl("/assets/css/ainf-site-nav.css")}">
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
@@ -336,7 +338,7 @@ function receiptDocument(title: string, body: string): string {
 </head>
 <body>
   <main class="receipt-page">${body}</main>
-  <script src="/assets/js/ainf-site-nav.js?v=20261003d" id="ainf-site-nav-js" data-clerk-key="${publicClerkKey()}"></script>
+  <script src="${versionedUrl("/assets/js/ainf-site-nav.js")}" id="ainf-site-nav-js" data-clerk-key="${publicClerkKey()}"></script>
 </body>
 </html>`;
 }

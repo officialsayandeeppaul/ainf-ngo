@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { isDatabaseConfigured } from "@/lib/env";
 import { lookupMembershipCard } from "@/lib/membership-card";
 import { cardVerifyCopy } from "@/lib/membership-card-art";
+import { noStore } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export const GET = noStore(async function GET(request: Request) {
   if (!isDatabaseConfigured) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
@@ -23,4 +24,4 @@ export async function GET(request: Request) {
     badge: result.badge,
     validUntil: result.validUntil?.toISOString() ?? null,
   });
-}
+});

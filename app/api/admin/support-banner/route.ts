@@ -5,6 +5,7 @@ import { guardApi } from "@/lib/auth/guard";
 import { supportBannerDelegate } from "@/lib/db";
 import { contextFromRequest } from "@/lib/request-context";
 import { getSupportBanner, toSupportBannerView } from "@/lib/support-banner";
+import { noStore } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,12 +37,12 @@ const bodySchema = z.object({
     }),
 });
 
-export async function GET() {
+export const GET = noStore(async function GET() {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminRead" });
   if (!guard.ok) return guard.response;
   const row = await getSupportBanner();
   return Response.json({ banner: toSupportBannerView(row) });
-}
+});
 
 export async function PATCH(request: Request) {
   const guard = await guardApi({ required: Role.SUPER_ADMIN, limiter: "adminMutation" });

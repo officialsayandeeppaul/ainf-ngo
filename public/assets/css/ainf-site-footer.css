@@ -103,3 +103,87 @@ html.ainf-projects-skin.ainf-shared-footer [data-ainf-oxira-footer="1"]{
   margin:0!important;
   padding:0!important;
 }
+
+/* Phones: this footer is the home page's desktop variant, so the two cards
+   and three link columns were squeezed side by side and the headings broke
+   mid-word ("Men" / "u"). Stack the cards and give the links two columns. */
+@media (max-width: 809.98px){
+  #ainf-site-footer [data-framer-name="Footer Top"]{
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:16px!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Top"] > [data-framer-name]{
+    width:100%!important;
+    max-width:100%!important;
+    flex:0 0 auto!important;
+    min-width:0!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Top"] > [data-framer-name="Menu"]{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:24px 16px!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Top"] > [data-framer-name="Menu"] > [data-framer-name="Contact"]{
+    grid-column:1 / -1;
+  }
+  #ainf-site-footer [data-framer-name="Footer Top"] > [data-framer-name="Menu"] > [data-framer-name]{
+    width:auto!important;
+    min-width:0!important;
+  }
+  #ainf-site-footer h4{
+    white-space:nowrap!important;
+  }
+  /* Framer's "fill" boxes (flex:1 0 0 on a 1px base) collapse once stacked:
+     the brand block went 1px tall and overlapped the copyright line. */
+  #ainf-site-footer [data-framer-name="Details"],
+  #ainf-site-footer [data-framer-name="Details"] > *{
+    height:auto!important;
+    flex:0 0 auto!important;
+    gap:16px!important;
+  }
+  /* Social links: two per row at their natural width, not 75px boxes with a
+     1px label that wrapped one letter per line. */
+  #ainf-site-footer [data-framer-name="Footer Bottom"]{
+    flex-wrap:wrap!important;
+    gap:12px!important;
+    height:auto!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Bottom"] > *{
+    flex:1 1 calc(50% - 6px)!important;
+    width:auto!important;
+    min-width:0!important;
+    height:auto!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Bottom"] > * > [data-framer-name]{
+    width:100%!important;
+    height:auto!important;
+    min-height:56px;
+    justify-content:space-between!important;
+    gap:8px!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Bottom"] > * > [data-framer-name] > div:first-child{
+    flex:1 1 auto!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+}
+@media (max-width: 480px){
+  #ainf-site-footer [data-framer-name="Footer Bottom"] h4,
+  #ainf-site-footer [data-framer-name="Footer Bottom"] h4 *{
+    --framer-font-size:19px!important;
+    font-size:19px!important;
+  }
+  #ainf-site-footer [data-framer-name="Footer Bottom"] > * > [data-framer-name]{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+}
+/* Below desktop the cards ran edge to edge; keep the page gutter. */
+@media (max-width: 1199.98px){
+  #ainf-site-footer > [data-framer-name="Container"]{
+    box-sizing:border-box!important;
+    padding-left:16px!important;
+    padding-right:16px!important;
+  }
+}

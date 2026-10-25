@@ -1,6 +1,6 @@
 /* Shared AINF floating pill navbar — identical on every page */
-@font-face{font-family:Onest;font-style:normal;font-weight:400;font-display:swap;src:url("/assets/fonts/0b532b340381e255.woff2") format("woff2")}
-@font-face{font-family:Onest;font-style:normal;font-weight:700;font-display:swap;src:url("/assets/fonts/98a11855328341d1.woff2") format("woff2")}
+@font-face{font-family:Onest;font-style:normal;font-weight:400;font-display: optional;src:url("/assets/fonts/0b532b340381e255.woff2") format("woff2")}
+@font-face{font-family:Onest;font-style:normal;font-weight:700;font-display: optional;src:url("/assets/fonts/98a11855328341d1.woff2") format("woff2")}
 
 #ainf-global-nav{
   position:fixed!important;
