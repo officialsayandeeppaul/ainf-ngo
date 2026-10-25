@@ -630,6 +630,8 @@ html.ainf-modal-lock,
 html.ainf-modal-lock body{
   overflow:hidden!important;
 }
+/* /about-us#our-mission lands below the fixed nav even before scripts run. */
+[data-framer-name="Mission & Vission"]#our-mission{ scroll-margin-top:100px; }
 .ainf-join-modal{
   position:fixed;
   inset:0;

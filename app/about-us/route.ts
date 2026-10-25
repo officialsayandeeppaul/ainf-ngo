@@ -15,6 +15,11 @@ import { serveFramerPage } from "@/lib/framer-page";
 
 export const dynamic = "force-static";
 
+// Project pages link "Our mission" to /about-us#our-mission. The id is in the
+// served HTML so the browser's own anchor jump works before any script loads;
+// ainf-page-boot.js then keeps the block in place through Framer's hydration.
+const MISSION_BLOCK = 'data-framer-name="Mission &amp; Vission"';
+
 export function GET() {
-  return serveFramerPage("about-us");
+  return serveFramerPage("about-us", (html) => html.replace(MISSION_BLOCK, `id="our-mission" ${MISSION_BLOCK}`));
 }
