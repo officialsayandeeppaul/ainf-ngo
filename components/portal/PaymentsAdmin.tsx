@@ -462,7 +462,11 @@ export function PaymentsAdmin({
                           {row.attempts > 1 ? ` · tried ${row.attempts} times` : ""}
                           {row.source ? ` · ${row.source}` : ""}
                         </div>
-                        {row.link ? (
+                        {row.link && row.link.status === "FAILED" ? (
+                          <div className="pt-dossier-meta pt-pay-note">
+                            Last attempt failed{row.link.lastError ? `: ${row.link.lastError}` : ""}. You can send a new link.
+                          </div>
+                        ) : row.link ? (
                           <div className="pt-dossier-meta">
                             Link {LINK_LABEL[row.link.status].toLowerCase()}
                             {row.link.status === "CREATED" && row.link.expiresLabel

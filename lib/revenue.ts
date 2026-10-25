@@ -1,4 +1,4 @@
-import { MembershipOrderStatus, type Prisma } from "@prisma/client";
+import { DonationStatus, MembershipOrderStatus, type Prisma } from "@prisma/client";
 import { lastMonthKeys, monthKeyUtc, monthLabelUtc, paidByMonth, paidByPlan } from "@/lib/crm-metrics";
 
 export type RevenueOrderRow = {
@@ -24,8 +24,14 @@ export type RevenueOrderRow = {
 };
 
 export type RevenueSnapshot = {
+  /** Membership and gifts together. */
   paidTotalPaise: number;
   paidCount: number;
+  membershipPaise: number;
+  membershipCount: number;
+  giftPaise: number;
+  giftCount: number;
+  refundedGiftPaise: number;
   refundCreditPaise: number;
   liveMembers: number;
   payingMembers: number;
@@ -36,6 +42,7 @@ export type RevenueSnapshot = {
   cancelledCount: number;
   byMonth: Array<{ key: string; label: string; paise: number }>;
   byPlan: Array<{ label: string; paise: number }>;
+  byDesk: Array<{ label: string; paise: number }>;
   byKind: Array<{ label: string; count: number; paise: number }>;
 };
 
@@ -55,6 +62,12 @@ export function parseRevenueDay(value: string | undefined, end = false): Date | 
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const date = new Date(`${value}T${end ? "23:59:59.999" : "00:00:00"}`);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function giftPaidWhere(from: Date | null, to: Date | null): Prisma.DonationWhereInput {
+  const paidAt: Prisma.DateTimeFilter | undefined =
+    from || to ? { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } : undefined;
+  return { status: DonationStatus.PAID, ...(paidAt ? { paidAt } : {}) };
 }
 
 export function revenuePaidWhere(from: Date | null, to: Date | null): Prisma.MembershipOrderWhereInput {
@@ -81,6 +94,14 @@ export function buildRevenueSnapshot(input: {
     createdAt: Date;
     tierName: string;
   }>;
+  /** Captured gifts still on the books (returned gifts excluded). */
+  paidGifts?: Array<{
+    amountPaise: number;
+    paidAt: Date | null;
+    createdAt: Date;
+    targetTitle: string;
+  }>;
+  refundedGiftPaise?: number;
   liveMembers: number;
   payingMembers: number;
   createdCount: number;
@@ -89,7 +110,10 @@ export function buildRevenueSnapshot(input: {
   now?: Date;
 }): RevenueSnapshot {
   const now = input.now ?? new Date();
-  const paidTotalPaise = input.paidOrders.reduce((sum, row) => sum + row.amountPaise, 0);
+  const gifts = input.paidGifts ?? [];
+  const membershipPaise = input.paidOrders.reduce((sum, row) => sum + row.amountPaise, 0);
+  const giftPaise = gifts.reduce((sum, row) => sum + row.amountPaise, 0);
+  const paidTotalPaise = membershipPaise + giftPaise;
   const refundCreditPaise = input.paidOrders.reduce((sum, row) => sum + row.creditPaise, 0);
   const monthlyPaise = input.paidOrders
     .filter((row) => row.interval === "MONTHLY")
@@ -109,7 +133,12 @@ export function buildRevenueSnapshot(input: {
 
   return {
     paidTotalPaise,
-    paidCount: input.paidOrders.length,
+    paidCount: input.paidOrders.length + gifts.length,
+    membershipPaise,
+    membershipCount: input.paidOrders.length,
+    giftPaise,
+    giftCount: gifts.length,
+    refundedGiftPaise: input.refundedGiftPaise ?? 0,
     refundCreditPaise,
     liveMembers: input.liveMembers,
     payingMembers: input.payingMembers,
@@ -119,7 +148,7 @@ export function buildRevenueSnapshot(input: {
     failedCount: input.failedCount,
     cancelledCount: input.cancelledCount,
     byMonth: paidByMonth(
-      input.paidOrders.map((row) => ({
+      [...input.paidOrders, ...gifts].map((row) => ({
         paidAt: row.paidAt,
         createdAt: row.createdAt,
         amountPaise: row.amountPaise,
@@ -133,6 +162,7 @@ export function buildRevenueSnapshot(input: {
         amountPaise: row.amountPaise,
       }))
     ),
+    byDesk: paidByPlan(gifts.map((row) => ({ tierName: row.targetTitle, amountPaise: row.amountPaise }))),
     byKind: [...kindMap.entries()]
       .map(([kind, stats]) => ({
         label: revenueKindLabel(kind),

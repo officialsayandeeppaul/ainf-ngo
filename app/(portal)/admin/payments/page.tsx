@@ -175,7 +175,9 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
       where: { status: { in: [PaymentInterestStatus.OPEN, PaymentInterestStatus.CONTACTED] } },
       _sum: { amountPaise: true },
     }),
+    // Attempts Razorpay refused never became links; their error shows on the request.
     db.paymentLink.findMany({
+      where: { status: { not: PaymentLinkStatus.FAILED } },
       orderBy: { createdAt: "desc" },
       take: 30,
       include: { interest: { select: { purpose: true, targetTitle: true, interval: true } } },

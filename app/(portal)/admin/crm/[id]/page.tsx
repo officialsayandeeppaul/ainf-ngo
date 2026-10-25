@@ -33,6 +33,7 @@ import { GrantMembershipButton, IdentityAdminControls } from "@/components/porta
 import { identityReadyForMembership } from "@/lib/donation-rules";
 import { interestLabel } from "@/lib/payment-interest";
 import { getVerificationPolicy } from "@/lib/verification-policy";
+import { getUserGiving } from "@/lib/user-donations";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { VerifyMethodStack } from "@/components/portal/VerifyMethods";
 
@@ -142,7 +143,7 @@ export default async function AdminCrmDossierPage({
   });
   if (!member) notFound();
 
-  const [grantTiers, interests, verifier] = await Promise.all([
+  const [grantTiers, interests, verifier, giving] = await Promise.all([
     db.membershipTier.findMany({
       orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: { id: true, name: true, badge: true, active: true },
@@ -158,6 +159,7 @@ export default async function AdminCrmDossierPage({
     member.identityVerifiedByUserId
       ? db.user.findUnique({ where: { id: member.identityVerifiedByUserId }, select: { email: true } })
       : Promise.resolve(null),
+    getUserGiving(member.email),
   ]);
 
   const previousTierIds = [
@@ -280,8 +282,8 @@ export default async function AdminCrmDossierPage({
         <div className="pt-crm-kpis">
           <CrmStat
             label="Paid to date"
-            value={formatInr(spentPaise)}
-            hint={`${paidOrders.length} captured payment${paidOrders.length === 1 ? "" : "s"}`}
+            value={formatInr(spentPaise + giving.summary.totalPaise)}
+            hint={`${formatInr(spentPaise)} membership · ${formatInr(giving.summary.totalPaise)} in ${giving.summary.giftCount} gift${giving.summary.giftCount === 1 ? "" : "s"}`}
           />
           <CrmStat label="Lifecycle" value={String(journey.length)} hint="Newest event first · capped load" />
           <CrmStat
@@ -698,6 +700,56 @@ export default async function AdminCrmDossierPage({
             </div>
           )}
         </section>
+
+        {giving.donations.length > 0 ? (
+          <section className="pt-card pt-card--flush" style={{ marginTop: 16 }}>
+            <div className="pt-card__head">
+              <h2 className="pt-section-title" style={{ margin: 0 }}>
+                Gifts
+              </h2>
+              <span className="pt-hint" style={{ margin: 0 }}>
+                Matched by {member.email}
+              </span>
+            </div>
+            <div className="pt-table-wrap">
+              <table className="pt-table pt-table--dossier">
+                <thead>
+                  <tr>
+                    <th>For</th>
+                    <th>Amount</th>
+                    <th>When</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {giving.donations.map((gift) => (
+                    <tr key={gift.id}>
+                      <td>
+                        <div className="pt-dossier-plan">{gift.targetTitle}</div>
+                        <a className="pt-dossier-meta" href={`/donate/receipt/${gift.receiptToken}`} target="_blank" rel="noopener noreferrer">
+                          Receipt
+                        </a>
+                      </td>
+                      <td>
+                        <span className="pt-money">{formatInr(gift.amountPaise)}</span>
+                      </td>
+                      <td className="pt-dossier-when">{formatDayTime(gift.at)}</td>
+                      <td>
+                        <span className={`pt-badge pt-badge--lift ${gift.status === "REFUNDED" ? "pt-badge--warning" : "pt-badge--success"}`}>
+                          {gift.status === "REFUNDED" ? "Returned" : "Received"}
+                        </span>
+                      </td>
+                      <td>
+                        <PaymentRef paymentId={gift.paymentId} orderId={null} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         <section className="pt-card pt-card--flush" style={{ marginTop: 16 }}>
           <div className="pt-card__head">
