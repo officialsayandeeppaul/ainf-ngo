@@ -125,6 +125,59 @@ test.describe("shared navigation", () => {
   });
 });
 
+test.describe("gift window and project CTAs", () => {
+  const PROJECT = "/projects/daily-meal-program";
+
+  for (const [width, height] of [
+    [390, 844],
+    [667, 375],
+    [1440, 900],
+  ]) {
+    test(`a dragged-out note keeps the gift window on screen at ${width}x${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await visit(page, PROJECT);
+      await page.waitForFunction(() => typeof (window as { __ainfOpenGiftModal?: unknown }).__ainfOpenGiftModal === "function");
+      await page.evaluate(() => (window as unknown as { __ainfOpenGiftModal: () => void }).__ainfOpenGiftModal());
+      const note = page.locator('#ainf-gift-modal textarea[name="note"]');
+      await note.scrollIntoViewIfNeeded();
+      const box = (await note.boundingBox())!;
+      // Drag the resize grip in the bottom-right corner far past the screen.
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height - 3);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height + 800, { steps: 8 });
+      await page.mouse.up();
+      const card = await page.evaluate(() => {
+        const el = document.querySelector(".ainf-gift-modal__card")!;
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom, sideways: el.scrollWidth - el.clientWidth };
+      });
+      expect(card.top).toBeGreaterThanOrEqual(0);
+      expect(card.bottom).toBeLessThanOrEqual(height);
+      expect(card.sideways).toBeLessThanOrEqual(1);
+      const submit = page.locator("#ainf-gift-modal .ainf-gift-modal__submit");
+      await submit.scrollIntoViewIfNeeded();
+      await expect(submit).toBeInViewport({ ratio: 1 });
+    });
+  }
+
+  test('"Our mission" goes to About\'s mission, not the gift window', async ({ page }) => {
+    await visit(page, PROJECT);
+    const mission = page.locator('[data-ainf-mission="1"]').first();
+    await expect(mission).toBeAttached({ timeout: 30_000 });
+    await mission.scrollIntoViewIfNeeded();
+    await mission.click();
+    await page.waitForURL(/\/about-us#our-mission$/);
+    await expect(page.locator("#ainf-gift-modal")).toHaveCount(0);
+    await page.waitForLoadState("load");
+    await expect(page.locator("#our-mission")).toBeInViewport();
+  });
+
+  test("About serves the #our-mission anchor in its HTML", async ({ request }) => {
+    const html = await (await request.get("/about-us")).text();
+    expect(html).toContain('id="our-mission" data-framer-name="Mission &amp; Vission"');
+  });
+});
+
 test.describe("portal access when signed out", () => {
   test("/account never renders member or admin data", async ({ page }) => {
     await visit(page, "/account");
