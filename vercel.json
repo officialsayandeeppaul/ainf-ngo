@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run vercel-build",
   "cleanUrls": true,
   "trailingSlash": false,
   "regions": ["sin1"],
