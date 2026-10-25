@@ -289,28 +289,47 @@
 
   // /about-us#our-mission: the Mission & Vision block has no id in the Framer
   // export, so it is given one and brought into view under the fixed nav.
-  // Framer hydration and lazy photos shift the layout after load, so the jump
-  // is repeated until the visitor scrolls on their own.
+  // Framer replaces that block once during hydration (dropping the id and
+  // shifting the layout) - under a second on a fast line, 14s or more on a
+  // slow one, often well after load. So the spot is re-settled until that
+  // replacement has happened and the block has then held still for a second
+  // (30s at most), or the visitor scrolls, taps, or presses a key.
   function bootMissionAnchor() {
     if (location.pathname.replace(/\/$/, "") !== "/about-us" || location.hash !== "#our-mission") return;
     var moved = false;
+    var started = Date.now();
+    var served = null;
+    var replacedAt = 0;
+    var shiftedAt = started;
     function stop() { moved = true; }
     ["wheel", "touchstart", "keydown", "pointerdown"].forEach(function (type) {
       window.addEventListener(type, stop, { once: true, passive: true });
     });
-    function jump() {
-      if (moved) return;
+    function settle() {
       var block = document.getElementById("our-mission") || document.querySelector('[data-framer-name="Mission & Vission"]');
       if (!block) return;
+      if (!served) served = block;
+      else if (!replacedAt && !served.isConnected) replacedAt = Date.now();
       if (!block.id) block.id = "our-mission";
       var nav = document.getElementById("ainf-global-nav");
       var offset = (nav ? Math.min(140, Math.max(0, nav.getBoundingClientRect().bottom)) : 80) + 20;
-      window.scrollTo(0, Math.max(0, block.getBoundingClientRect().top + window.pageYOffset - offset));
+      var drift = block.getBoundingClientRect().top - offset;
+      if (Math.abs(drift) > 2) {
+        shiftedAt = Date.now();
+        window.scrollTo(0, Math.max(0, window.pageYOffset + drift));
+      }
     }
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    jump();
-    [120, 600, 1400, 2600].forEach(function (ms) { setTimeout(jump, ms); });
-    window.addEventListener("load", jump, { once: true });
+    settle();
+    var timer = setInterval(function () {
+      var now = Date.now();
+      var done = replacedAt && now - replacedAt > 1000 && now - shiftedAt > 1000;
+      if (moved || done || now - started > 30000) {
+        clearInterval(timer);
+        return;
+      }
+      settle();
+    }, 150);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootMissionAnchor);
   else bootMissionAnchor();
