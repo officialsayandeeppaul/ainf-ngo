@@ -225,6 +225,36 @@ export function verifyPaymentLinkSignature(input: {
   return safeEqual(expected, input.signature);
 }
 
+export type RazorpayKeyHealth = "ok" | "rejected" | "unreachable" | "missing";
+
+let keyHealth: { at: number; value: RazorpayKeyHealth } | null = null;
+
+/** One cheap authenticated read, cached for five minutes, so admin pages can say when the keys stop working. */
+export async function checkRazorpayKeys(): Promise<RazorpayKeyHealth> {
+  if (!env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) return "missing";
+  if (keyHealth && Date.now() - keyHealth.at < 300_000) return keyHealth.value;
+  let value: RazorpayKeyHealth;
+  try {
+    const response = await fetch("https://api.razorpay.com/v1/payment_links?count=1", {
+      headers: { Authorization: authHeader() },
+      signal: AbortSignal.timeout(6_000),
+    });
+    value = response.status === 401 ? "rejected" : response.ok ? "ok" : "unreachable";
+  } catch {
+    value = "unreachable";
+  }
+  keyHealth = { at: Date.now(), value };
+  return value;
+}
+
+/** Turns Razorpay's bare "Authentication failed" into something an admin can act on. */
+export function explainRazorpayError(message: string): string {
+  if (/authentication failed/i.test(message)) {
+    return "Razorpay rejected the API keys (Authentication failed). Generate a new key pair in the Razorpay Dashboard → Account & Settings → API Keys, then update NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel and redeploy.";
+  }
+  return message;
+}
+
 /** Dashboard deep-link for a payment (works in test and live mode once signed in). */
 export function razorpayPaymentDashboardUrl(paymentId: string): string {
   return `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;

@@ -45,6 +45,19 @@
         "#ainf-interest-modal button.ainf-interest__ok{width:100%;border:0;border-radius:999px;background:#1c7d48;color:#fff;padding:13px 18px;font:inherit;font-size:15px;font-weight:500;cursor:pointer}" +
         "#ainf-interest-modal button.ainf-interest__ok:focus-visible{outline:3px solid rgba(28,125,72,.35);outline-offset:2px}" +
         "@keyframes ainfInterestIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}" +
+        "@keyframes ainfInterestUp{from{transform:translateY(100%)}to{transform:none}}" +
+        "html.ainf-interest-open,html.ainf-interest-open body{overflow:hidden!important}" +
+        "@media (max-width:560px){" +
+        "#ainf-interest-modal{align-items:flex-end;padding:0}" +
+        "#ainf-interest-modal .ainf-interest__panel{width:100%;max-height:88vh;border-radius:22px 22px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom));animation:ainfInterestUp .26s ease-out}" +
+        "#ainf-interest-modal .ainf-interest__mark{width:40px;height:40px;margin-bottom:12px}" +
+        "#ainf-interest-modal h2{font-size:21px}" +
+        "#ainf-interest-modal p{font-size:14.5px;margin-bottom:14px}" +
+        "#ainf-interest-modal dl{grid-template-columns:1fr;gap:2px;padding:12px}" +
+        "#ainf-interest-modal dt{font-size:12px;letter-spacing:.02em}" +
+        "#ainf-interest-modal dd{margin-bottom:8px;font-size:14.5px}" +
+        "#ainf-interest-modal dd:last-child{margin-bottom:0}" +
+        "}" +
         "@media (prefers-reduced-motion:reduce){#ainf-interest-modal .ainf-interest__panel{animation:none}}";
       document.head.appendChild(style);
     }
@@ -106,6 +119,7 @@
 
     function close() {
       document.removeEventListener("keydown", onKey, true);
+      document.documentElement.classList.remove("ainf-interest-open");
       root.remove();
       if (previous && previous.focus) {
         try { previous.focus({ preventScroll: true }); } catch (error) { previous.focus(); }
@@ -123,6 +137,7 @@
     backdrop.addEventListener("click", close);
     ok.addEventListener("click", close);
     document.addEventListener("keydown", onKey, true);
+    document.documentElement.classList.add("ainf-interest-open");
     document.body.appendChild(root);
     ok.focus({ preventScroll: true });
   }
@@ -565,6 +580,7 @@
         lockScroll(false);
         if (giftReturn && giftReturn.focus) giftReturn.focus();
       }
+      root.__ainfClose = close;
       root.addEventListener("click", function (event) {
         if (!(event.target.closest && event.target.closest(".ainf-gift-menu"))) closeGiftMenu(root);
         if (event.target === root || (event.target.closest && event.target.closest("[data-close]"))) close();
@@ -913,7 +929,9 @@
         if (ainfIsPaused(result.body)) {
           giftBusy = false;
           if (button) button.disabled = false;
-          giftNote(root, "Your interest is saved. We will email you a payment link.", false);
+          giftNote(root, "", false);
+          // One window at a time: the gift form closes, then the thank-you opens.
+          if (typeof root.__ainfClose === "function") root.__ainfClose();
           ainfShowInterest(result.body);
           return;
         }

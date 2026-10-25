@@ -20,7 +20,9 @@ import { membershipIsLive } from "./membership-state";
 import { interestLabel } from "./payment-interest";
 import {
   cancelRazorpayPaymentLink,
+  checkRazorpayKeys,
   createRazorpayPaymentLink,
+  explainRazorpayError,
   fetchRazorpayPaymentLink,
   getRazorpayPayment,
   notifyRazorpayPaymentLink,
@@ -118,6 +120,11 @@ export async function createLinkForInterest(input: {
   }
   if (!Number.isInteger(input.amountPaise) || input.amountPaise < LINK_MIN_PAISE) {
     return { ok: false, status: 400, message: "Enter an amount of at least ₹1." };
+  }
+
+  // Known-bad keys would only leave a failed gift or order row behind; stop before writing anything.
+  if ((await checkRazorpayKeys()) === "rejected") {
+    return { ok: false, status: 502, message: `Razorpay refused the link: ${explainRazorpayError("Authentication failed")}` };
   }
 
   const now = new Date();
@@ -247,7 +254,7 @@ export async function createLinkForInterest(input: {
         data: { status: MembershipOrderStatus.FAILED },
       });
     }
-    return { ok: false, status: 502, message: `Razorpay refused the link: ${message}` };
+    return { ok: false, status: 502, message: `Razorpay refused the link: ${explainRazorpayError(message)}` };
   }
 
   await db.paymentInterest.update({

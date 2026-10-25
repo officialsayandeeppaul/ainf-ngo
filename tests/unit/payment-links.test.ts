@@ -20,6 +20,7 @@ const h = vi.hoisted(() => {
     cancelLink: vi.fn(),
     notifyLink: vi.fn(),
     getPayment: vi.fn(),
+    keyHealth: vi.fn(async () => "ok"),
     markGift: vi.fn(),
     markOrder: vi.fn(),
     email: vi.fn(async () => ({ sent: true })),
@@ -124,6 +125,7 @@ vi.mock("@/lib/razorpay", async () => {
     cancelRazorpayPaymentLink: h.cancelLink,
     notifyRazorpayPaymentLink: h.notifyLink,
     getRazorpayPayment: h.getPayment,
+    checkRazorpayKeys: h.keyHealth,
   };
 });
 
@@ -316,6 +318,17 @@ describe("creating a link", () => {
       ok: false,
       status: 400,
     });
+    expect(h.createLink).not.toHaveBeenCalled();
+  });
+
+  it("stops before writing anything when Razorpay rejects the keys, and says how to fix them", async () => {
+    seedGiftInterest();
+    h.keyHealth.mockResolvedValueOnce("rejected");
+    const result = await createLinkForInterest({ interestId: "int_gift", ...linkInput });
+    expect(result).toMatchObject({ ok: false, status: 502 });
+    if (!result.ok) expect(result.message).toMatch(/API Keys/);
+    expect(h.tables.donation.size).toBe(0);
+    expect(h.tables.paymentLink.size).toBe(0);
     expect(h.createLink).not.toHaveBeenCalled();
   });
 

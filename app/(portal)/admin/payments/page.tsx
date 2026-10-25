@@ -15,6 +15,7 @@ import { formatDay, formatDayTime } from "@/lib/format-date";
 import { formatInr } from "@/lib/membership";
 import { interestLabel } from "@/lib/payment-interest";
 import { getPaymentSettings, toPaymentSettingsView } from "@/lib/payment-settings";
+import { checkRazorpayKeys } from "@/lib/razorpay";
 import { parseRevenueDay } from "@/lib/revenue";
 import { CrmStat } from "@/components/portal/CrmCharts";
 import { DashShell } from "@/components/portal/DashShell";
@@ -145,6 +146,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
   };
 
   const [
+    keyHealth,
     settingsRow,
     interests,
     statusCounts,
@@ -157,6 +159,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
     gifts,
     giftTotal,
   ] = await Promise.all([
+    checkRazorpayKeys(),
     getPaymentSettings(),
     db.paymentInterest.findMany({
       where: interestWhere,
@@ -334,6 +337,21 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
           <div className="pt-alert pt-alert--warning" style={{ marginBottom: 16 }}>
             <p className="pt-alert__title">Razorpay keys are missing</p>
             <p>Checkout and payment links need NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.</p>
+          </div>
+        ) : keyHealth === "rejected" ? (
+          <div className="pt-alert pt-alert--error" style={{ marginBottom: 16 }}>
+            <p className="pt-alert__title">Razorpay is rejecting the API keys</p>
+            <p>
+              Checkout and payment links fail with “Authentication failed” until this is fixed. In the
+              Razorpay Dashboard open Account &amp; Settings → API Keys, generate a key pair (test or
+              live), then set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel → Settings →
+              Environment Variables and redeploy.
+            </p>
+          </div>
+        ) : keyHealth === "unreachable" ? (
+          <div className="pt-alert pt-alert--warning" style={{ marginBottom: 16 }}>
+            <p className="pt-alert__title">Razorpay did not answer</p>
+            <p>The key check timed out. Links may still work; try again in a minute.</p>
           </div>
         ) : null}
 
