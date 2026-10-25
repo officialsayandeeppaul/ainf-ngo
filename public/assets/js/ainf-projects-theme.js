@@ -155,6 +155,7 @@
           if (t.closest && t.closest('[data-framer-name="Icon"]')) return;
           var label = (t.textContent || "").trim();
           if (label === "Donate now") t.textContent = "Support AINF";
+          if (/support ainf/i.test(t.textContent || "")) btn.style.setProperty("cursor", "pointer", "important");
           t.style.setProperty("color", "#fff", "important");
           t.style.setProperty("-webkit-text-fill-color", "#fff", "important");
           t.style.setProperty("font-weight", "400", "important");

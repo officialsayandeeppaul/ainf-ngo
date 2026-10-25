@@ -227,7 +227,8 @@
           beginJoin(link);
           return;
         }
-        if (link.getAttribute("data-framer-name") === "Primary btn" || link.getAttribute("data-framer-name") === "Primary") {
+        // Template buttons keep their own link, unless they are a "Support AINF" button.
+        if ((link.getAttribute("data-framer-name") === "Primary btn" || link.getAttribute("data-framer-name") === "Primary") && !supportLabel(link)) {
           return;
         }
         if (path === "/donate-now" || supportLabel(link)) {
@@ -238,7 +239,10 @@
           return;
         }
       }
-      var control = event.target.closest && event.target.closest("button, [role='button']");
+      // Framer's Primary btn is often a styled div rather than a <button>.
+      var control =
+        event.target.closest &&
+        event.target.closest('button, [role="button"], [data-framer-name="Primary btn"], [data-framer-name="btn hover variation"]');
       if (control && supportLabel(control) && !(link && path === "/donate-now")) {
         var hostForm = control.closest && control.closest("form");
         if (!(hostForm && hostForm.querySelector('select[name="Location"]'))) {
