@@ -8,6 +8,7 @@ import {
 } from "@/lib/donations";
 import { isDatabaseConfigured, isRazorpayWebhookConfigured } from "@/lib/env";
 import { cancelMembership, markOrderPaid } from "@/lib/membership-pay";
+import { handlePaymentLinkEvent } from "@/lib/payment-links";
 import { getRazorpayPayment, verifyWebhookSignature } from "@/lib/razorpay";
 import { notesRecord } from "@/lib/donation-rules";
 import { checkRateLimit } from "@/lib/ratelimit";
@@ -35,6 +36,7 @@ type RazorpayEnvelope = {
     order?: { entity?: Entity };
     subscription?: { entity?: Entity };
     refund?: { entity?: Entity };
+    payment_link?: { entity?: Entity & { reference_id?: string } };
   };
 };
 
@@ -74,11 +76,13 @@ export async function POST(request: Request) {
   const order = payload.payload?.order?.entity;
   const subscription = payload.payload?.subscription?.entity;
   const refund = payload.payload?.refund?.entity;
+  const paymentLink = payload.payload?.payment_link?.entity;
   const razorpayOrderId = payment?.order_id ?? order?.id ?? null;
   const razorpaySubscriptionId = subscription?.id ?? payment?.subscription_id ?? null;
   const razorpayPaymentId = payment?.id ?? refund?.payment_id ?? null;
   const notes = notesRecord(payment?.notes);
-  const externalId = payment?.id ?? refund?.id ?? subscription?.id ?? order?.id ?? eventType;
+  const externalId =
+    payment?.id ?? refund?.id ?? subscription?.id ?? paymentLink?.id ?? order?.id ?? eventType;
 
   try {
     await db.webhookEvent.create({
@@ -101,6 +105,31 @@ export async function POST(request: Request) {
     order?.status === "paid";
 
   try {
+    // Admin payment links settle through their own record, never the checkout paths below.
+    if (paymentLink?.id || notes.ainfLinkId) {
+      await handlePaymentLinkEvent({
+        eventType,
+        razorpayLinkId: paymentLink?.id ?? null,
+        referenceId: paymentLink?.reference_id ?? notes.ainfLinkId ?? null,
+        payment: payment?.id
+          ? {
+              id: payment.id,
+              amount: payment.amount ?? 0,
+              currency: payment.currency,
+              status: payment.status,
+              captured: payment.captured,
+              order_id: payment.order_id ?? paymentLink?.order_id ?? null,
+            }
+          : null,
+        context,
+      });
+      await db.webhookEvent.updateMany({
+        where: { provider: "razorpay", externalId, eventType },
+        data: { processedAt: new Date() },
+      });
+      return Response.json({ ok: true });
+    }
+
     const ownsDonation = await donationOwnsPayment({
       razorpayOrderId,
       razorpayPaymentId,

@@ -81,6 +81,11 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  /// Set when a super admin marked this identity verified without Didit, PAN, or OTP.
+  identityVerifiedByAdminAt DateTime?
+  identityVerifiedByUserId  String?
+  identityVerifiedNote      String?
+
   membershipTierId            String?
   membershipTier              MembershipTier?  @relation("UserMembership", fields: [membershipTierId], references: [id], onDelete: SetNull)
   membershipInterval          BillingInterval?
@@ -95,6 +100,7 @@ model User {
   auditLogs        AuditLog[]        @relation("AuditActor")
   membershipOrders MembershipOrder[]
   membershipCard   MembershipCard?
+  paymentInterests PaymentInterest[]
 
   @@index([role])
   @@index([kycStatus])
@@ -234,9 +240,10 @@ model MembershipTier {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members User[]             @relation("UserMembership")
-  orders  MembershipOrder[]
-  offers  MembershipOfferOnTier[]
+  members   User[]             @relation("UserMembership")
+  orders    MembershipOrder[]
+  offers    MembershipOfferOnTier[]
+  interests PaymentInterest[]
 
   @@index([active, sortOrder])
 }
@@ -315,6 +322,11 @@ model MembershipOrder {
 
   cancelAtPeriodEnd Boolean   @default(false)
   cancelledAt       DateTime?
+
+  /// Set when a super admin granted this term without payment.
+  grantedByUserId String?
+  grantNote       String?
+  paymentLink     PaymentLink?
 
   createdAt DateTime  @default(now())
   paidAt    DateTime?
@@ -455,9 +467,123 @@ model Donation {
   refundedAt        DateTime?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+  paymentLink       PaymentLink?
 
   @@index([status, createdAt])
   @@index([kind])
+}
+
+enum PaymentPurpose {
+  DONATION
+  MEMBERSHIP
+}
+
+enum PaymentInterestStatus {
+  OPEN
+  CONTACTED
+  LINK_SENT
+  PAID
+  DISMISSED
+}
+
+enum PaymentLinkStatus {
+  CREATED
+  PAID
+  EXPIRED
+  CANCELLED
+  FAILED
+}
+
+/// Singleton (id = "singleton"). The admin switch for taking money online.
+model PaymentSettings {
+  id              String    @id @default("singleton")
+  enabled         Boolean   @default(true)
+  /// Shown in the "we saved your interest" window. Empty uses the standard copy.
+  pausedMessage   String    @default("")
+  pausedAt        DateTime?
+  updatedAt       DateTime  @updatedAt
+  updatedByUserId String?
+}
+
+/// Someone tried to pay while payments were paused. Admin follows up, usually with a payment link.
+model PaymentInterest {
+  id      String                @id @default(cuid())
+  purpose PaymentPurpose
+  status  PaymentInterestStatus @default(OPEN)
+
+  /// Always set for membership; set for a gift when the giver was signed in.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name        String
+  email       String
+  phone       String?
+  amountPaise Int
+
+  /// What they chose, captured so a later rename does not rewrite it.
+  donationKind DonationKind?
+  targetSlug   String?
+  targetTitle  String
+  tierId       String?
+  tier         MembershipTier?  @relation(fields: [tierId], references: [id], onDelete: SetNull)
+  interval     BillingInterval?
+
+  source          String?
+  attempts        Int       @default(1)
+  lastAttemptAt   DateTime  @default(now())
+  adminNote       String?
+  handledAt       DateTime?
+  handledByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  links PaymentLink[]
+
+  @@index([status, createdAt])
+  @@index([purpose, status])
+  @@index([email])
+  @@index([userId])
+}
+
+/// A Razorpay payment link sent by an admin. Paying it fulfils the gift or membership it was made for.
+model PaymentLink {
+  id         String            @id @default(cuid())
+  purpose    PaymentPurpose
+  status     PaymentLinkStatus @default(CREATED)
+  interestId String?
+  interest   PaymentInterest?  @relation(fields: [interestId], references: [id], onDelete: SetNull)
+
+  amountPaise   Int
+  description   String
+  customerName  String
+  customerEmail String
+  customerPhone String?
+
+  razorpayLinkId    String? @unique
+  shortUrl          String?
+  razorpayPaymentId String? @unique
+  razorpayOrderId   String?
+
+  donationId        String?          @unique
+  donation          Donation?        @relation(fields: [donationId], references: [id], onDelete: SetNull)
+  membershipOrderId String?          @unique
+  membershipOrder   MembershipOrder? @relation(fields: [membershipOrderId], references: [id], onDelete: SetNull)
+
+  expiresAt   DateTime?
+  notifySms   Boolean   @default(false)
+  notifyEmail Boolean   @default(false)
+  emailedAt   DateTime?
+  lastError   String?
+
+  createdByUserId String?
+  paidAt          DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([interestId])
 }
 
 

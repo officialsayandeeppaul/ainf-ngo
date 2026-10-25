@@ -87,9 +87,14 @@ export async function expireDueMemberships(limit = 80): Promise<number> {
 }
 
 async function findSeedOrder(input: {
+  membershipOrderId?: string | null;
   razorpayOrderId?: string | null;
   razorpaySubscriptionId?: string | null;
 }): Promise<MembershipOrder | null> {
+  if (input.membershipOrderId) {
+    const byId = await db.membershipOrder.findUnique({ where: { id: input.membershipOrderId } });
+    if (byId) return byId;
+  }
   if (input.razorpayOrderId) {
     const byOrder = await db.membershipOrder.findUnique({
       where: { razorpayOrderId: input.razorpayOrderId },
@@ -170,7 +175,9 @@ async function writeLiveMembership(
         // Local term is authoritative if Razorpay already dropped the old mandate.
       }
     }
-    nextSub = (await startFutureSubscription(order, term.expiresAt)) ?? subscriptionId;
+    // Never fall back to the mandate just cancelled above, or the member shows as auto-renewing.
+    nextSub =
+      (await startFutureSubscription(order, term.expiresAt)) ?? (subscriptionId === previous ? null : subscriptionId);
   }
   await db.user.update({
     where: { id: order.userId },
@@ -188,6 +195,8 @@ async function writeLiveMembership(
 }
 
 export async function markOrderPaid(input: {
+  /** Payment-link orders are found by row id; checkout orders by their Razorpay ids. */
+  membershipOrderId?: string | null;
   razorpayOrderId?: string | null;
   razorpaySubscriptionId?: string | null;
   razorpayPaymentId?: string | null;

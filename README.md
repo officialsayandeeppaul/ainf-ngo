@@ -60,6 +60,23 @@ Framer re-renders most sections. Three pieces keep that invisible:
 
 `npm run test:e2e` includes a check that no page's photos change after load.
 
+## Payments desk (`/admin/payments`)
+
+- **Switch:** pausing online payments makes gift and plan checkouts return
+  `409 payments_paused`; the site shows a thank-you window and the attempt is
+  saved as a `PaymentInterest`. `PAYMENTS_PAUSED=true` on the host forces it off.
+  Webhooks, open checkouts, admin payment links, and auto-renew mandates keep
+  working while paused.
+- **Payment links:** sent from the queue (`lib/payment-links.ts`). Each link
+  owns a `Donation` or `MembershipOrder` row, so paying it runs the normal
+  receipt/badge/card path. It settles from the payer's return (`/pay/done`), the
+  webhook (enable `payment_link.paid`, `.expired`, `.cancelled`), or "Check
+  status".
+- **CRM dossier:** grant any plan free (`lib/membership-grant.ts`, ₹0 order
+  marked `grantedByUserId`, card issued, mandate stopped) and verify an identity
+  without Didit/PAN/OTP (`lib/identity-override.ts`; removing it restores what the
+  member's own records show).
+
 ## Caching
 
 Scripts and stylesheets are referenced with a `?v=` derived from their

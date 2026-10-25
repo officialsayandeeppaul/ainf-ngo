@@ -152,6 +152,79 @@ export async function getRazorpayPayment(paymentId: string): Promise<RazorpayPay
   return razorpayFetch<RazorpayPayment>(`/payments/${encodeURIComponent(paymentId)}`);
 }
 
+export type RazorpayPaymentLink = {
+  id: string;
+  short_url: string;
+  status: string;
+  amount: number;
+  amount_paid?: number;
+  currency: string;
+  reference_id?: string | null;
+  expire_by?: number | null;
+  order_id?: string | null;
+  payments?: Array<{ payment_id: string; amount: number; status: string }> | null;
+};
+
+/** Hosted Razorpay page for one fixed amount. `referenceId` must be unique per link (max 40 chars). */
+export async function createRazorpayPaymentLink(input: {
+  amountPaise: number;
+  description: string;
+  referenceId: string;
+  customer: { name: string; email?: string; contact?: string };
+  notify: { sms: boolean; email: boolean };
+  expireBy?: number;
+  callbackUrl?: string;
+  notes?: Record<string, string>;
+}): Promise<RazorpayPaymentLink> {
+  return razorpayFetch<RazorpayPaymentLink>("/payment_links", {
+    method: "POST",
+    body: JSON.stringify({
+      amount: input.amountPaise,
+      currency: "INR",
+      accept_partial: false,
+      description: input.description.slice(0, 2048),
+      reference_id: input.referenceId.slice(0, 40),
+      customer: input.customer,
+      notify: input.notify,
+      reminder_enable: true,
+      notes: input.notes ?? {},
+      ...(input.expireBy ? { expire_by: input.expireBy } : {}),
+      ...(input.callbackUrl ? { callback_url: input.callbackUrl, callback_method: "get" } : {}),
+    }),
+  });
+}
+
+export async function fetchRazorpayPaymentLink(linkId: string): Promise<RazorpayPaymentLink> {
+  return razorpayFetch<RazorpayPaymentLink>(`/payment_links/${encodeURIComponent(linkId)}`);
+}
+
+export async function cancelRazorpayPaymentLink(linkId: string): Promise<RazorpayPaymentLink> {
+  return razorpayFetch<RazorpayPaymentLink>(`/payment_links/${encodeURIComponent(linkId)}/cancel`, {
+    method: "POST",
+  });
+}
+
+/** Asks Razorpay to send the link again over SMS or email. */
+export async function notifyRazorpayPaymentLink(linkId: string, medium: "sms" | "email"): Promise<void> {
+  await razorpayFetch(`/payment_links/${encodeURIComponent(linkId)}/notify_by/${medium}`, { method: "POST" });
+}
+
+/** Payment link redirect: HMAC_SHA256(link_id|reference_id|status|payment_id, key_secret). */
+export function verifyPaymentLinkSignature(input: {
+  linkId: string;
+  referenceId: string;
+  status: string;
+  paymentId: string;
+  signature: string;
+}): boolean {
+  const secret = env.RAZORPAY_KEY_SECRET;
+  if (!secret || !input.linkId || !input.status || !input.paymentId || !input.signature) return false;
+  const expected = createHmac("sha256", secret)
+    .update(`${input.linkId}|${input.referenceId}|${input.status}|${input.paymentId}`)
+    .digest("hex");
+  return safeEqual(expected, input.signature);
+}
+
 /** Dashboard deep-link for a payment (works in test and live mode once signed in). */
 export function razorpayPaymentDashboardUrl(paymentId: string): string {
   return `https://dashboard.razorpay.com/app/payments/${encodeURIComponent(paymentId)}`;

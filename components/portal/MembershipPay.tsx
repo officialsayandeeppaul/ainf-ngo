@@ -6,6 +6,7 @@ import { discountLabel, formatInr, yearlyPaise, type YearlyDiscountKind } from "
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PlanBenefitStack } from "@/components/portal/PlanBenefits";
 import { parsePlanBenefits, type PlanBenefit } from "@/lib/plan-benefits";
+import type { SavedInterest } from "@/lib/saved-interests";
 
 type Plan = {
   id: string;
@@ -28,6 +29,7 @@ type PaymentRow = {
   status: string;
   recurring: boolean;
   changeKind?: string;
+  granted?: boolean;
 };
 
 type Quote = {
@@ -54,6 +56,55 @@ type RazorpaySuccess = {
   razorpay_payment_id: string;
   razorpay_signature: string;
 };
+
+type PausedBody = {
+  error: "payments_paused";
+  title: string;
+  message: string;
+  interest: { id: string; what: string; amount: string; email: string; repeat: boolean };
+};
+
+const INTEREST_STATUS: Record<SavedInterest["status"], { label: string; tone: string }> = {
+  OPEN: { label: "Saved · we will contact you", tone: "pt-badge--neutral" },
+  CONTACTED: { label: "In touch", tone: "pt-badge--info" },
+  LINK_SENT: { label: "Payment link ready", tone: "pt-badge--warning" },
+  PAID: { label: "Paid", tone: "pt-badge--success" },
+  DISMISSED: { label: "Closed", tone: "pt-badge--neutral" },
+};
+
+export function SavedInterests({ rows, title = "Your saved requests" }: { rows: SavedInterest[]; title?: string }) {
+  if (rows.length === 0) return null;
+  return (
+    <section className="pt-card pt-card--flush">
+      <div className="pt-card__head">
+        <h2 className="pt-section-title" style={{ margin: 0 }}>
+          {title}
+        </h2>
+      </div>
+      <div className="pt-activity">
+        {rows.map((row) => {
+          const status = INTEREST_STATUS[row.status];
+          return (
+            <div className="pt-activity__row" key={row.id}>
+              <span className="pt-activity__action">
+                {row.what} · {row.amount}
+                {row.payUntil ? <span className="pt-hint"> · link valid until {row.payUntil}</span> : null}
+              </span>
+              <span className="pt-activity__time">{row.when}</span>
+              {row.status === "LINK_SENT" && row.payUrl ? (
+                <a className="pt-btn pt-btn--primary pt-btn--sm" href={row.payUrl} target="_blank" rel="noopener noreferrer">
+                  Pay now
+                </a>
+              ) : (
+                <span className={`pt-badge ${status.tone}`}>{status.label}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 declare global {
   interface Window {
@@ -90,11 +141,16 @@ function changeLabel(kind?: string) {
 export function MembershipPay({
   plans,
   razorpayOn,
+  paymentsOpen = true,
+  interests = [],
   current,
   payments,
 }: {
   plans: Plan[];
   razorpayOn: boolean;
+  /** False while an admin has paused online payments: choosing a plan saves interest instead. */
+  paymentsOpen?: boolean;
+  interests?: SavedInterest[];
   current: {
     tierId: string;
     badge: string;
@@ -117,6 +173,7 @@ export function MembershipPay({
   const [dialog, setDialog] = useState<
     null | { type: "end" } | { type: "stop" } | { type: "switch"; plan: Plan; quote: Quote }
   >(null);
+  const [paused, setPaused] = useState<PausedBody | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,7 +196,7 @@ export function MembershipPay({
   async function pay(plan: Plan) {
     const quote = quotes[plan.id];
     if (!razorpayOn || quote?.kind === "same") return;
-    if (quote && quote.kind !== "new") {
+    if (paymentsOpen && quote && quote.kind !== "new") {
       setDialog({ type: "switch", plan, quote });
       return;
     }
@@ -156,6 +213,11 @@ export function MembershipPay({
         body: JSON.stringify({ tierId: plan.id, interval }),
       });
       const order = await started.json();
+      if (started.status === 409 && order?.error === "payments_paused") {
+        setPaused(order as PausedBody);
+        router.refresh();
+        return;
+      }
       if (!started.ok) throw new Error(order.message ?? "Could not start payment.");
       if (order.applied) {
         router.refresh();
@@ -280,7 +342,14 @@ export function MembershipPay({
           <p className="pt-alert__title">Payments are not live yet</p>
           <p>Razorpay keys are missing on this instance.</p>
         </div>
+      ) : !paymentsOpen ? (
+        <div className="pt-alert pt-alert--info">
+          <p className="pt-alert__title">Online payments are paused</p>
+          <p>Choose a plan and we will save your interest. The AINF team will send you a secure payment link as soon as payments reopen.</p>
+        </div>
       ) : null}
+
+      <SavedInterests rows={interests} />
 
       <div className="pt-segment" role="radiogroup" aria-label="Billing interval">
         <button
@@ -369,7 +438,9 @@ export function MembershipPay({
                       ? "Current plan"
                       : busyId === plan.id
                         ? "Working…"
-                        : (quote?.cta ?? "Pay with Razorpay")}
+                        : !paymentsOpen
+                          ? "Choose this plan"
+                          : (quote?.cta ?? "Pay with Razorpay")}
                   </button>
                 </div>
               </article>
@@ -392,7 +463,7 @@ export function MembershipPay({
               <div className="pt-activity__row" key={row.id}>
                 <span className="pt-activity__action">
                   {row.tierName} · {row.interval === "YEARLY" ? "yearly" : "monthly"} · {row.amount}
-                  {changeLabel(row.changeKind) ? ` · ${changeLabel(row.changeKind)}` : ""}
+                  {row.granted ? " · granted by AINF" : changeLabel(row.changeKind) ? ` · ${changeLabel(row.changeKind)}` : ""}
                   {row.recurring ? " · recurring" : ""}
                 </span>
                 <span className="pt-activity__time">{row.when}</span>
@@ -448,6 +519,27 @@ export function MembershipPay({
           } else void cancel(true);
         }}
       />
+
+      <ConfirmDialog
+        open={paused !== null}
+        title={paused?.title ?? "Thank you for your interest"}
+        body={paused?.message}
+        confirmLabel="Got it"
+        hideCancel
+        onCancel={() => setPaused(null)}
+        onConfirm={() => setPaused(null)}
+      >
+        {paused ? (
+          <dl className="pt-kv pt-interest-summary">
+            <dt>Saved</dt>
+            <dd>{paused.interest.what}</dd>
+            <dt>Amount</dt>
+            <dd>{paused.interest.amount}</dd>
+            <dt>We will write to</dt>
+            <dd>{paused.interest.email}</dd>
+          </dl>
+        ) : null}
+      </ConfirmDialog>
     </div>
   );
 }

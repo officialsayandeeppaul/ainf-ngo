@@ -18,6 +18,7 @@ export type RoleChangeReason =
   | "otp_verified"
   | "pan_verified"
   | "admin_manual"
+  | "admin_identity"
   | "bootstrap"
   | "admin_demote";
 

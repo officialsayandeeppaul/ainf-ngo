@@ -1,6 +1,10 @@
+import { DonationKind, PaymentPurpose } from "@prisma/client";
 import { z } from "zod";
-import { createGiftOrder } from "@/lib/donations";
+import { getAuthContext } from "@/lib/auth/session";
+import { checkGiftRequest, createGiftOrder } from "@/lib/donations";
 import { env, isDatabaseConfigured, isRazorpayConfigured } from "@/lib/env";
+import { pausedPayload, recordPaymentInterest } from "@/lib/payment-interest";
+import { getPaymentSettings, paymentsOpenFor } from "@/lib/payment-settings";
 import { checkRateLimit, rateLimitResponse } from "@/lib/ratelimit";
 import { contextFromRequest } from "@/lib/request-context";
 
@@ -14,11 +18,12 @@ const schema = z.object({
   name: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
   phone: z.string().trim().min(8).max(20),
+  source: z.string().trim().max(40).optional(),
 });
 
 /** Starts a one-time Razorpay order. The amount is checked again on the server. */
 export async function POST(request: Request) {
-  if (!isDatabaseConfigured || !isRazorpayConfigured) {
+  if (!isDatabaseConfigured) {
     return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
   }
 
@@ -39,6 +44,34 @@ export async function POST(request: Request) {
   const digits = input.phone.replace(/[^\d]/g, "");
   if (digits.length < 8 || digits.length > 15) {
     return Response.json({ error: "invalid_input", message: "Enter a phone number we can reach." }, { status: 400 });
+  }
+
+  const settings = await getPaymentSettings();
+  if (!paymentsOpenFor(settings)) {
+    const checked = await checkGiftRequest(input);
+    if (!checked.ok) {
+      return Response.json({ error: "rejected", message: checked.message }, { status: checked.status });
+    }
+    const viewer = await getAuthContext().catch(() => null);
+    const { interest } = await recordPaymentInterest(
+      {
+        purpose: PaymentPurpose.DONATION,
+        userId: viewer?.user.id ?? null,
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        amountPaise: input.amountPaise,
+        donationKind: checked.target.kind as DonationKind,
+        targetSlug: checked.target.slug,
+        targetTitle: checked.target.title,
+        source: input.source ?? "site",
+      },
+      context
+    );
+    return Response.json(pausedPayload(settings, interest), { status: 409 });
+  }
+  if (!isRazorpayConfigured) {
+    return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
   }
 
   const created = await createGiftOrder({

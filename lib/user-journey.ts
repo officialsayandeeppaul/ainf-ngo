@@ -73,6 +73,7 @@ export function journeyKindForAction(action: string): JourneyKind {
     return "payment";
   }
   if (action.startsWith("membership.")) return "membership";
+  if (action.startsWith("payments.")) return "payment";
   if (action.startsWith("security.")) return "access";
   if (action.startsWith("admin.")) return "admin";
   return "account";

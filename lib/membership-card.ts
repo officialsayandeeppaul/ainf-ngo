@@ -221,11 +221,23 @@ async function allocateRegNo(year: number): Promise<string> {
   return nextCardRegNo(rows[0]?.regNo ?? null, year);
 }
 
+/**
+ * The SVG files are a cache: every page renders the card from the database row.
+ * Serverless hosts have a read-only `public/`, so a failed write must not stop
+ * the card from being issued.
+ */
 async function writeCardFiles(regNo: string, frontSvg: string, backSvg: string) {
   const files = cardFilePaths(regNo);
-  await mkdir(files.folder, { recursive: true });
-  await writeFile(files.frontPath, frontSvg, "utf8");
-  await writeFile(files.backPath, backSvg, "utf8");
+  try {
+    await mkdir(files.folder, { recursive: true });
+    await writeFile(files.frontPath, frontSvg, "utf8");
+    await writeFile(files.backPath, backSvg, "utf8");
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException | null)?.code;
+    if (code !== "EROFS" && code !== "EACCES" && code !== "EPERM" && code !== "ENOENT") {
+      console.warn("[membership-card] could not cache card files", error);
+    }
+  }
   return files;
 }
 

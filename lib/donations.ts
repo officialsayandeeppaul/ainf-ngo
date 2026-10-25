@@ -145,6 +145,30 @@ export async function resolveGiftTarget(input: {
   };
 }
 
+export type CheckedGift = Extract<Resolved, { ok: true }> & { slug: string | null };
+
+/** Target and amount rules shared by a real order and an interest recorded while payments are paused. */
+export async function checkGiftRequest(input: {
+  kind: GiftKind;
+  slug?: string | null;
+  amountPaise: number;
+}): Promise<{ ok: true; target: CheckedGift } | { ok: false; status: number; message: string }> {
+  const settings = await getGiftSettings();
+  const target = await resolveGiftTarget({ kind: input.kind, slug: input.slug });
+  if (!target.ok) return { ok: false, status: 400, message: target.message };
+  if (target.floor > settings.maxPaise) {
+    return { ok: false, status: 409, message: "Gifts are paused until the minimum is below the maximum." };
+  }
+  if (!Number.isInteger(input.amountPaise) || input.amountPaise < target.floor) {
+    return { ok: false, status: 400, message: "That amount is below the minimum for this gift." };
+  }
+  if (input.amountPaise > settings.maxPaise) {
+    return { ok: false, status: 400, message: "That amount is above the maximum for a gift." };
+  }
+  const slug = input.kind === "GENERAL" ? null : (input.slug ?? "").trim().toLowerCase() || null;
+  return { ok: true, target: { ...target, slug } };
+}
+
 export async function createGiftOrder(input: {
   kind: GiftKind;
   slug?: string | null;
@@ -163,18 +187,9 @@ export async function createGiftOrder(input: {
     }
   | { ok: false; status: number; message: string }
 > {
-  const settings = await getGiftSettings();
-  const target = await resolveGiftTarget({ kind: input.kind, slug: input.slug });
-  if (!target.ok) return { ok: false, status: 400, message: target.message };
-  if (target.floor > settings.maxPaise) {
-    return { ok: false, status: 409, message: "Gifts are paused until the minimum is below the maximum." };
-  }
-  if (!Number.isInteger(input.amountPaise) || input.amountPaise < target.floor) {
-    return { ok: false, status: 400, message: "That amount is below the minimum for this gift." };
-  }
-  if (input.amountPaise > settings.maxPaise) {
-    return { ok: false, status: 400, message: "That amount is above the maximum for a gift." };
-  }
+  const checked = await checkGiftRequest(input);
+  if (!checked.ok) return checked;
+  const { target } = checked;
 
   const donation = await db.donation.create({
     data: {
@@ -243,17 +258,23 @@ async function emailReceiptOnce(row: Donation): Promise<void> {
 }
 
 export async function markGiftPaidFromPayment(input: {
-  razorpayOrderId: string;
+  razorpayOrderId: string | null;
   razorpayPaymentId: string;
   amountPaise: number;
   currency: string | null | undefined;
   status: string | null | undefined;
   captured?: boolean;
+  /** Payment-link gifts are found by row id: their Razorpay order only exists once the link is paid. */
+  donationId?: string | null;
 }): Promise<
   | { ok: true; receiptPath: string; deduplicated: boolean }
   | { ok: false; status: number; message: string }
 > {
-  const row = await db.donation.findUnique({ where: { razorpayOrderId: input.razorpayOrderId } });
+  const row = input.donationId
+    ? await db.donation.findUnique({ where: { id: input.donationId } })
+    : input.razorpayOrderId
+      ? await db.donation.findUnique({ where: { razorpayOrderId: input.razorpayOrderId } })
+      : null;
   if (!row) return { ok: false, status: 404, message: "Gift not found." };
 
   if (row.status === DonationStatus.REFUNDED) {
@@ -292,6 +313,7 @@ export async function markGiftPaidFromPayment(input: {
       data: {
         status: DonationStatus.PAID,
         razorpayPaymentId: input.razorpayPaymentId,
+        ...(!row.razorpayOrderId && input.razorpayOrderId ? { razorpayOrderId: input.razorpayOrderId } : {}),
         paidAt: new Date(),
       },
     });

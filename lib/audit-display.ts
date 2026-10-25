@@ -12,6 +12,8 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.KycStatusChanged]: "Didit status",
   [AuditAction.KycManualReview]: "Didit review",
   [AuditAction.KycWebhookRejected]: "Didit webhook rejected",
+  [AuditAction.IdentityVerifiedByAdmin]: "Verified by admin",
+  [AuditAction.IdentityAdminVerificationRemoved]: "Admin verification removed",
   [AuditAction.PanVerifyAttempted]: "PAN attempted",
   [AuditAction.PanVerifySucceeded]: "PAN verified",
   [AuditAction.PanVerifyFailed]: "PAN failed",
@@ -36,6 +38,7 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.MembershipOfferUpdated]: "Offer updated",
   [AuditAction.MembershipOfferDeleted]: "Offer deleted",
   [AuditAction.MembershipCardIssued]: "ID card issued",
+  [AuditAction.MembershipGranted]: "Membership granted",
   [AuditAction.RazorpayWebhookRejected]: "Razorpay webhook rejected",
   [AuditAction.ContactMessageReceived]: "Contact message",
   [AuditAction.ContactMessageReviewed]: "Contact reviewed",
@@ -48,6 +51,13 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.DonationMissionSaved]: "Gift mission",
   [AuditAction.DonationCaptured]: "Gift paid",
   [AuditAction.DonationRefunded]: "Gift returned",
+  [AuditAction.PaymentsSwitched]: "Payments switched",
+  [AuditAction.PaymentInterestRecorded]: "Payment interest saved",
+  [AuditAction.PaymentInterestUpdated]: "Payment interest updated",
+  [AuditAction.PaymentLinkCreated]: "Payment link sent",
+  [AuditAction.PaymentLinkResent]: "Payment link resent",
+  [AuditAction.PaymentLinkPaid]: "Payment link paid",
+  [AuditAction.PaymentLinkClosed]: "Payment link closed",
 };
 
 const META_LABEL: Record<string, string> = {

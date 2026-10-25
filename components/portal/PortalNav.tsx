@@ -56,6 +56,7 @@ function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[
       {
         label: "Money",
         items: [
+          { href: "/admin/payments", label: "Payments" },
           { href: "/admin/revenue", label: "Revenue" },
           { href: "/admin/plans", label: "Plans" },
         ],

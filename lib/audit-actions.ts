@@ -14,6 +14,8 @@ export const AuditAction = {
   KycStatusChanged: "kyc.status_changed",
   KycManualReview: "kyc.manual_review",
   KycWebhookRejected: "kyc.webhook_rejected",
+  IdentityVerifiedByAdmin: "kyc.admin_verified",
+  IdentityAdminVerificationRemoved: "kyc.admin_verification_removed",
 
   PanVerifyAttempted: "pan.verify_attempted",
   PanVerifySucceeded: "pan.verify_succeeded",
@@ -43,6 +45,7 @@ export const AuditAction = {
   MembershipOfferUpdated: "membership.offer_updated",
   MembershipOfferDeleted: "membership.offer_deleted",
   MembershipCardIssued: "membership.card_issued",
+  MembershipGranted: "membership.granted",
   RazorpayWebhookRejected: "membership.webhook_rejected",
 
   ContactMessageReceived: "contact.message_received",
@@ -57,6 +60,14 @@ export const AuditAction = {
   DonationMissionSaved: "donation.mission_saved",
   DonationCaptured: "donation.captured",
   DonationRefunded: "donation.refunded",
+
+  PaymentsSwitched: "payments.switched",
+  PaymentInterestRecorded: "payments.interest_recorded",
+  PaymentInterestUpdated: "payments.interest_updated",
+  PaymentLinkCreated: "payments.link_created",
+  PaymentLinkResent: "payments.link_resent",
+  PaymentLinkPaid: "payments.link_paid",
+  PaymentLinkClosed: "payments.link_closed",
 } as const;
 
 export type AuditActionValue = (typeof AuditAction)[keyof typeof AuditAction];

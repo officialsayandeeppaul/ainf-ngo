@@ -22,7 +22,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /** Bump when new Prisma models are added so a stale singleton is rebuilt once. */
-const PRISMA_DELEGATE_GEN = 6;
+const PRISMA_DELEGATE_GEN = 7;
 
 function createClient(): PrismaClient {
   requireDatabaseEnv();
@@ -53,6 +53,9 @@ type ClientDelegates = PrismaClient & {
   donationSettings?: unknown;
   donationMission?: unknown;
   donation?: unknown;
+  paymentSettings?: unknown;
+  paymentInterest?: unknown;
+  paymentLink?: unknown;
 };
 
 /** True when this process still holds a PrismaClient built before a later `prisma generate`. */
@@ -68,7 +71,10 @@ function isStaleClient(client: PrismaClient): boolean {
     typeof row.supportBanner === "undefined" ||
     typeof row.fieldProject === "undefined" ||
     typeof row.donationSettings === "undefined" ||
-    typeof row.donation === "undefined"
+    typeof row.donation === "undefined" ||
+    typeof row.paymentSettings === "undefined" ||
+    typeof row.paymentInterest === "undefined" ||
+    typeof row.paymentLink === "undefined"
   );
 }
 

@@ -5583,3 +5583,268 @@ html.pt-modal-open {
   color: var(--ainf-green);
   border-bottom-color: var(--ainf-green);
 }
+
+/* ---------------------------------------------------------------------------
+   Payments desk, payment switch, grant and identity tools
+   --------------------------------------------------------------------------- */
+
+.pt-pay-desk {
+  display: grid;
+  gap: 16px;
+}
+
+.pt-pay-desk > .pt-alert {
+  margin: 0;
+}
+
+.pt-pay-switch {
+  border-left: 4px solid var(--ainf-green);
+}
+
+.pt-pay-switch.is-paused {
+  border-left-color: var(--warning);
+  background: #fffbf4;
+}
+
+.pt-pay-switch__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pt-pay-switch__facts {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pt-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pt-switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.pt-switch__track {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background 0.18s ease;
+}
+
+.pt-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease;
+}
+
+.pt-switch input:checked + .pt-switch__track {
+  background: var(--ainf-green);
+}
+
+.pt-switch input:checked + .pt-switch__track::after {
+  transform: translateX(22px);
+}
+
+.pt-switch input:focus-visible + .pt-switch__track {
+  outline: 3px solid var(--ainf-green-ring);
+  outline-offset: 2px;
+}
+
+.pt-switch input:disabled + .pt-switch__track {
+  opacity: 0.55;
+}
+
+.pt-switch input:disabled {
+  cursor: not-allowed;
+}
+
+.pt-switch__label {
+  min-width: 2.2em;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.pt-pay-queue__head {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.pt-pay-search {
+  flex: 0 1 300px;
+  margin: 0;
+}
+
+.pt-pay-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pt-segment--wrap {
+  flex-wrap: wrap;
+  border-radius: 16px;
+}
+
+a.pt-segment__btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pt-pay-tabs__n {
+  min-width: 1.6em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-segment__btn.is-on .pt-pay-tabs__n {
+  background: #fff;
+  color: var(--ainf-green-dark);
+}
+
+.pt-pay-table td {
+  vertical-align: top;
+}
+
+.pt-pay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  min-width: 180px;
+}
+
+.pt-pay-actions__quiet {
+  color: var(--ink-faint);
+}
+
+.pt-pay-note {
+  color: var(--warning);
+}
+
+.pt-pay-form .pt-check {
+  margin-top: 8px;
+}
+
+.pt-pay-made {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+
+.pt-pay-made .pt-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pt-pay-filters {
+  grid-template-columns: repeat(2, minmax(130px, 160px)) repeat(2, minmax(150px, 200px)) auto;
+  padding: 14px 22px 0;
+}
+
+.pt-card__foot--stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pt-grant .pt-label {
+  display: block;
+}
+
+.pt-identity-admin {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.pt-identity-admin__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-identity-admin__state .pt-hint {
+  margin: 0;
+}
+
+.pt-interest-summary {
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .pt-pay-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pt-pay-filters .pt-crm-period__actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .pt-pay-switch__head {
+    flex-direction: column;
+  }
+
+  .pt-pay-search {
+    flex: 1 1 100%;
+  }
+
+  .pt-pay-tabs {
+    padding: 12px 16px;
+  }
+
+  .pt-pay-actions {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .pt-pay-filters {
+    grid-template-columns: 1fr;
+    padding: 12px 16px 0;
+  }
+}

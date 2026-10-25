@@ -19,6 +19,114 @@
     return message + " You can try again in about " + wait + ".";
   }
 
+  function ainfIsPaused(body) {
+    return Boolean(body && body.error === "payments_paused");
+  }
+
+  // A checkout answered 409 payments_paused: the server has already saved the
+  // visitor's interest, so this window only thanks them and says what happens next.
+  function ainfShowInterest(body) {
+    var info = (body && body.interest) || {};
+    var old = document.getElementById("ainf-interest-modal");
+    if (old) old.remove();
+    if (!document.getElementById("ainf-interest-style")) {
+      var style = document.createElement("style");
+      style.id = "ainf-interest-style";
+      style.textContent =
+        "#ainf-interest-modal{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Onest,Inter,system-ui,sans-serif}" +
+        "#ainf-interest-modal .ainf-interest__backdrop{position:absolute;inset:0;background:rgba(16,28,22,.48);border:0;padding:0;cursor:pointer}" +
+        "#ainf-interest-modal .ainf-interest__panel{position:relative;width:min(440px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#1a1d1b;border-radius:22px;padding:26px 24px 22px;box-shadow:0 24px 64px rgba(16,28,22,.28);animation:ainfInterestIn .22s ease-out}" +
+        "#ainf-interest-modal .ainf-interest__mark{width:44px;height:44px;border-radius:50%;background:#e7f6ee;color:#1c7d48;display:flex;align-items:center;justify-content:center;margin:0 0 14px}" +
+        "#ainf-interest-modal h2{margin:0 0 8px;font-size:23px;line-height:1.15;font-weight:500;letter-spacing:-.03em}" +
+        "#ainf-interest-modal p{margin:0 0 16px;font-size:15px;line-height:1.5;color:#3d4a44}" +
+        "#ainf-interest-modal dl{margin:0 0 18px;padding:12px 14px;border-radius:14px;background:#f4f7f5;border:1px solid #e2e7e4;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}" +
+        "#ainf-interest-modal dt{color:#5c6b64}" +
+        "#ainf-interest-modal dd{margin:0;color:#1a1d1b;overflow-wrap:anywhere}" +
+        "#ainf-interest-modal button.ainf-interest__ok{width:100%;border:0;border-radius:999px;background:#1c7d48;color:#fff;padding:13px 18px;font:inherit;font-size:15px;font-weight:500;cursor:pointer}" +
+        "#ainf-interest-modal button.ainf-interest__ok:focus-visible{outline:3px solid rgba(28,125,72,.35);outline-offset:2px}" +
+        "@keyframes ainfInterestIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}" +
+        "@media (prefers-reduced-motion:reduce){#ainf-interest-modal .ainf-interest__panel{animation:none}}";
+      document.head.appendChild(style);
+    }
+
+    var previous = document.activeElement;
+    var root = document.createElement("div");
+    root.id = "ainf-interest-modal";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-labelledby", "ainf-interest-title");
+    root.setAttribute("aria-describedby", "ainf-interest-body");
+
+    var backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "ainf-interest__backdrop";
+    backdrop.setAttribute("aria-label", "Close");
+    backdrop.tabIndex = -1;
+
+    var panel = document.createElement("div");
+    panel.className = "ainf-interest__panel";
+    var mark = document.createElement("div");
+    mark.className = "ainf-interest__mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var title = document.createElement("h2");
+    title.id = "ainf-interest-title";
+    title.textContent = (body && body.title) || "Thank you for your interest";
+    var text = document.createElement("p");
+    text.id = "ainf-interest-body";
+    text.textContent =
+      (body && body.message) ||
+      "We are not taking online payments right now, but we have saved your interest. The AINF team will contact you with a secure payment link.";
+    var summary = document.createElement("dl");
+    [
+      ["Saved", info.what],
+      ["Amount", info.amount],
+      ["We will write to", info.email]
+    ].forEach(function (pair) {
+      if (!pair[1]) return;
+      var dt = document.createElement("dt");
+      dt.textContent = pair[0];
+      var dd = document.createElement("dd");
+      dd.textContent = pair[1];
+      summary.appendChild(dt);
+      summary.appendChild(dd);
+    });
+    var ok = document.createElement("button");
+    ok.type = "button";
+    ok.className = "ainf-interest__ok";
+    ok.textContent = "Got it";
+
+    panel.appendChild(mark);
+    panel.appendChild(title);
+    panel.appendChild(text);
+    if (summary.children.length) panel.appendChild(summary);
+    panel.appendChild(ok);
+    root.appendChild(backdrop);
+    root.appendChild(panel);
+
+    function close() {
+      document.removeEventListener("keydown", onKey, true);
+      root.remove();
+      if (previous && previous.focus) {
+        try { previous.focus({ preventScroll: true }); } catch (error) { previous.focus(); }
+      }
+    }
+    function onKey(event) {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        close();
+      } else if (event.key === "Tab") {
+        event.preventDefault();
+        ok.focus();
+      }
+    }
+    backdrop.addEventListener("click", close);
+    ok.addEventListener("click", close);
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(root);
+    ok.focus({ preventScroll: true });
+  }
+
   document.addEventListener(
     "click",
     function (event) {
@@ -794,13 +902,21 @@
         amountPaise: paise,
         name: name.value.trim(),
         email: email.value.trim(),
-        phone: phone.value.trim()
+        phone: phone.value.trim(),
+        source: "gift-window"
       })
     })
       .then(function (response) {
         return response.json().then(function (body) { return { ok: response.ok, body: body }; });
       })
       .then(function (result) {
+        if (ainfIsPaused(result.body)) {
+          giftBusy = false;
+          if (button) button.disabled = false;
+          giftNote(root, "Your interest is saved. We will email you a payment link.", false);
+          ainfShowInterest(result.body);
+          return;
+        }
         if (!result.ok) {
           giftBusy = false;
           if (button) button.disabled = false;
@@ -3264,7 +3380,8 @@
             amountPaise: paise,
             name: name.value.trim(),
             email: email.value.trim(),
-            phone: phone.value.trim()
+            phone: phone.value.trim(),
+            source: "project-page"
           })
         }).then(function (response) {
           return response.json().then(function (body) { return { ok: response.ok, body: body, paise: paise }; });
@@ -3272,6 +3389,12 @@
       })
       .then(function (result) {
         if (!result) return;
+        if (ainfIsPaused(result.body)) {
+          releaseProjectPay(form);
+          projectPayNote(form, "Your interest is saved. We will email you a payment link.");
+          ainfShowInterest(result.body);
+          return;
+        }
         if (!result.ok) {
           form.removeAttribute("data-ainf-paying");
           if (button) button.disabled = false;
@@ -3497,13 +3620,20 @@
           amountPaise: paise,
           name: name.value.trim(),
           email: email.value.trim(),
-          phone: phone.value.trim()
+          phone: phone.value.trim(),
+          source: "donate-page"
         })
       })
         .then(function (response) {
           return response.json().then(function (body) { return { ok: response.ok, body: body }; });
         })
         .then(function (result) {
+          if (ainfIsPaused(result.body)) {
+            busy = false;
+            note("Your interest is saved. We will email you a payment link.", false);
+            ainfShowInterest(result.body);
+            return;
+          }
           if (!result.ok || !window.Razorpay) {
             busy = false;
             note(ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);

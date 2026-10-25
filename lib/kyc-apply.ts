@@ -80,10 +80,15 @@ export async function applyDiditDecision(params: {
     },
   });
 
-  await db.user.update({
-    where: { id: record.userId },
-    data: { kycStatus: status },
-  });
+  // An admin-verified member keeps that standing until an admin removes it; the
+  // session row above still records what Didit decided.
+  const adminVerified = Boolean(record.user.identityVerifiedByAdminAt);
+  if (!adminVerified || status === KycStatus.APPROVED) {
+    await db.user.update({
+      where: { id: record.userId },
+      data: { kycStatus: status },
+    });
+  }
 
   await recordAudit({
     action: AuditAction.KycStatusChanged,
@@ -112,7 +117,7 @@ export async function applyDiditDecision(params: {
     await notify(() => sendKycOutcomeSms(record.user, "approved"));
   }
 
-  if (status === KycStatus.DECLINED && record.user.role === Role.VERIFIED_USER) {
+  if (status === KycStatus.DECLINED && record.user.role === Role.VERIFIED_USER && !adminVerified) {
     await revokeVerified({
       targetUserId: record.userId,
       reason: "kyc_revoked",

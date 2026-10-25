@@ -8,6 +8,8 @@ import { SetupNotice } from "@/components/portal/SetupNotice";
 import { formatDay } from "@/lib/format-date";
 import { formatInr } from "@/lib/membership";
 import { getUserGiving } from "@/lib/user-donations";
+import { loadSavedInterests } from "@/lib/saved-interests";
+import { SavedInterests } from "@/components/portal/MembershipPay";
 
 export const metadata: Metadata = { title: "Your giving" };
 export const dynamic = "force-dynamic";
@@ -30,7 +32,10 @@ export default async function AccountDonationsPage() {
   }
 
   const { user, role } = await requirePageAuth("/account/donations");
-  const { donations, summary } = await getUserGiving(user.email);
+  const [{ donations, summary }, interests] = await Promise.all([
+    getUserGiving(user.email),
+    loadSavedInterests({ purpose: "DONATION", OR: [{ email: user.email.toLowerCase() }, { userId: user.id }] }),
+  ]);
 
   return (
     <DashShell role={role} currentPath="/account/donations">
@@ -56,6 +61,12 @@ export default async function AccountDonationsPage() {
             <p className="pt-stat__value">{formatInr(summary.thisYearPaise)}</p>
           </div>
         </div>
+
+        {interests.length > 0 ? (
+          <div style={{ marginBottom: 18 }}>
+            <SavedInterests rows={interests} title="Gifts you asked to make" />
+          </div>
+        ) : null}
 
         <section className="pt-card">
           <h2 className="pt-section-title">Gift history</h2>

@@ -122,7 +122,12 @@ export default async function VerifyPage({
         >
           <span style={{ fontSize: 13.5, color: "var(--ink-muted)" }}>Current status</span>
           <KycBadge status={fresh.kycStatus} />
-          {fresh.panVerified ? (
+          {fresh.identityVerifiedByAdminAt ? (
+            <span className="pt-badge pt-badge--success">
+              <span className="pt-badge__dot" aria-hidden="true" />
+              Verified by the AINF team
+            </span>
+          ) : fresh.panVerified ? (
             <span className="pt-badge pt-badge--success">
               <span className="pt-badge__dot" aria-hidden="true" />
               PAN verified
@@ -138,7 +143,9 @@ export default async function VerifyPage({
             <div>
               <p className="pt-alert__title">You are verified</p>
               <p className="pt-hint" style={{ margin: "6px 0 0" }}>
-                Nothing more to do on this page. Your account has verified member access.
+                {fresh.identityVerifiedByAdminAt
+                  ? "The AINF team verified your identity directly. Nothing more to do on this page."
+                  : "Nothing more to do on this page. Your account has verified member access."}
               </p>
             </div>
           </section>

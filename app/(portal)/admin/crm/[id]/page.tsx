@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { KycStatus, MembershipChangeKind, PanStatus, Prisma } from "@prisma/client";
+import { KycStatus, MembershipChangeKind, PanStatus, PaymentInterestStatus, Prisma } from "@prisma/client";
 import { AuditAction } from "@/lib/audit";
 import { auditActionLabel, auditChips, shortId } from "@/lib/audit-display";
 import { requirePageSuperAdmin } from "@/lib/auth/guard";
@@ -29,6 +29,10 @@ import { SetupNotice } from "@/components/portal/SetupNotice";
 import { KycBadge, PanBadge, UserStatusBadge } from "@/components/portal/StatusBadge";
 import { MembershipIdCard } from "@/components/portal/MembershipIdCard";
 import { MembershipAdminControls, UserJourney } from "@/components/portal/UserJourney";
+import { GrantMembershipButton, IdentityAdminControls } from "@/components/portal/MemberAdminTools";
+import { identityReadyForMembership } from "@/lib/donation-rules";
+import { interestLabel } from "@/lib/payment-interest";
+import { getVerificationPolicy } from "@/lib/verification-policy";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { VerifyMethodStack } from "@/components/portal/VerifyMethods";
 
@@ -46,6 +50,22 @@ const CHANGE_LABEL: Record<MembershipChangeKind, string> = {
   UPGRADE: "Upgrade",
   DOWNGRADE: "Downgrade",
   INTERVAL_CHANGE: "Cycle change",
+};
+
+const INTEREST_LABEL: Record<PaymentInterestStatus, string> = {
+  OPEN: "Waiting",
+  CONTACTED: "Contacted",
+  LINK_SENT: "Link sent",
+  PAID: "Paid",
+  DISMISSED: "Dismissed",
+};
+
+const INTEREST_TONE: Record<PaymentInterestStatus, string> = {
+  OPEN: "pt-badge--warning",
+  CONTACTED: "pt-badge--info",
+  LINK_SENT: "pt-badge--info",
+  PAID: "pt-badge--success",
+  DISMISSED: "pt-badge--neutral",
 };
 
 function decisionReason(decision: unknown): string | null {
@@ -115,11 +135,30 @@ export default async function AdminCrmDossierPage({
         include: {
           tier: { select: { name: true } },
           offer: { select: { name: true } },
+          paymentLink: { select: { id: true } },
         },
       },
     },
   });
   if (!member) notFound();
+
+  const [grantTiers, interests, verifier] = await Promise.all([
+    db.membershipTier.findMany({
+      orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { id: true, name: true, badge: true, active: true },
+    }),
+    db.paymentInterest
+      .findMany({
+        where: { OR: [{ userId: member.id }, { email: member.email.toLowerCase() }] },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        include: { links: { orderBy: { createdAt: "desc" }, take: 1 } },
+      })
+      .catch(() => []),
+    member.identityVerifiedByUserId
+      ? db.user.findUnique({ where: { id: member.identityVerifiedByUserId }, select: { email: true } })
+      : Promise.resolve(null),
+  ]);
 
   const previousTierIds = [
     ...new Set(
@@ -391,7 +430,21 @@ export default async function AdminCrmDossierPage({
                 )}
               </dd>
             </dl>
-            <div className="pt-card__foot">
+            <div className="pt-card__foot pt-card__foot--stack">
+              <GrantMembershipButton
+                userId={member.id}
+                tiers={grantTiers}
+                suspended={member.status !== "ACTIVE"}
+                current={
+                  live && member.membershipTier && member.membershipExpiresAt
+                    ? {
+                        tierName: member.membershipTier.name,
+                        untilLabel: formatDay(member.membershipExpiresAt),
+                        recurring: Boolean(member.membershipSubscriptionId) && !member.membershipCancelAtPeriodEnd,
+                      }
+                    : null
+                }
+              />
               <MembershipAdminControls
                 userId={member.id}
                 live={live}
@@ -421,7 +474,71 @@ export default async function AdminCrmDossierPage({
             numbers are never shown here.
           </p>
           <VerifyMethodStack summary={summary} />
+          <IdentityAdminControls
+            userId={member.id}
+            verified={identityReadyForMembership(member, getVerificationPolicy())}
+            adminVerified={
+              member.identityVerifiedByAdminAt
+                ? {
+                    atLabel: formatDayTime(member.identityVerifiedByAdminAt),
+                    byEmail: verifier?.email ?? null,
+                    note: member.identityVerifiedNote,
+                  }
+                : null
+            }
+          />
         </section>
+
+        {interests.length > 0 ? (
+          <section className="pt-card pt-card--flush" style={{ marginBottom: 18 }}>
+            <div className="pt-card__head">
+              <h2 className="pt-section-title" style={{ margin: 0 }}>
+                Payment requests
+              </h2>
+              <Link href="/admin/payments" className="pt-link">
+                Open payments desk
+              </Link>
+            </div>
+            <div className="pt-table-wrap">
+              <table className="pt-table pt-table--dossier">
+                <thead>
+                  <tr>
+                    <th>Asked for</th>
+                    <th>Amount</th>
+                    <th>Tries</th>
+                    <th>Last tried</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {interests.map((row) => (
+                    <tr key={row.id}>
+                      <td>
+                        <div className="pt-dossier-plan">{interestLabel(row)}</div>
+                        {row.links[0] ? (
+                          <div className="pt-dossier-meta">
+                            Link {row.links[0].status.toLowerCase()}
+                            {row.links[0].paidAt ? ` · paid ${formatDayTime(row.links[0].paidAt)}` : ""}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td>
+                        <span className="pt-money">{formatInr(row.amountPaise)}</span>
+                      </td>
+                      <td>{row.attempts}</td>
+                      <td className="pt-dossier-when">{formatDayTime(row.lastAttemptAt)}</td>
+                      <td>
+                        <span className={`pt-badge pt-badge--lift ${INTEREST_TONE[row.status]}`}>
+                          {INTEREST_LABEL[row.status]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         <div className="pt-grid pt-grid--methods pt-grid--equal">
           <section className="pt-card pt-card--stack">
@@ -546,6 +663,11 @@ export default async function AdminCrmDossierPage({
                       </td>
                       <td>
                         <span className="pt-pill">{CHANGE_LABEL[order.changeKind]}</span>
+                        {order.grantedByUserId ? (
+                          <div className="pt-dossier-meta">Granted free{order.grantNote ? ` · ${order.grantNote}` : ""}</div>
+                        ) : order.paymentLink ? (
+                          <div className="pt-dossier-meta">Via payment link</div>
+                        ) : null}
                       </td>
                       <td className="pt-dossier-when">{formatDayTime(order.paidAt ?? order.createdAt)}</td>
                       <td>

@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { isClerkConfigured, isDatabaseConfigured, isRedisConfigured } from "@/lib/env";
 import { getVerificationPolicy } from "@/lib/verification-policy";
 import { getSupportBanner, toSupportBannerView } from "@/lib/support-banner";
+import { getPaymentSettings, paymentsOpenFor } from "@/lib/payment-settings";
 import { DashShell } from "@/components/portal/DashShell";
 import { Pagination } from "@/components/portal/Pagination";
 import { SetupNotice } from "@/components/portal/SetupNotice";
@@ -55,6 +56,8 @@ export default async function AdminPage({
     auditTotal,
     failedWebhooks,
     supportBannerRow,
+    paymentSettings,
+    waitingInterests,
   ] = await Promise.all([
     db.user.count(),
     db.user.count({ where: { role: Role.VERIFIED_USER } }),
@@ -75,6 +78,8 @@ export default async function AdminPage({
     db.auditLog.count(),
     db.webhookEvent.count({ where: { error: { not: null } } }),
     getSupportBanner(),
+    getPaymentSettings(),
+    db.paymentInterest.count({ where: { status: { in: ["OPEN", "CONTACTED"] } } }).catch(() => 0),
   ]);
   const activityPages = Math.max(1, Math.ceil(auditTotal / ACTIVITY_PAGE_SIZE));
   const supportBanner = toSupportBannerView(supportBannerRow);
@@ -95,6 +100,22 @@ export default async function AdminPage({
               Set <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code>.
               In development an in-memory fallback is used; in production requests to rate-limited
               endpoints are rejected outright.
+            </p>
+          </div>
+        ) : null}
+
+        {!paymentsOpenFor(paymentSettings) || waitingInterests > 0 ? (
+          <div className={`pt-alert ${paymentsOpenFor(paymentSettings) ? "pt-alert--info" : "pt-alert--warning"}`}>
+            <p className="pt-alert__title">
+              {paymentsOpenFor(paymentSettings) ? "Payments are live" : "Online payments are paused"}
+              {waitingInterests > 0
+                ? ` · ${waitingInterests} ${waitingInterests === 1 ? "person is" : "people are"} waiting for a payment link`
+                : ""}
+            </p>
+            <p>
+              <Link href="/admin/payments" className="pt-link">
+                Open the payments desk
+              </Link>
             </p>
           </div>
         ) : null}

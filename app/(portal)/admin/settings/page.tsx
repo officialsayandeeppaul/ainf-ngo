@@ -110,6 +110,20 @@ export default async function AdminSettingsPage() {
           </div>
         </section>
 
+        <section className="pt-card" style={{ marginBottom: 18 }}>
+          <h2 className="pt-section-title">Online payments</h2>
+          <p className="pt-hint" style={{ marginTop: 0 }}>
+            Pause or reopen Razorpay checkout for gifts and plans, follow up with people who asked to
+            pay while it was paused, and send them payment links. <code>PAYMENTS_PAUSED=true</code>{" "}
+            on the host forces payments off.
+          </p>
+          <div className="pt-btn-row" style={{ marginTop: 14 }}>
+            <Link href="/admin/payments" className="pt-btn pt-btn--primary">
+              Open payments desk
+            </Link>
+          </div>
+        </section>
+
         {(Object.keys(GROUP_LABEL) as ServiceRow["group"][]).map((group) => (
           <section key={group} className="pt-card pt-card--flush" style={{ marginBottom: 18 }}>
             <div className="pt-card__head">

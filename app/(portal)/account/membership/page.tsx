@@ -8,6 +8,8 @@ import { formatInr } from "@/lib/membership";
 import { membershipIsLive } from "@/lib/membership-state";
 import { identityReadyForMembership } from "@/lib/donation-rules";
 import { getVerificationPolicy } from "@/lib/verification-policy";
+import { getPaymentSettings, paymentsOpenFor } from "@/lib/payment-settings";
+import { loadSavedInterests } from "@/lib/saved-interests";
 import Link from "next/link";
 import { CardPhotoEditor } from "@/components/portal/CardPhotoEditor";
 import { DashShell } from "@/components/portal/DashShell";
@@ -18,7 +20,11 @@ import { SetupNotice } from "@/components/portal/SetupNotice";
 export const metadata: Metadata = { title: "Membership" };
 export const dynamic = "force-dynamic";
 
-export default async function AccountMembershipPage() {
+export default async function AccountMembershipPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ paid?: string }>;
+}) {
   if (!isClerkConfigured || !isDatabaseConfigured) {
     return (
       <SetupNotice
@@ -29,17 +35,21 @@ export default async function AccountMembershipPage() {
   }
 
   const { user, role } = await requirePageAuth("/account/membership");
-  const [plans, member, orders] = await Promise.all([
+  const query = await searchParams;
+  const [plans, member, orders, paymentSettings, interests] = await Promise.all([
     db.membershipTier.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     loadUserMembership(user.id),
     db.membershipOrder.findMany({
-      where: { userId: user.id },
+      // Orders behind an admin payment link show here once paid; until then they are a saved request.
+      where: { userId: user.id, OR: [{ paymentLink: { is: null } }, { status: "PAID" }] },
       orderBy: { createdAt: "desc" },
       include: { tier: { select: { name: true } } },
     }),
+    getPaymentSettings(),
+    loadSavedInterests({ userId: user.id, purpose: "MEMBERSHIP" }),
   ]);
 
   const live = member ? membershipIsLive(member) : false;
@@ -77,6 +87,12 @@ export default async function AccountMembershipPage() {
           Upgrade or downgrade any time. Unused days from the current plan become credit, the new plan
           starts today, and the next billing date becomes today plus one month or year.
         </p>
+        {query.paid === "link" && live ? (
+          <div className="pt-alert pt-alert--success" style={{ marginBottom: 16 }}>
+            <p className="pt-alert__title">Payment received</p>
+            <p>Thank you. Your membership is active and your card is ready below.</p>
+          </div>
+        ) : null}
         {card ? (
           <>
             <MembershipIdCard {...card} />
@@ -92,6 +108,8 @@ export default async function AccountMembershipPage() {
           <MembershipPay
           plans={plans}
           razorpayOn={isRazorpayConfigured}
+          paymentsOpen={paymentsOpenFor(paymentSettings)}
+          interests={interests}
           current={current}
           payments={orders.map((order) => ({
             id: order.id,
@@ -102,13 +120,16 @@ export default async function AccountMembershipPage() {
             status: order.status,
             recurring: order.recurring,
             changeKind: order.changeKind,
+            granted: Boolean(order.grantedByUserId),
           }))}
         />
         ) : (
           <section className="pt-card" style={{ marginTop: 18 }}>
             <h2 className="pt-section-title">Verify identity first</h2>
             <p className="pt-hint">
-              A Field Sevak plan needs an approved identity before Razorpay opens. A gift to AINF does not.
+              {live
+                ? "Your membership is active. To change or renew a plan online, verify your identity first."
+                : "A Field Sevak plan needs an approved identity before Razorpay opens. A gift to AINF does not."}
             </p>
             <p style={{ marginTop: 14 }}>
               <Link href="/account/verify" className="pt-btn pt-btn--primary">

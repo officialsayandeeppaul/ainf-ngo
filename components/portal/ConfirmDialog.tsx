@@ -29,6 +29,7 @@ export function ConfirmDialog({
   tone = "primary",
   busy = false,
   confirmDisabled = false,
+  hideCancel = false,
   children,
   onCancel,
   onConfirm,
@@ -41,6 +42,8 @@ export function ConfirmDialog({
   tone?: "primary" | "danger" | "secondary";
   busy?: boolean;
   confirmDisabled?: boolean;
+  /** Acknowledge-only windows: a single button that closes. */
+  hideCancel?: boolean;
   children?: ReactNode;
   onCancel: () => void;
   onConfirm: () => void;
@@ -114,9 +117,11 @@ export function ConfirmDialog({
         {body ? <p className="pt-modal__body">{body}</p> : null}
         {children}
         <div className="pt-modal__actions">
-          <button type="button" className="pt-btn pt-btn--ghost" disabled={busy} onClick={onCancel}>
-            {cancelLabel}
-          </button>
+          {hideCancel ? null : (
+            <button type="button" className="pt-btn pt-btn--ghost" disabled={busy} onClick={onCancel}>
+              {cancelLabel}
+            </button>
+          )}
           <button
             ref={confirmRef}
             type="button"

@@ -439,6 +439,26 @@ export function receiptMissingHtml(): string {
   );
 }
 
+/** Landing page after a payment link when the payment cannot be confirmed on the spot. */
+export function paymentNoticeHtml(input: {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  cta?: { href: string; label: string };
+}): string {
+  const cta = input.cta
+    ? `<a class="home" href="${escapeHtml(input.cta.href)}">${escapeHtml(input.cta.label)}</a>`
+    : `<a class="home" href="/">Back to home</a>`;
+  return receiptDocument(
+    `${input.title} · AINF`,
+    `<p class="eyebrow is-returned">${escapeHtml(input.eyebrow)}</p>
+     <h1>${escapeHtml(input.title)}</h1>
+     <p class="lead">${escapeHtml(input.lead)}</p>
+     <div class="actions">${cta}${input.cta ? `<a class="plain" href="/contact-us">Contact us</a>` : ""}</div>
+     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
+  );
+}
+
 /** Self-service receipt recovery for guests who gave without an account. */
 export function receiptLookupHtml(): string {
   return receiptDocument(

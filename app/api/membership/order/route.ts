@@ -1,4 +1,4 @@
-import { BillingInterval, MembershipOrderStatus, type MembershipTier } from "@prisma/client";
+import { BillingInterval, MembershipOrderStatus, PaymentPurpose, type MembershipTier } from "@prisma/client";
 import { z } from "zod";
 import { AuditAction, recordAudit } from "@/lib/audit";
 import { guardApi } from "@/lib/auth/guard";
@@ -9,6 +9,8 @@ import { applyComplimentarySwitch, expireMembershipIfNeeded } from "@/lib/member
 import { razorpayDuePaise } from "@/lib/membership-quote";
 import { canStartPayment, membershipIsLive, paymentBlockMessage } from "@/lib/membership-state";
 import { identityReadyForMembership } from "@/lib/donation-rules";
+import { pausedPayload, recordPaymentInterest } from "@/lib/payment-interest";
+import { getPaymentSettings, paymentsOpenFor } from "@/lib/payment-settings";
 import { getVerificationPolicy } from "@/lib/verification-policy";
 import {
   createRazorpayOrder,
@@ -77,8 +79,9 @@ export async function POST(request: Request) {
     );
   }
 
+  // Orders behind an admin's payment link wait days, not minutes; they are not an open checkout.
   const pending = await db.membershipOrder.findFirst({
-    where: { userId: user.id, status: MembershipOrderStatus.CREATED },
+    where: { userId: user.id, status: MembershipOrderStatus.CREATED, paymentLink: { is: null } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -90,6 +93,26 @@ export async function POST(request: Request) {
   const quote = await quoteForUser({ user, tier, interval: input.interval });
   if (quote.kind === "same") {
     return Response.json({ error: "blocked", message: paymentBlockMessage("same") }, { status: 409 });
+  }
+
+  const settings = await getPaymentSettings();
+  if (!paymentsOpenFor(settings) && razorpayDuePaise(quote.duePaise) > 0) {
+    const { interest } = await recordPaymentInterest(
+      {
+        purpose: PaymentPurpose.MEMBERSHIP,
+        userId: user.id,
+        name: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email,
+        email: user.email,
+        phone: user.phone,
+        amountPaise: razorpayDuePaise(quote.duePaise),
+        targetTitle: tier.name,
+        tierId: tier.id,
+        interval: input.interval,
+        source: "portal",
+      },
+      contextFromRequest(request)
+    );
+    return Response.json(pausedPayload(settings, interest), { status: 409 });
   }
 
   const switching = quote.kind !== "new";

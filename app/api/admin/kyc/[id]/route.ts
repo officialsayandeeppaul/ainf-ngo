@@ -64,7 +64,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     },
   });
 
-  await db.user.update({ where: { id: record.userId }, data: { kycStatus: nextStatus } });
+  // A decline on a member an admin verified directly closes this session only;
+  // their standing changes when that admin verification is removed from the CRM.
+  const adminVerified = Boolean(record.user.identityVerifiedByAdminAt);
+  if (!adminVerified || nextStatus === KycStatus.APPROVED) {
+    await db.user.update({ where: { id: record.userId }, data: { kycStatus: nextStatus } });
+  }
 
   await recordAudit({
     action: AuditAction.KycManualReview,
@@ -91,7 +96,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
     void sendKycApprovedEmail(record.user).catch(() => {});
   } else {
-    if (record.user.role === Role.VERIFIED_USER) {
+    if (record.user.role === Role.VERIFIED_USER && !adminVerified) {
       await revokeVerified({
         targetUserId: record.userId,
         reason: "kyc_revoked",

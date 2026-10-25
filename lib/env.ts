@@ -64,6 +64,8 @@ const rawSchema = z.object({
   VERIFICATION_DIDIT: z.string().optional(),
   VERIFICATION_PAN: z.string().optional(),
   VERIFICATION_OTP: z.string().optional(),
+  /** "true" pauses online checkout regardless of the admin switch (ops kill switch). */
+  PAYMENTS_PAUSED: z.string().optional(),
 });
 
 /** Treats "" the same as unset so a placeholder line never reads as configured. */
@@ -132,6 +134,7 @@ export const isRazorpayConfigured = Boolean(
   env.NEXT_PUBLIC_RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET
 );
 export const isRazorpayWebhookConfigured = Boolean(env.RAZORPAY_WEBHOOK_SECRET);
+export const isPaymentsEnvPaused = env.PAYMENTS_PAUSED === "true" || env.PAYMENTS_PAUSED === "1";
 export const isAdminMfaRequired = (() => {
   const raw = env.SUPER_ADMIN_REQUIRE_MFA;
   if (raw === "true" || raw === "1") return true;

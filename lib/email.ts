@@ -342,6 +342,93 @@ export function sendDonationReceiptEmail(params: {
   });
 }
 
+const PAYMENT_NOTE =
+  "You are receiving this because you asked to pay All India Nevarlands Foundation. This is an automated message — please do not reply.";
+
+/** Sent once when someone tries to pay while online payments are paused. */
+export function sendPaymentInterestEmail(params: {
+  to: string;
+  name: string;
+  what: string;
+  amountPaise: number;
+}): Promise<EmailResult> {
+  const first = params.name.trim().split(/\s+/)[0] || "";
+  const hello = first ? `Dear ${escapeHtml(first)},` : "Dear friend,";
+  const amount = formatInr(params.amountPaise);
+  return deliver({
+    to: params.to,
+    subject: "We saved your interest — AINF",
+    html: shell(
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Thank you for your interest</h1>
+       <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">We are not taking online payments right now, so nothing was charged. We have saved your interest in <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.what)}</strong> (${escapeHtml(amount)}).</p>
+       <p style="margin:0;font-size:14.5px;color:#5c6660">As soon as payments reopen, the AINF team will email you a secure Razorpay link to complete it.</p>`,
+      undefined,
+      PAYMENT_NOTE
+    ),
+    text: `Thank you for your interest\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nWe are not taking online payments right now, so nothing was charged. We have saved your interest in ${params.what} (${amount}).\n\nAs soon as payments reopen, the AINF team will email you a secure Razorpay link to complete it.`,
+  });
+}
+
+/** An admin-issued Razorpay payment link. */
+export function sendPaymentLinkEmail(params: {
+  to: string;
+  name: string;
+  what: string;
+  amountPaise: number;
+  url: string;
+  expiresAt: Date | null;
+}): Promise<EmailResult> {
+  const first = params.name.trim().split(/\s+/)[0] || "";
+  const hello = first ? `Dear ${escapeHtml(first)},` : "Dear friend,";
+  const amount = formatInr(params.amountPaise);
+  const until = params.expiresAt
+    ? params.expiresAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+  const expiry = until ? ` The link works until ${until}.` : "";
+  return deliver({
+    to: params.to,
+    subject: `Your AINF payment link — ${amount}`,
+    html: shell(
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Your payment link is ready</h1>
+       <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you for waiting. You can now complete <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.what)}</strong> for <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> through Razorpay's secure checkout.${escapeHtml(expiry)}</p>
+       <p style="margin:0;font-size:13px;color:#8a938d">If the button does not open, copy this address into your browser: ${escapeHtml(params.url)}</p>`,
+      { href: params.url, label: `Pay ${amount}` },
+      PAYMENT_NOTE
+    ),
+    text: `Your payment link is ready\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you for waiting. You can now complete ${params.what} for ${amount} through Razorpay's secure checkout.${expiry}\n\nPay here: ${params.url}`,
+  });
+}
+
+/** A super admin made this account a member without payment. */
+export function sendMembershipGrantedEmail(params: {
+  to: string;
+  firstName: string | null;
+  tierName: string;
+  expiresAt: Date;
+}): Promise<EmailResult> {
+  const href = absoluteUrl("/account/membership");
+  const hi = params.firstName ? `Hi ${escapeHtml(params.firstName)},` : "Hi,";
+  const until = params.expiresAt.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return deliver({
+    to: params.to,
+    subject: `You are now an AINF ${params.tierName} member`,
+    html: shell(
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Welcome aboard</h1>
+       <p style="margin:0 0 12px;font-size:14.5px">${hi}</p>
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">The AINF team has made you a <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.tierName)}</strong> member. Your badge is live until <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(until)}</strong>, and nothing was charged.</p>
+       <p style="margin:0;font-size:14.5px;color:#5c6660">Your membership card is ready to view and print from your account.</p>`,
+      { href, label: "View your membership" }
+    ),
+    text: `Welcome aboard\n\n${params.firstName ? `Hi ${params.firstName},` : "Hi,"}\n\nThe AINF team has made you a ${params.tierName} member. Your badge is live until ${until}, and nothing was charged.\n\nView your membership: ${href}`,
+  });
+}
+
 export function sendDonationRefundEmail(params: {
   to: string;
   name: string;
