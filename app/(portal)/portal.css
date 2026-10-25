@@ -5590,20 +5590,28 @@ html.pt-modal-open {
 
 .pt-pay-desk {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
+  min-width: 0;
+}
+
+/* A wide table must scroll inside its card, never widen the whole desk. */
+.pt-pay-desk > * {
+  min-width: 0;
 }
 
 .pt-pay-desk > .pt-alert {
   margin: 0;
 }
 
-.pt-pay-switch {
-  border-left: 4px solid var(--ainf-green);
+.pt-pay-switch.is-paused {
+  background: #fffbf4;
 }
 
-.pt-pay-switch.is-paused {
-  border-left-color: var(--warning);
-  background: #fffbf4;
+.pt-pay-switch .pt-textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  resize: vertical;
 }
 
 .pt-pay-switch__head {
@@ -5846,5 +5854,76 @@ a.pt-segment__btn {
   .pt-pay-filters {
     grid-template-columns: 1fr;
     padding: 12px 16px 0;
+  }
+}
+
+
+/* Phones: each request and link becomes a stacked card instead of a crushed table row. */
+@media (max-width: 760px) {
+  .pt-pay-table,
+  .pt-pay-table tbody,
+  .pt-pay-table tr,
+  .pt-pay-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pt-pay-table thead {
+    display: none;
+  }
+
+  .pt-pay-table tr {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pt-pay-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .pt-pay-table td {
+    padding: 3px 0 !important;
+    border: 0 !important;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .pt-pay-table td:first-child .pt-dossier-plan {
+    font-size: 15px;
+  }
+
+  .pt-pay-table td .pt-badge {
+    margin-top: 4px;
+  }
+
+  .pt-pay-table .pt-pay-actions {
+    justify-content: flex-start;
+    min-width: 0;
+    margin-top: 10px;
+  }
+
+  .pt-pay-table .pt-pay-actions .pt-btn {
+    white-space: nowrap;
+  }
+
+  .pt-pay-switch__facts {
+    padding-left: 16px;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Wider screens: fixed layout splits columns evenly, which left the action
+   buttons spilling out of the card. Give each column its share. */
+@media (min-width: 761px) {
+  .pt-pay-table th:nth-child(1), .pt-pay-table td:nth-child(1) { width: 22%; }
+  .pt-pay-table th:nth-child(2), .pt-pay-table td:nth-child(2) { width: 21%; }
+  .pt-pay-table th:nth-child(3), .pt-pay-table td:nth-child(3) { width: 9%; }
+  .pt-pay-table th:nth-child(4), .pt-pay-table td:nth-child(4) { width: 13%; }
+  .pt-pay-table th:nth-child(5), .pt-pay-table td:nth-child(5) { width: 10%; }
+  .pt-pay-table th:nth-child(6), .pt-pay-table td:nth-child(6) { width: 25%; }
+
+  .pt-pay-table .pt-pay-actions {
+    min-width: 0;
   }
 }

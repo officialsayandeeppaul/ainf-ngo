@@ -91,7 +91,8 @@
       style.id = "ainf-interest-style";
       style.textContent =
         "#ainf-interest-modal{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Onest,Inter,system-ui,sans-serif}" +
-        "#ainf-interest-modal .ainf-interest__backdrop{position:absolute;inset:0;background:rgba(16,28,22,.48);border:0;padding:0;cursor:pointer}" +
+        "#ainf-interest-modal .ainf-interest__backdrop{position:absolute;inset:0;background:rgba(16,28,22,.42);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:0;padding:0;cursor:pointer;animation:ainfInterestFade .2s ease-out}" +
+        "@keyframes ainfInterestFade{from{opacity:0}to{opacity:1}}" +
         "#ainf-interest-modal .ainf-interest__panel{position:relative;width:min(440px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#1a1d1b;border-radius:22px;padding:26px 24px 22px;box-shadow:0 24px 64px rgba(16,28,22,.28);animation:ainfInterestIn .22s ease-out}" +
         "#ainf-interest-modal .ainf-interest__mark{width:44px;height:44px;border-radius:50%;background:#e7f6ee;color:#1c7d48;display:flex;align-items:center;justify-content:center;margin:0 0 14px}" +
         "#ainf-interest-modal h2{margin:0 0 8px;font-size:23px;line-height:1.15;font-weight:500;letter-spacing:-.03em}" +
@@ -3690,13 +3691,15 @@
           targets.forEach(function (row) {
             var option = document.createElement("option");
             option.value = row.kind + ":" + row.slug;
-            option.textContent = row.title;
+            option.textContent = giftPlainTitle(row);
             select.appendChild(option);
           });
           select.setAttribute("data-ainf-opts", marker);
           select.setAttribute("data-ainf-cms", "1");
         }
-        var want = window.__ainfGiftCause || current || preferred;
+        // The visitor's pick, else this page's desk; Framer's own value or the
+        // browser's default first option is not a choice.
+        var want = window.__ainfGiftCause || preferred || current;
         if (want && select.querySelector('option[value="' + want + '"]') && select.value !== want) select.value = want;
         if (targets.length) mountCauseMenu(select.closest("form"), select);
       });
@@ -3751,7 +3754,7 @@
           name: name.value.trim(),
           email: email.value.trim(),
           phone: phone.value.trim(),
-          source: giftPath() === "/donate-now" ? "donate-page" : "home-form"
+          source: giftPath() === "/donate-now" ? "donate-page" : giftPath() === "/" ? "home-form" : "page-form:" + giftPath()
         })
       })
         .then(function (response) {
@@ -3843,7 +3846,8 @@
       if (event.target && event.target.name === "Location") paint();
     });
 
-    fetch("/api/donations/targets" + location.search, { headers: { accept: "application/json" } })
+    // A cause page preselects its own desk, like the gift window does.
+    fetch("/api/donations/targets" + (location.search || giftQuery()), { headers: { accept: "application/json" } })
       .then(function (response) { return response.json(); })
       .then(function (body) {
         targets = body.targets || [];
