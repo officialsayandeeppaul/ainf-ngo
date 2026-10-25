@@ -205,8 +205,15 @@ function receiptDocument(title: string, body: string): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(title)}</title>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/0b532b340381e255.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/98a11855328341d1.woff2" crossorigin>
   <link rel="stylesheet" href="${versionedUrl("/assets/css/ainf-site-nav.css")}">
   <style>
+    /* The site CSS uses font-display: optional (no reflow on the long pages),
+       which can leave a receipt in the fallback font on a slow load. These
+       short pages swap Onest in instead, so they always end in the brand font. */
+    @font-face { font-family: Onest; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/0b532b340381e255.woff2") format("woff2"); }
+    @font-face { font-family: Onest; font-style: normal; font-weight: 700; font-display: swap; src: url("/assets/fonts/98a11855328341d1.woff2") format("woff2"); }
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
     body {
