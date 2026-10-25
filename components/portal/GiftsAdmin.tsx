@@ -11,17 +11,6 @@ export type GiftMission = {
   minPaise: number | null;
 };
 
-export type GiftLedgerRow = {
-  id: string;
-  when: string;
-  name: string;
-  email: string;
-  target: string;
-  amount: string;
-  status: string;
-  emailed: boolean;
-};
-
 function rupeesToPaise(raw: string): number | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
@@ -37,19 +26,14 @@ function paiseField(paise: number | null): string {
 export function GiftsAdmin({
   initialSettings,
   initialMissions,
-  initialRows,
-  paidTotal,
 }: {
   initialSettings: { minPaise: number; maxPaise: number; suggestedPaise: number[] };
   initialMissions: GiftMission[];
-  initialRows: GiftLedgerRow[];
-  paidTotal: string;
 }) {
   const [minRupees, setMinRupees] = useState(String(initialSettings.minPaise / 100));
   const [maxRupees, setMaxRupees] = useState(String(initialSettings.maxPaise / 100));
   const [chips, setChips] = useState(initialSettings.suggestedPaise.map((value) => value / 100).join(", "));
   const [missions, setMissions] = useState(initialMissions);
-  const [rows, setRows] = useState(initialRows);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -127,22 +111,6 @@ export function GiftsAdmin({
     setMissions((current) => [...current, body.mission!]);
     setDraft({ title: "", slug: "", min: "" });
     setNotice(`${body.mission.title} added.`);
-  }
-
-  async function refund(id: string) {
-    if (!window.confirm("Return this gift in full?")) return;
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    const response = await fetch(`/api/admin/donations/${id}/refund`, { method: "POST" });
-    const body = (await response.json().catch(() => null)) as { message?: string } | null;
-    setBusy(false);
-    if (!response.ok) {
-      setError(body?.message || "Could not return that gift.");
-      return;
-    }
-    setRows((current) => current.map((row) => (row.id === id ? { ...row, status: "REFUNDED" } : row)));
-    setNotice("Gift returned.");
   }
 
   return (
@@ -254,54 +222,6 @@ export function GiftsAdmin({
         </button>
       </section>
 
-      <section className="pt-card">
-        <h2 className="pt-section-title">Ledger</h2>
-        <p className="pt-hint">Paid gifts still on the books: {paidTotal}. Returned gifts are not included. Project raised lines stay the figures you type.</p>
-        <div className="pt-table-wrap">
-          <table className="pt-table">
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Giver</th>
-                <th>For</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Email</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>No gifts yet.</td>
-                </tr>
-              ) : (
-                rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.when}</td>
-                    <td>
-                      {row.name}
-                      <br />
-                      <span className="pt-hint">{row.email}</span>
-                    </td>
-                    <td>{row.target}</td>
-                    <td>{row.amount}</td>
-                    <td>{row.status === "REFUNDED" ? "Returned" : row.status === "PAID" ? "Received" : row.status}</td>
-                    <td>{row.emailed ? "Sent" : "Not sent"}</td>
-                    <td>
-                      {row.status === "PAID" ? (
-                        <button className="pt-btn" type="button" disabled={busy} onClick={() => refund(row.id)}>
-                          Return
-                        </button>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
   );
 }

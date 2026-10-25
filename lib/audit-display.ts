@@ -51,6 +51,7 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.DonationMissionSaved]: "Gift mission",
   [AuditAction.DonationCaptured]: "Gift paid",
   [AuditAction.DonationRefunded]: "Gift returned",
+  [AuditAction.DonationReceiptSent]: "Gift receipt emailed",
   [AuditAction.PaymentsSwitched]: "Payments switched",
   [AuditAction.PaymentInterestRecorded]: "Payment interest saved",
   [AuditAction.PaymentInterestUpdated]: "Payment interest updated",

@@ -60,6 +60,7 @@ export const AuditAction = {
   DonationMissionSaved: "donation.mission_saved",
   DonationCaptured: "donation.captured",
   DonationRefunded: "donation.refunded",
+  DonationReceiptSent: "donation.receipt_sent",
 
   PaymentsSwitched: "payments.switched",
   PaymentInterestRecorded: "payments.interest_recorded",
