@@ -207,10 +207,6 @@
     ["100% donations used for program", "Every rupee stays on this work"],
     ["Hear from those who've seen the impact.", "From families, sevaks, and partners in our blocks."],
     [
-      "We've seen lives change when people come together, One meal, one family, one step at a time.",
-      "They work with respect and consistency. Support reaches the right students and families in our blocks, without delays.",
-    ],
-    [
       "This project brings basic healthcare services directly to people who cannot afford medical treatment or travel long distances to hospitals. Many individuals in underserved communities delay or completely avoid care due to cost, distance, or lack of awareness, which often leads to worsening health conditions.",
       "Swasthya Desk takes checkups and essential medicines to hamlets where the primary health centre is a long ride away. In Nala, Jamtara, and nearby blocks, families often wait until a fever becomes an emergency. A camp, a referral, and a medicine they can actually collect changes that.",
     ],
@@ -303,6 +299,29 @@
     ],
   ];
 
+  // The testimonial slides are Framer text effects: each quote is two coloured
+  // runs that Framer splits into animated word and letter spans it owns. They
+  // are rewritten in the module (scripts/apply-project-copy-to-modules.mjs) and
+  // in the served HTML (lib/project-copy.ts) per run, never in the browser.
+  var TESTIMONIAL_COPY = [
+    ["We’ve seen lives change when people come together,", "We’ve seen lives change when help reaches the hamlet,"],
+    ["One meal, one family, one step at a time.", "one camp, one meal, one family at a time."],
+    ["We distribute meals directly, and you can see instantly how it works.", "Every rupee is tagged to a desk, and you can see where it lands."],
+    ["The support reaches the right people, without delays.", "Support reaches the right families in our blocks, without delays."],
+  ];
+
+  // Animated text (Framer's appear effect, or our letter split) is owned by
+  // React; replacing its text tears the spans apart mid-animation.
+  function isAnimatedText(el) {
+    if (el.closest && el.closest('[data-framer-name^="review "]')) return true;
+    var spans = el.querySelectorAll("span[style]");
+    var split = 0;
+    for (var i = 0; i < spans.length && split < 3; i++) {
+      if (/inline-block/i.test(spans[i].getAttribute("style") || "")) split++;
+    }
+    return split >= 3;
+  }
+
   function plainCopy(el) {
     return (el.textContent || "")
       .replace(/[\u2019\u2018]/g, "'")
@@ -320,6 +339,7 @@
       if (el.getAttribute("data-ainf-cms") === "1") return;
       if (el.closest && el.closest("#ainf-global-nav, #ainf-site-footer")) return;
       if (el.querySelector("h1, h2, h3, h4, p, li")) return;
+      if (isAnimatedText(el)) return;
       var now = plainCopy(el);
       var next = table[now];
       if (!next || next === now) return;

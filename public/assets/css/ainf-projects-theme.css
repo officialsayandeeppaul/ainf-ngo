@@ -117,3 +117,14 @@ body.ainf-projects-skin [data-framer-name="Icon Sphere"][data-ainf-piggy="1"] .a
   flex:0 0 auto!important;
   pointer-events:none!important;
 }
+
+/* Section pills ("About this work", "On the ground"…) are Framer's Primary
+   component sized to min-content. That fit the template's one-word labels;
+   our multi-word labels shrank the pill to one word and clipped the rest. */
+.framer-O97nK.framer-5go1w0 {
+  width: max-content !important;
+  max-width: 100%;
+}
+.framer-O97nK.framer-5go1w0 .framer-text {
+  white-space: nowrap;
+}

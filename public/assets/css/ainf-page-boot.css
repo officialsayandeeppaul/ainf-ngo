@@ -675,7 +675,9 @@ html.ainf-modal-lock body{
   cursor:pointer;
 }
 .ainf-join-modal__primary{ background:#1c7d48!important; color:#fff!important; border-color:#1c7d48!important; }
-form.framer-et7jxz .ainf-gift-note{
+/* The "Support AINF" gift form: /donate-now (framer-et7jxz) and the homepage copy (matched by its cause select). */
+form.framer-et7jxz .ainf-gift-note,
+form:has(select[name="Location"]) .ainf-gift-note{
   margin:0 0 12px;
   width:100%;
   font-family:Onest,Inter,system-ui,sans-serif;
@@ -683,16 +685,21 @@ form.framer-et7jxz .ainf-gift-note{
   line-height:1.45;
   color:#3d4a44;
 }
-form.framer-et7jxz .ainf-gift-note.is-error{ color:#8d2b2b; }
-form.framer-et7jxz [data-ainf-phone]{
+form.framer-et7jxz .ainf-gift-note.is-error,
+form:has(select[name="Location"]) .ainf-gift-note.is-error{ color:#8d2b2b; }
+form.framer-et7jxz [data-ainf-phone],
+form:has(select[name="Location"]) [data-ainf-phone]{
   width:100%;
   flex:1 1 100%;
   margin-top:12px;
 }
-form.framer-et7jxz [data-ainf-phone] label{
+form.framer-et7jxz [data-ainf-phone] label,
+form:has(select[name="Location"]) [data-ainf-phone] label{
   width:100%;
+  flex:1 1 auto!important;
 }
-form.framer-et7jxz button[type="submit"]{
+form.framer-et7jxz button[type="submit"],
+form:has(select[name="Location"]) button[type="submit"]{
   opacity:1!important;
   pointer-events:auto!important;
 }
@@ -964,4 +971,17 @@ form.framer-et7jxz button[type="submit"]{
 .ainf-gift-modal input[data-gift-error]:focus{
   outline:2px solid rgba(192,57,43,0.25);
   border-color:#c0392b;
+}
+
+/* Gift form cause drawer: match the form's own inputs (16px text, 49px tall, 10px corners). */
+form:has(select[name="Location"]) .ainf-gift-menu{
+  width:100%;
+}
+form:has(select[name="Location"]) .ainf-gift-menu__trigger{
+  min-height:49px!important;
+  padding:12px 15px!important;
+  border-radius:10px!important;
+  font-family:Onest,Inter,system-ui,sans-serif!important;
+  font-size:16px!important;
+  line-height:1.2!important;
 }

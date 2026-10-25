@@ -19,6 +19,63 @@
     return message + " You can try again in about " + wait + ".";
   }
 
+  // Framer hydrates the gift and project forms a moment after load and swaps
+  // their inputs, wiping anything typed in that window (the /donate-now form
+  // is above the fold, so people do type that early). What a person types is
+  // kept in memory only and written back into the new inputs.
+  var ainfFormMemory = {};
+  var ainfFormWatch = null;
+  var AINF_REMEMBER = /^(Name|Email|Phone|Amount|Support AINF Amount|Message)$/;
+
+  function ainfRememberable(el) {
+    if (!el || !el.name || !AINF_REMEMBER.test(el.name) || !el.form) return false;
+    return Boolean(el.form.querySelector('select[name="Location"], [name="Choose The Cause"]'));
+  }
+
+  document.addEventListener(
+    "input",
+    function (event) {
+      if (!event.isTrusted || !ainfRememberable(event.target)) return;
+      ainfFormMemory[event.target.name] = event.target.value;
+      ainfWatchForms();
+    },
+    true
+  );
+
+  // Started on the first keystroke in a gift form, so pages nobody types on
+  // (and their letter-by-letter animations) pay nothing for it.
+  function ainfWatchForms() {
+    if (ainfFormWatch || !window.MutationObserver) return;
+    ainfFormWatch = new MutationObserver(function (records) {
+      for (var i = 0; i < records.length; i++) {
+        var added = records[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (node.nodeType !== 1) continue;
+          if (/^(FORM|INPUT|TEXTAREA)$/.test(node.tagName) || (node.firstElementChild && node.querySelector("input[name], textarea[name]"))) {
+            ainfRestoreForms();
+            return;
+          }
+        }
+      }
+    });
+    ainfFormWatch.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  function ainfRestoreForms() {
+    var fields = document.querySelectorAll("form input[name], form textarea[name]");
+    for (var i = 0; i < fields.length; i++) {
+      var el = fields[i];
+      var saved = ainfFormMemory[el.name];
+      if (!saved || el.value || !ainfRememberable(el)) continue;
+      var proto = el.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      var setter = Object.getOwnPropertyDescriptor(proto, "value");
+      if (setter && setter.set) setter.set.call(el, saved);
+      else el.value = saved;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
   function ainfIsPaused(body) {
     return Boolean(body && body.error === "payments_paused");
   }
@@ -1587,7 +1644,7 @@
     var scope = root || document;
     var nodes = scope.querySelectorAll("p, h1, h2, h3, h4, li, figcaption, blockquote");
     nodes.forEach(function (el) {
-      if (el.closest && el.closest("#ainf-global-nav, #ainf-site-footer, [id^='ainf-lang-switcher']")) return;
+      if (el.closest && el.closest("#ainf-global-nav, #ainf-site-footer, [id^='ainf-lang-switcher'], [data-framer-name^='review ']")) return;
       if (letterSpanCount(el) >= 4) return;
       if (/^H[1-4]$/.test(el.tagName)) return;
       var text = plainTextWithBreaks(el);
@@ -1726,7 +1783,8 @@
   function fixPlainHeadings(root) {
     var scope = root || document;
     scope.querySelectorAll("h1, h2, h3, h4, h5").forEach(function (heading) {
-      if (heading.closest && heading.closest("#ainf-global-nav, #ainf-site-footer")) return;
+      // Testimonial slides are Framer text effects with their copy set in the module.
+      if (heading.closest && heading.closest('#ainf-global-nav, #ainf-site-footer, [data-framer-name^="review "]')) return;
       if (heading.querySelector && heading.querySelector("[data-ainf-letter-wrap], [data-ainf-word]")) return;
       var text = plainTextWithBreaks(heading);
       if (!text || text.length < 3) return;
@@ -3116,8 +3174,13 @@
   }
 
   function mountProjectCauseMenu(form) {
-    var select = form.querySelector('[name="Choose The Cause"]');
-    if (!select) return;
+    mountCauseMenu(form, form.querySelector('[name="Choose The Cause"]'));
+  }
+
+  // The cause <select> stays in the form (its value is what gets submitted);
+  // people pick from the same drawer the gift window uses.
+  function mountCauseMenu(form, select) {
+    if (!form || !select) return;
     if (!projectCauseDrawer) {
       projectCauseDrawer = document.createElement("div");
       projectCauseDrawer.className = "ainf-gift-menu__drawer";
@@ -3126,6 +3189,33 @@
       projectCauseDrawer.style.zIndex = "2147483600";
       projectCauseDrawer.innerHTML = '<ul class="ainf-gift-menu__list" role="listbox"></ul>';
       document.body.appendChild(projectCauseDrawer);
+      // While Framer hydrates, a capture listener on <body> stops every click,
+      // so the trigger and options are handled here, on document, ahead of it.
+      document.addEventListener("click", function (event) {
+        var target = event.target;
+        if (!target || !target.closest) return;
+        var trigger = target.closest("[data-ainf-cause-trigger]");
+        var option = !trigger && target.closest("[data-ainf-project-cause] .ainf-gift-menu__option");
+        if (!trigger && !(option && option.__ainfPick)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (option) {
+          option.__ainfPick();
+          return;
+        }
+        if (projectCauseOpen === trigger && !projectCauseDrawer.hidden) {
+          closeProjectCauseMenu();
+          return;
+        }
+        if (!trigger.__ainfSelect) return;
+        closeProjectCauseMenu();
+        fillProjectCauseList(trigger.__ainfSelect);
+        projectCauseDrawer.hidden = false;
+        trigger.classList.add("is-open");
+        trigger.setAttribute("aria-expanded", "true");
+        projectCauseOpen = trigger;
+        placeProjectCauseMenu(trigger);
+      }, true);
       document.addEventListener("click", function (event) {
         if (!projectCauseDrawer || projectCauseDrawer.hidden) return;
         if (event.target.closest && (event.target.closest("[data-ainf-project-cause]") || event.target.closest("[data-ainf-cause-menu]"))) return;
@@ -3166,30 +3256,19 @@
           shell.style.setProperty("padding", "0", "important");
         }
       }
-      menu.querySelector("[data-ainf-cause-trigger]").addEventListener("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var trigger = event.currentTarget;
-        if (projectCauseOpen === trigger && projectCauseDrawer && !projectCauseDrawer.hidden) {
-          closeProjectCauseMenu();
-          return;
-        }
-        closeProjectCauseMenu();
-        fillProjectCauseList(select);
-        projectCauseDrawer.hidden = false;
-        trigger.classList.add("is-open");
-        trigger.setAttribute("aria-expanded", "true");
-        projectCauseOpen = trigger;
-        placeProjectCauseMenu(trigger);
-      });
     }
+    // Framer may swap the <select> on a re-render; the trigger always points at the live one.
+    menu.querySelector("[data-ainf-cause-trigger]").__ainfSelect = select;
     select.tabIndex = -1;
     select.setAttribute("aria-hidden", "true");
     select.style.setProperty("display", "none", "important");
     var label = menu.querySelector(".ainf-gift-menu__label");
     var current = String(select.value || "").trim();
-    label.textContent = current || "Select a cause";
-    label.classList.toggle("is-placeholder", !current);
+    var picked = select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+    var text = current ? (picked && picked.textContent.trim()) || current : "Select a cause";
+    // Only write on change: the gift form re-mounts from a MutationObserver.
+    if (label.textContent !== text) label.textContent = text;
+    if (label.classList.contains("is-placeholder") !== !current) label.classList.toggle("is-placeholder", !current);
   }
 
   function fillProjectCauseList(select) {
@@ -3209,16 +3288,17 @@
     button.textContent = option.textContent || option.value;
     button.classList.toggle("is-active", option.value === select.value);
     button.setAttribute("aria-selected", option.value === select.value ? "true" : "false");
-    button.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
+    // Run by the document-level click handler in mountCauseMenu.
+    button.__ainfPick = function () {
+      // Remembered so a Framer re-render of the form cannot undo the choice.
+      if (select.name === "Location") window.__ainfGiftCause = option.value;
       select.value = option.value;
       select.dispatchEvent(new Event("change", { bubbles: true }));
       var form = select.closest("form");
-      if (form) mountProjectCauseMenu(form);
+      if (form) mountCauseMenu(form, select);
       projectFieldNote(form && form.querySelector("[data-ainf-cause-trigger]"), "");
       closeProjectCauseMenu();
-    });
+    };
     item.appendChild(button);
     list.appendChild(item);
   }
@@ -3483,10 +3563,41 @@
       });
   }
 
+  // The "Support AINF" Framer form (cause, amount, name, email) appears on
+  // /donate-now and on the homepage; both take a real gift.
+  function isGiftForm(form) {
+    return Boolean(form && form.querySelector && form.querySelector('select[name="Location"]'));
+  }
+
+  // A field inside the form that is actually on screen (Framer ships one copy
+  // of the form per breakpoint and hides the others).
+  function liveGiftField(selector) {
+    var nodes = document.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; i++) {
+      var form = nodes[i].closest && nodes[i].closest("form");
+      var box = (form || nodes[i]).getBoundingClientRect();
+      if (box.width > 8 && box.height > 8) return nodes[i];
+    }
+    return nodes[0] || null;
+  }
+
   function bootGiftForm() {
-    if (giftPath() !== "/donate-now" || window.__ainfGiftBoot) return;
+    if (window.__ainfGiftBoot) return;
+    if (giftPath() !== "/donate-now" && !document.querySelector('form select[name="Location"]')) return;
     window.__ainfGiftBoot = true;
-    ensureCheckout();
+    // Razorpay's checkout is a heavy script. /donate-now exists to take a gift,
+    // so it loads up front; on the homepage it waits until someone uses the form.
+    if (giftPath() === "/donate-now") ensureCheckout();
+    else {
+      var warmCheckout = function (event) {
+        if (!event.target || !event.target.closest || !isGiftForm(event.target.closest("form"))) return;
+        document.removeEventListener("focusin", warmCheckout, true);
+        document.removeEventListener("pointerdown", warmCheckout, true);
+        ensureCheckout();
+      };
+      document.addEventListener("focusin", warmCheckout, true);
+      document.addEventListener("pointerdown", warmCheckout, true);
+    }
 
     var targets = [];
     var preferred = "";
@@ -3516,7 +3627,7 @@
     }
 
     function currentTarget() {
-      var select = shown('select[name="Location"]');
+      var select = liveGiftField('select[name="Location"]');
       if (!select) return null;
       return targets.find(function (row) { return row.kind + ":" + row.slug === select.value; }) || null;
     }
@@ -3585,8 +3696,9 @@
           select.setAttribute("data-ainf-opts", marker);
           select.setAttribute("data-ainf-cms", "1");
         }
-        var want = current || preferred;
-        if (want && select.querySelector('option[value="' + want + '"]')) select.value = want;
+        var want = window.__ainfGiftCause || current || preferred;
+        if (want && select.querySelector('option[value="' + want + '"]') && select.value !== want) select.value = want;
+        if (targets.length) mountCauseMenu(select.closest("form"), select);
       });
       var row = currentTarget();
       var amount = shown('input[name="Support AINF Amount"]');
@@ -3639,7 +3751,7 @@
           name: name.value.trim(),
           email: email.value.trim(),
           phone: phone.value.trim(),
-          source: "donate-page"
+          source: giftPath() === "/donate-now" ? "donate-page" : "home-form"
         })
       })
         .then(function (response) {
@@ -3652,11 +3764,27 @@
             ainfShowInterest(result.body);
             return;
           }
-          if (!result.ok || !window.Razorpay) {
+          if (!result.ok) {
             busy = false;
             note(ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);
             return;
           }
+          // Checkout loads on first use outside /donate-now, so wait for it here.
+          whenRazorpay(function () { openGiftCheckout(result); }, function () {
+            busy = false;
+            note("Payment could not open. Refresh and try again.", true);
+          });
+        })
+        .catch(function () {
+          busy = false;
+          note("The gift could not be started.", true);
+        });
+    }
+
+    function openGiftCheckout(result) {
+          var name = shown('input[name="Name"]');
+          var email = shown('input[name="Email"]');
+          var phone = shown('input[name="Phone"]');
           var checkoutBox = new window.Razorpay({
             key: result.body.keyId,
             amount: result.body.amountPaise,
@@ -3688,19 +3816,12 @@
             }
           });
           checkoutBox.open();
-        })
-        .catch(function () {
-          busy = false;
-          note("The gift could not be started.", true);
-        });
     }
 
     document.addEventListener(
       "submit",
       function (event) {
-        if (giftPath() !== "/donate-now") return;
-        var form = event.target;
-        if (!form || !form.querySelector || !form.querySelector('select[name="Location"]')) return;
+        if (!isGiftForm(event.target)) return;
         event.preventDefault();
         event.stopPropagation();
         startGift();
@@ -3710,9 +3831,8 @@
     document.addEventListener(
       "click",
       function (event) {
-        if (giftPath() !== "/donate-now") return;
         var button = event.target && event.target.closest && event.target.closest('button[type="submit"]');
-        if (!button || !button.closest("form")) return;
+        if (!button || !isGiftForm(button.closest("form"))) return;
         event.preventDefault();
         event.stopPropagation();
         startGift();
@@ -3734,12 +3854,51 @@
       })
       .catch(function () { note("The cause list could not be loaded. Refresh and try again.", true); });
 
+    // A few early passes cover hydration; later re-renders are caught by the
+    // observer below (each pass measures the form, so they are not free).
     var ticks = 0;
     var lock = setInterval(function () {
       paint();
       ticks += 1;
-      if (ticks > 24) clearInterval(lock);
+      if (ticks >= 6) clearInterval(lock);
     }, 700);
+
+    // Framer hydrates the form a moment after load and drops the drawer we
+    // mounted, putting the native <select> back. Re-mount from the observer,
+    // which runs before the next paint, so nobody sees or clicks the gap.
+    function formNeedsPaint() {
+      var selects = document.querySelectorAll('select[name="Location"]');
+      for (var i = 0; i < selects.length; i++) {
+        var form = selects[i].closest("form");
+        if (!form) continue;
+        if (!form.querySelector("[data-ainf-cause-menu]")) return true;
+        if (selects[i].style.getPropertyValue("display") !== "none") return true;
+      }
+      return false;
+    }
+    // Only added subtrees that carry the cause <select> matter. The homepage
+    // animates letter by letter, so scanning the document on every mutation
+    // cost seconds of main thread; leaf nodes are skipped without a query.
+    function addsCauseSelect(records) {
+      for (var i = 0; i < records.length; i++) {
+        var added = records[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (node.nodeType !== 1) continue;
+          if (node.tagName === "SELECT") {
+            if (node.name === "Location") return true;
+            continue;
+          }
+          if (node.firstElementChild && node.querySelector('select[name="Location"]')) return true;
+        }
+      }
+      return false;
+    }
+    if (window.MutationObserver) {
+      new MutationObserver(function (records) {
+        if (targets.length && addsCauseSelect(records) && formNeedsPaint()) paint();
+      }).observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   if (document.body) bootGiftForm();

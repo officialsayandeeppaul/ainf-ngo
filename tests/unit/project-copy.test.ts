@@ -2,15 +2,34 @@ import { describe, expect, it } from "vitest";
 import { applyProjectCopy } from "@/lib/project-copy";
 
 describe("applyProjectCopy", () => {
-  it("swaps template sentences for the AINF copy, word-split ones included", () => {
+  it("swaps template sentences for the AINF copy", () => {
+    const html = '<h1 class="t">Projects That Create Real Change</h1>';
+    expect(applyProjectCopy(html)).toBe('<h1 class="t">Projects on the Ground</h1>');
+  });
+
+  it("rewrites a testimonial run word by word and keeps Framer's animated spans", () => {
+    const word = "display:inline-block;opacity:0.001;filter:blur(10px)";
+    const run = (style: string, words: string[]) =>
+      `<span class="framer-text" style="${style}">${words.map((w) => `<span style="${word}">${w}</span>`).join(" ")}</span>`;
     const html =
-      '<h1 class="t">Projects That Create Real Change</h1>' +
-      '<p class="q"><span style="display:inline-block">We’ve</span> <span>seen</span> lives change when people come together, One meal, one family, one step at a time.</p>';
+      '<h2 class="framer-text">' +
+      run("--framer-text-color:grey", ["We’ve", "seen", "lives", "change", "when", "people", "come", "together,"]) +
+      run("--framer-text-color:black", ["One", "meal,", "one", "family,", "one", "step", "at", "a", "time."]) +
+      "</h2>";
     const out = applyProjectCopy(html);
-    expect(out).toContain('<h1 class="t">Projects on the Ground</h1>');
-    expect(out).toContain(
-      '<p class="q">They work with respect and consistency. Support reaches the right students and families in our blocks, without delays.</p>'
+    expect(out).toBe(
+      '<h2 class="framer-text">' +
+        run("--framer-text-color:grey", ["We’ve", "seen", "lives", "change", "when", "help", "reaches", "the", "hamlet,"]) +
+        run("--framer-text-color:black", ["one", "camp,", "one", "meal,", "one", "family", "at", "a", "time."]) +
+        "</h2>"
     );
+  });
+
+  it("never flattens animated text into plain text", () => {
+    const html =
+      '<p class="q"><span style="display:inline-block">Introduction</span></p>' +
+      '<h2><span style="display:inline-block">Hear</span> from those who&#39;ve seen the impact.</h2>';
+    expect(applyProjectCopy(html)).toBe(html);
   });
 
   it("leaves database copy and unrelated text alone", () => {

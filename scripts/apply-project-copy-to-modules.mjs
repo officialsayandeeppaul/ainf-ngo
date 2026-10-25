@@ -43,7 +43,7 @@ function table(source, name) {
 
 const theme = readFileSync(THEME, "utf8");
 const exact = new Map();
-for (const [from, to] of table(theme, "PROJECT_COPY")) {
+for (const [from, to] of [...table(theme, "PROJECT_COPY"), ...table(theme, "TESTIMONIAL_COPY")]) {
   exact.set(from, to);
   exact.set(from.replace(/'/g, "’"), to);
 }
