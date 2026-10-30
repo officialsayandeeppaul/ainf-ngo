@@ -977,10 +977,13 @@
     var spaceAbove = rect.top - gap - 12;
     var openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
     var maxHeight = Math.max(140, Math.min(280, openUp ? spaceAbove : spaceBelow));
-    drawer.style.top = (openUp ? Math.max(8, rect.top - maxHeight - gap) : rect.bottom + gap) + "px";
     drawer.style.left = left + "px";
     drawer.style.width = width + "px";
     drawer.style.maxHeight = maxHeight + "px";
+    // Opening upward, sit on the field by the drawer's real height, not its cap,
+    // or a short list floats away from the field.
+    var height = openUp ? Math.min(maxHeight, drawer.offsetHeight || maxHeight) : 0;
+    drawer.style.top = (openUp ? Math.max(8, rect.top - height - gap) : rect.bottom + gap) + "px";
   }
 
   function closeGiftMenu(root) {
@@ -3426,7 +3429,8 @@
     projectCauseDrawer.style.left = Math.min(Math.max(8, rect.left), window.innerWidth - rect.width - 8) + "px";
     projectCauseDrawer.style.width = rect.width + "px";
     projectCauseDrawer.style.maxHeight = maxHeight + "px";
-    projectCauseDrawer.style.top = (openUp ? Math.max(8, rect.top - maxHeight - gap) : rect.bottom + gap) + "px";
+    var height = openUp ? Math.min(maxHeight, projectCauseDrawer.offsetHeight || maxHeight) : 0;
+    projectCauseDrawer.style.top = (openUp ? Math.max(8, rect.top - height - gap) : rect.bottom + gap) + "px";
   }
 
   function mountProjectCauseMenu(form) {
