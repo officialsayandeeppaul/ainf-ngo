@@ -2,6 +2,8 @@ import { Role, UserStatus, type User } from "@prisma/client";
 import { AuditAction, recordAudit } from "../audit";
 import { db } from "../db";
 import type { RequestContext } from "../request-context";
+import { suspensionHasEnded } from "../suspension";
+import { sendSuspensionNotice } from "../suspension-notice";
 import { mirrorRoleToClerk } from "./session";
 
 /**
@@ -105,37 +107,80 @@ export async function revokeVerified(params: {
   return changeRole({ ...params, nextRole: Role.USER });
 }
 
+/**
+ * Suspends, bans or reinstates an account and tells the member (email, or SMS
+ * for mobile-number accounts). A null actor is the automatic lift when a timed
+ * suspension runs out.
+ */
 export async function setUserStatus(params: {
   targetUserId: string;
   status: UserStatus;
   reason?: string | null;
-  actor: { userId: string; clerkId: string; role: Role };
+  /** When the suspension lifts by itself; null = until an admin reinstates. */
+  until?: Date | null;
+  actor: { userId: string; clerkId: string; role: Role } | null;
   context?: RequestContext | null;
 }): Promise<User> {
   const { targetUserId, status, reason, actor, context } = params;
   const suspended = status !== UserStatus.ACTIVE;
+  const until = suspended && status === UserStatus.SUSPENDED ? (params.until ?? null) : null;
+  const before = await db.user.findUnique({ where: { id: targetUserId } });
+  const wasActive = !before || before.status === UserStatus.ACTIVE;
 
-  const user = await db.user.update({
+  let user = await db.user.update({
     where: { id: targetUserId },
     data: {
       status,
       suspendedAt: suspended ? new Date() : null,
       suspendedReason: suspended ? (reason ?? null) : null,
+      suspendedUntil: until,
+      suspendedByUserId: suspended ? (actor?.userId ?? null) : null,
+      suspensionNoticeChannel: null,
+      suspensionNoticeSentAt: null,
     },
   });
 
+  // Only tell the member when something changed for them.
+  const notice =
+    suspended
+      ? await sendSuspensionNotice(user, { kind: "suspended", reason: reason ?? "", until })
+      : wasActive
+        ? null
+        : await sendSuspensionNotice(user, { kind: "reinstated" });
+  if (suspended && notice) {
+    user = await db.user.update({
+      where: { id: user.id },
+      data: {
+        suspensionNoticeChannel: notice.sent ? notice.channel : null,
+        suspensionNoticeSentAt: notice.sent ? new Date() : null,
+      },
+    });
+  }
+
   await recordAudit({
     action: suspended ? AuditAction.UserSuspended : AuditAction.UserReinstated,
-    actorUserId: actor.userId,
-    actorClerkId: actor.clerkId,
-    actorRole: actor.role,
+    actorUserId: actor?.userId ?? null,
+    actorClerkId: actor?.clerkId ?? null,
+    actorRole: actor?.role ?? null,
     targetType: "user",
     targetId: user.id,
     context: context ?? null,
-    metadata: { status, reason: reason ?? null },
+    metadata: {
+      status,
+      reason: reason ?? null,
+      until: until ? until.toISOString() : null,
+      automatic: actor === null,
+      notice: notice ? { channel: notice.channel, sent: notice.sent, error: notice.error } : null,
+    },
   });
 
   return user;
+}
+
+/** Lifts a timed suspension whose end has passed. Returns the fresh user, or the same one. */
+export async function liftEndedSuspension(user: User): Promise<User> {
+  if (!suspensionHasEnded(user)) return user;
+  return setUserStatus({ targetUserId: user.id, status: UserStatus.ACTIVE, actor: null });
 }
 
 export async function countSuperAdmins(): Promise<number> {

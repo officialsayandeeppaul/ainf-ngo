@@ -237,7 +237,12 @@ export type SmsResult = { sent: boolean; error?: string };
  * Sends a transactional SMS. Returns rather than throws: SMS is a courtesy
  * channel and must never fail the operation that triggered it.
  */
-export function buildSmsParams(params: { to: string; message: string }): URLSearchParams | { error: string } {
+export function buildSmsParams(params: {
+  to: string;
+  message: string;
+  /** DLT template for this message; defaults to APITXT_DLT_TEMPLATE_ID. */
+  templateId?: string;
+}): URLSearchParams | { error: string } {
   if (!isApitxtConfigured) return { error: "not_configured" };
   if (!env.APITXT_SENDER_ID) return { error: "no_sender_id" };
   const mobile = params.to.replace(/[^\d]/g, "").replace(/^0+/, "");
@@ -255,13 +260,14 @@ export function buildSmsParams(params: { to: string; message: string }): URLSear
   // DLT is opt-in. Verification and OTP work without template / PE ids.
   const requireDlt = env.APITXT_REQUIRE_DLT === "true" || env.APITXT_REQUIRE_DLT === "1";
   if (requireDlt) {
-    if (env.APITXT_DLT_TEMPLATE_ID) body.set("DLT_TE_ID", env.APITXT_DLT_TEMPLATE_ID);
+    const template = params.templateId || env.APITXT_DLT_TEMPLATE_ID;
+    if (template) body.set("DLT_TE_ID", template);
     if (env.APITXT_PE_ID) body.set("PE_ID", env.APITXT_PE_ID);
   }
   return body;
 }
 
-export async function sendSms(params: { to: string; message: string }): Promise<SmsResult> {
+export async function sendSms(params: { to: string; message: string; templateId?: string }): Promise<SmsResult> {
   const built = buildSmsParams(params);
   if ("error" in built) {
     if (built.error === "not_configured") console.warn("[apitxt] SMS skipped — APITXT_AUTH_KEY not set");

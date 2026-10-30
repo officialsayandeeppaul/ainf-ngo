@@ -38,6 +38,8 @@ const rawSchema = z.object({
   APITXT_SENDER_ID: z.string().optional(),
   APITXT_ROUTE: z.string().default("4"),
   APITXT_DLT_TEMPLATE_ID: z.string().optional(),
+  /** DLT template registered for the account-suspended / reinstated SMS. Falls back to APITXT_DLT_TEMPLATE_ID. */
+  APITXT_DLT_SUSPEND_TEMPLATE_ID: z.string().optional(),
   APITXT_PE_ID: z.string().optional(),
   /** Second APITXT key, used only for text OTP (sendOTP). No DLT fields. */
   APITXT_OTP_AUTH_KEY: z.string().optional(),

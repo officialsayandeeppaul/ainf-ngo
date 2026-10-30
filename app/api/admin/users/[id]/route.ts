@@ -5,6 +5,12 @@ import { guardApi } from "@/lib/auth/guard";
 import { changeRole, countSuperAdmins, setUserStatus } from "@/lib/auth/role-service";
 import { db } from "@/lib/db";
 import { contextFromRequest } from "@/lib/request-context";
+import {
+  SUSPENSION_PERIOD_VALUES,
+  SUSPENSION_REASON_MAX,
+  SUSPENSION_REASON_MIN,
+  suspendedUntilFor,
+} from "@/lib/suspension";
 
 /**
  * Super admin user mutations.
@@ -24,7 +30,8 @@ const bodySchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("setStatus"),
     status: z.nativeEnum(UserStatus),
-    reason: z.string().trim().max(400).optional(),
+    reason: z.string().trim().max(SUSPENSION_REASON_MAX).optional(),
+    period: z.enum(SUSPENSION_PERIOD_VALUES).optional(),
   }),
 ]);
 
@@ -98,13 +105,39 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return Response.json({ ok: true, role: updated.role });
   }
 
+  // The member is told why and for how long, so both are required to suspend.
+  const suspending = input.status !== UserStatus.ACTIVE;
+  if (suspending && (input.reason ?? "").length < SUSPENSION_REASON_MIN) {
+    return Response.json(
+      {
+        error: "reason_required",
+        message: `Write the reason the member will see (at least ${SUSPENSION_REASON_MIN} characters).`,
+      },
+      { status: 400 }
+    );
+  }
+  if (input.status === UserStatus.SUSPENDED && !input.period) {
+    return Response.json(
+      { error: "period_required", message: "Choose how long the suspension lasts." },
+      { status: 400 }
+    );
+  }
+
   const updated = await setUserStatus({
     targetUserId: target.id,
     status: input.status,
-    reason: input.reason ?? null,
+    reason: suspending ? (input.reason ?? null) : null,
+    until: input.status === UserStatus.SUSPENDED && input.period ? suspendedUntilFor(input.period) : null,
     actor,
     context,
   });
 
-  return Response.json({ ok: true, status: updated.status });
+  return Response.json({
+    ok: true,
+    status: updated.status,
+    suspendedUntil: updated.suspendedUntil ? updated.suspendedUntil.toISOString() : null,
+    notice: suspending
+      ? { channel: updated.suspensionNoticeChannel, sent: Boolean(updated.suspensionNoticeSentAt) }
+      : null,
+  });
 }

@@ -220,6 +220,11 @@ export default async function AdminUsersPage({
                       </td>
                       <td>
                         <UserStatusBadge status={user.status} />
+                        {user.status === "SUSPENDED" ? (
+                          <span className="pt-status-until">
+                            {user.suspendedUntil ? `until ${formatDay(user.suspendedUntil)}` : "until reinstated"}
+                          </span>
+                        ) : null}
                       </td>
                       <td style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>
                         {formatDay(user.createdAt)}
@@ -230,6 +235,7 @@ export default async function AdminUsersPage({
                           role={user.role}
                           status={user.status}
                           isSelf={user.id === viewer.id}
+                          contact={{ email: user.email, phone: user.phone }}
                         />
                       </td>
                     </tr>

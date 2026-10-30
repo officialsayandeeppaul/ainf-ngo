@@ -77,6 +77,12 @@ model User {
 
   suspendedAt     DateTime?
   suspendedReason String?
+  /// When a suspension lifts by itself; null means until an admin reinstates.
+  suspendedUntil    DateTime?
+  suspendedByUserId String?
+  /// How the member was told: "email", "sms", or null when no notice went out.
+  suspensionNoticeChannel String?
+  suspensionNoticeSentAt  DateTime?
   lastSeenAt      DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -100,6 +106,7 @@ model User {
   auditLogs        AuditLog[]        @relation("AuditActor")
   membershipOrders MembershipOrder[]
   membershipCard   MembershipCard?
+  cardPhoto        CardPhoto?
   paymentInterests PaymentInterest[]
 
   @@index([role])
@@ -357,6 +364,17 @@ model MembershipCard {
 
   @@index([token])
   @@index([expiresAt])
+}
+
+/// The member's ID card photo (passport crop, JPEG). Kept in Postgres because
+/// the serverless host's filesystem is read-only; a separate table so user
+/// queries never load the bytes.
+model CardPhoto {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bytes     Bytes
+  mime      String   @default("image/jpeg")
+  updatedAt DateTime @updatedAt
 }
 
 /// Singleton row (id = "singleton") for defaults used when creating a new tier.

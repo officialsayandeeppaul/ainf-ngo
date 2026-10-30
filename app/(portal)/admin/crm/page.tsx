@@ -382,6 +382,11 @@ export default async function AdminCrmPage({
                         </td>
                         <td>
                           <UserStatusBadge status={user.status} />
+                          {user.status === "SUSPENDED" ? (
+                            <span className="pt-status-until">
+                              {user.suspendedUntil ? `until ${formatDay(user.suspendedUntil)}` : "until reinstated"}
+                            </span>
+                          ) : null}
                         </td>
                         <td>
                           <div className="pt-crm-email">
@@ -399,6 +404,7 @@ export default async function AdminCrmPage({
                               role={user.role}
                               status={user.status}
                               isSelf={user.id === viewer.id}
+                              contact={{ email: user.email, phone: user.phone }}
                             />
                           </div>
                         </td>

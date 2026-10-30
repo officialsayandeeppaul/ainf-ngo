@@ -21,12 +21,17 @@ export default async function SuspendedPage() {
     );
   }
 
+  // getAuthContext lifts a timed suspension that has run out.
   const ctx = await getAuthContext();
   if (!ctx) redirect("/sign-in");
   // Reinstated users should not be able to sit on this page.
   if (ctx.user.status === UserStatus.ACTIVE) redirect("/account");
 
   const banned = ctx.user.status === UserStatus.BANNED;
+  const until = banned ? null : ctx.user.suspendedUntil;
+  const contactLine = ctx.user.email.endsWith("@mobile.theainf.in")
+    ? `the mobile number on this account${ctx.user.phone ? ` (${ctx.user.phone})` : ""}`
+    : `the email address on this account (${ctx.user.email})`;
 
   return (
     <DashShell role={null}>
@@ -35,25 +40,45 @@ export default async function SuspendedPage() {
         <p className="pt-subtitle">
           {banned
             ? "This account has been closed and cannot be used to access member services."
-            : "Access to member services is paused on this account."}
+            : until
+              ? "Access to member services is paused on this account for a set time."
+              : "Access to member services is paused on this account until AINF reinstates it."}
         </p>
-        <div className="pt-card">
-          {ctx.user.suspendedReason ? (
-            <>
-              <p className="pt-eyebrow">Reason given</p>
-              <p style={{ margin: "0 0 18px", fontSize: 14 }}>{ctx.user.suspendedReason}</p>
-            </>
-          ) : null}
-          {ctx.user.suspendedAt ? (
-            <p className="pt-hint" style={{ marginTop: 0 }}>
-              Since{" "}
-              {formatDayTime(ctx.user.suspendedAt)}
-            </p>
-          ) : null}
+        <div className="pt-card pt-suspended-card">
+          <dl className="pt-suspended-facts">
+            <div>
+              <dt>Reason</dt>
+              <dd>{ctx.user.suspendedReason || "No reason was recorded. Please contact us."}</dd>
+            </div>
+            {!banned ? (
+              <div>
+                <dt>How long</dt>
+                <dd>
+                  {until ? (
+                    <>
+                      Until <strong>{formatDayTime(until)}</strong> (India time). It lifts by itself then; sign
+                      in again after that.
+                    </>
+                  ) : (
+                    "Until AINF reinstates it."
+                  )}
+                </dd>
+              </div>
+            ) : null}
+            {ctx.user.suspendedAt ? (
+              <div>
+                <dt>Since</dt>
+                <dd>{formatDayTime(ctx.user.suspendedAt)}</dd>
+              </div>
+            ) : null}
+          </dl>
           <hr className="pt-divider" />
           <p style={{ margin: 0, fontSize: 14, color: "var(--ink-muted)" }}>
-            If you believe this is a mistake, please get in touch and quote the email address on
-            this account.
+            If you believe this is a mistake, write to{" "}
+            <a className="pt-link" href="mailto:hello@theainf.in">
+              hello@theainf.in
+            </a>{" "}
+            and quote {contactLine}.
           </p>
           <div className="pt-btn-row" style={{ marginTop: 18 }}>
             <Link href="/contact-us" className="pt-btn pt-btn--primary">

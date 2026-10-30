@@ -6,6 +6,7 @@ import { AuditAction, recordAudit } from "../audit";
 import { requestContext } from "../request-context";
 import { expireMembershipIfNeeded } from "../membership-pay";
 import { indianMobile, e164India } from "../mobile-auth";
+import { suspensionHasEnded } from "../suspension";
 import { roleFromUnknown, type ClerkPublicMetadata } from "./roles";
 
 /**
@@ -95,8 +96,13 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   if (!clerkId) return null;
   if (!isDatabaseConfigured) return null;
 
-  const existing = await db.user.findUnique({ where: { clerkId } });
-  if (existing) {
+  const found = await db.user.findUnique({ where: { clerkId } });
+  if (found) {
+    // A timed suspension lifts on the member's first visit after it ends.
+    // Loaded lazily: role-service imports this module.
+    const existing = suspensionHasEnded(found)
+      ? await (await import("./role-service")).liftEndedSuspension(found)
+      : found;
     const expired = await expireMembershipIfNeeded(existing.id);
     const fresh = expired
       ? ((await db.user.findUnique({ where: { id: existing.id } })) ?? existing)

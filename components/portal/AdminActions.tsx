@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { Role, UserStatus } from "@/lib/prisma-enums-client";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PortalSelect } from "@/components/portal/PortalSelect";
+import {
+  SUSPENSION_PERIODS,
+  SUSPENSION_REASON_MAX,
+  SUSPENSION_REASON_MIN,
+  suspensionNoticeChannel,
+  type SuspensionPeriod,
+} from "@/lib/suspension";
 
 const ROLE_LABEL: Record<Role, string> = {
   [Role.USER]: "Member",
@@ -34,11 +41,14 @@ export function UserRowActions({
   role,
   status,
   isSelf,
+  contact,
 }: {
   userId: string;
   role: Role;
   status: UserStatus;
   isSelf: boolean;
+  /** Where the suspension notice goes; shown to the admin before they confirm. */
+  contact?: { email: string; phone: string | null };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -47,13 +57,28 @@ export function UserRowActions({
   const [nextRole, setNextRole] = useState<Role | null>(null);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [reinstateOpen, setReinstateOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [period, setPeriod] = useState<SuspensionPeriod>("7d");
 
   useEffect(() => {
     setNextRole(null);
     setSuspendOpen(false);
     setReinstateOpen(false);
+    setReason("");
+    setPeriod("7d");
     setError(null);
   }, [role, status, userId]);
+
+  const reasonShort = reason.trim().length < SUSPENSION_REASON_MIN;
+  const channel = contact ? suspensionNoticeChannel(contact) : null;
+  const noticeHint =
+    channel === "email"
+      ? `They are emailed at ${contact!.email}.`
+      : channel === "sms"
+        ? `They signed up with a mobile number, so they get an SMS at ${contact!.phone}.`
+        : contact
+          ? "This account has no email or mobile on file, so no notice can be sent. They see the reason when they sign in."
+          : "They are emailed, or sent an SMS if they signed up with a mobile number.";
 
   if (isSelf) {
     return <span style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>Your own account</span>;
@@ -132,23 +157,59 @@ export function UserRowActions({
       <ConfirmDialog
         open={suspendOpen}
         title="Suspend this account?"
-        body="They will not be able to use the portal until you reinstate them. The change is audited."
-        confirmLabel="Yes, suspend"
+        body="They cannot use member services while suspended. They are told the reason and how long it lasts, and the change is audited."
+        confirmLabel="Suspend and notify"
         tone="danger"
         busy={disabled}
-        onCancel={() => setSuspendOpen(false)}
-        onConfirm={() =>
-          void run({
-            action: "setStatus",
-            status: UserStatus.SUSPENDED,
-            reason: "Suspended by administrator",
-          })
-        }
-      />
+        confirmDisabled={reasonShort}
+        onCancel={() => {
+          setSuspendOpen(false);
+          setError(null);
+        }}
+        onConfirm={() => {
+          if (!reasonShort) void run({ action: "setStatus", status: UserStatus.SUSPENDED, reason: reason.trim(), period });
+        }}
+      >
+        <div className="pt-suspend-form">
+          <label className="pt-label" htmlFor={`suspend-reason-${userId}`}>
+            Reason the member will see
+          </label>
+          <textarea
+            id={`suspend-reason-${userId}`}
+            className="pt-textarea"
+            rows={3}
+            maxLength={SUSPENSION_REASON_MAX}
+            placeholder="For example: the payment on this membership was reversed by the bank."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <p className="pt-hint pt-suspend-form__count">
+            {reason.trim().length}/{SUSPENSION_REASON_MAX}
+            {reasonShort ? ` · at least ${SUSPENSION_REASON_MIN} characters` : ""}
+          </p>
+          <span className="pt-label">How long</span>
+          <div className="pt-suspend-form__periods" role="radiogroup" aria-label="How long">
+            {SUSPENSION_PERIODS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={period === option.value}
+                className={`pt-suspend-form__period${period === option.value ? " is-on" : ""}`}
+                onClick={() => setPeriod(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="pt-hint pt-suspend-form__notice">{noticeHint}</p>
+        </div>
+        {error ? <p className="pt-alert pt-alert--error">{error}</p> : null}
+      </ConfirmDialog>
       <ConfirmDialog
         open={reinstateOpen}
         title="Reinstate this account?"
-        body="They can sign in and use the portal again. The change is audited."
+        body="They can sign in and use the portal again, and are told their account is active. The change is audited."
         confirmLabel="Yes, reinstate"
         busy={disabled}
         onCancel={() => setReinstateOpen(false)}
