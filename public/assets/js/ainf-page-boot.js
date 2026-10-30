@@ -1128,9 +1128,10 @@
       }, 1200 * attempt);
       return true;
     }
-    // A request that hangs on a poor line is cut off and retried like a failure.
+    // It answers in about 0.2 s; one that hangs on a poor line is cut off after
+    // 6 s and retried like a failure.
     var abort = typeof AbortController === "function" ? new AbortController() : null;
-    var cutoff = abort ? setTimeout(function () { abort.abort(); }, 8000) : 0;
+    var cutoff = abort ? setTimeout(function () { abort.abort(); }, 6000) : 0;
     fetch("/api/donations/targets" + giftQuery(), { headers: { accept: "application/json" }, signal: abort ? abort.signal : undefined })
       .then(function (response) {
         return response.json().then(function (body) { return { ok: response.ok, body: body }; });
