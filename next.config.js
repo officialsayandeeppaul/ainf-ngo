@@ -11,6 +11,8 @@ const nextConfig = {
   // The 25 Framer pages are route handlers that gzip their own body; the
   // portal is the only part of the app that renders React.
   poweredByHeader: false,
+  // pdfkit reads its own files at runtime; bundling it breaks those paths.
+  serverExternalPackages: ["pdfkit"],
   outputFileTracingIncludes: {
     // Project pages are rebuilt at runtime (ISR) and version their scripts
     // from file contents (lib/asset-version.ts), so those folders ship too.
@@ -20,6 +22,8 @@ const nextConfig = {
       "./public/assets/css/*.css",
       "./public/i18n/*",
     ],
+    // Receipt PDFs embed Onest from TTF files (lib/receipt-pdf.ts).
+    "/donate/receipt/[token]/pdf": ["./lib/fonts/*.ttf"],
   },
   webpack(config, { dev }) {
     // This project lives on an exFAT volume, where readlink() on a regular file
@@ -108,6 +112,8 @@ const nextConfig = {
       { source: "/privacy", destination: "/legal-pages/terms-conditions", permanent: true },
       { source: "/terms-of-use", destination: "/legal-pages/terms-conditions", permanent: true },
       { source: "/terms-conditions", destination: "/legal-pages/terms-conditions", permanent: true },
+      // The admin donations ledger used to be called "Gifts".
+      { source: "/admin/gifts", destination: "/admin/donations", permanent: false },
     ];
   },
 };

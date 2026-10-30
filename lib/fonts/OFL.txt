@@ -1,0 +1,10 @@
+Onest-Regular.ttf and Onest-Bold.ttf
+
+Copyright 2021 The Onest Project Authors (https://github.com/simpals/onest)
+
+These fonts are licensed under the SIL Open Font License, Version 1.1.
+The license is available with a FAQ at: https://openfontlicense.org
+
+They are the site's own Onest web fonts (public/assets/fonts/0b532b340381e255.woff2
+and 98a11855328341d1.woff2) decompressed to TrueType, unmodified, so the donation
+receipt PDF (lib/receipt-pdf.ts) can embed them.
