@@ -589,11 +589,11 @@
       "bn": "হ্যাঁ — Support AINF ফর্মে Desk/Vertical নির্বাচন করুন: Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, বা Janajati।",
       "hi": "हाँ — Support AINF form में Desk/Vertical चुनें: Shiksha, Swasthya, Rozgar, Nari Suraksha, Kheti, या Janajati।"
     },
-    "Today's Gift — Tomorrow's Job or Degree": {
-      "bn": "আজকের উপহার — আগামীকালের চাকরি বা ডিগ্রি",
-      "hi": "आज का उपहार — कल की नौकरी या degree"
+    "Today's Donation — Tomorrow's Job or Degree": {
+      "bn": "আজকের দান — আগামীকালের চাকরি বা ডিগ্রি",
+      "hi": "आज का दान — कल की नौकरी या degree"
     },
-    "Even a small amount can cover coaching fees, travel stipends, or a skill kit. Larger gifts can sponsor a full batch — every rupee is tracked in AINF's ledger.": {
+    "Even a small amount can cover coaching fees, travel stipends, or a skill kit. Larger donations can sponsor a full batch — every rupee is tracked in AINF's ledger.": {
       "bn": "এমনকি অল্প পরিমাণ কোচিং ফি, ভ্রমণ ভাতা বা দক্ষতা কিট কভার করতে পারে। বড় অনুদান পুরো ব্যাচ স্পনসর করতে পারে — প্রতিটি টাকা AINF ledger-এ tracked।",
       "hi": "थोड़ी राशि भी coaching fees, travel stipend या skill kit कवर कर सकती है। बड़े दान पूरा batch sponsor कर सकते हैं — हर रुपया AINF ledger में tracked है।"
     },
@@ -937,9 +937,9 @@
       "bn": "AINF-এর সাথে পরীক্ষার ব্যাচ কোচ করুন, দক্ষতা সপ্তাহান্ত রাখুন বা প্লেসমেন্ট সেলে বসুন। দুই ঘণ্টাও কাজে লাগে যদি একজন শিক্ষার্থী দিক পায়।",
       "hi": "AINF के साथ परीक्षा बैच कोच करें, कौशल सप्ताहांत चलाएँ या प्लेसमेंट सेल में बैठें। दो घंटे भी काफी हैं अगर एक छात्र को दिशा मिल जाए।"
     },
-    "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families.": {
-      "bn": "আপনার উপহার ভাতা, পড়ার সামগ্রী, পরামর্শ ও জরুরি ত্রাণ — সরাসরি শিক্ষার্থী ও পরিবারের কাছে পৌঁছায়।",
-      "hi": "आपका उपहार भत्ता, अध्ययन सामग्री, परामर्श और आपात राहत — सीधे छात्रों और परिवारों तक पहुँचता है।"
+    "Your donation covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families.": {
+      "bn": "আপনার দান ভাতা, পড়ার সামগ্রী, পরামর্শ ও জরুরি ত্রাণ — সরাসরি শিক্ষার্থী ও পরিবারের কাছে পৌঁছায়।",
+      "hi": "आपका दान भत्ता, अध्ययन सामग्री, परामर्श और आपात राहत — सीधे छात्रों और परिवारों तक पहुँचता है।"
     },
     "Students, field sevaks, and partners from Asansol to Jamtara — straight talk on learning, landing work, and earning dignity.": {
       "bn": "আসানসোল থেকে জামতাড়া পর্যন্ত শিক্ষার্থী, ফিল্ড সেবক ও অংশীদার — শেখা, কাজ পাওয়া ও মর্যাদা অর্জনের সোজা কথা।",
@@ -2101,9 +2101,9 @@
       "bn": "অনুদান আমাদের স্বাস্থ্য সচেতনতা, চিকিৎসা সহায়তা ও প্রয়োজনীয় সেবার সাথে সম্প্রদায়কে যুক্ত করতে দেয়। এতে সামগ্রিক সুস্থতা বাড়ে এবং মানুষ প্রয়োজনীয় সেবা পায়।",
       "hi": "दान से हम स्वास्थ्य जागरूकता, चिकित्सा सहायता और ज़रूरी सेवाओं से समुदायों को जोड़ पाते हैं। इससे समग्र कल्याण सुधरता है और लोगों को ज़रूरी देखभाल मिलती है।"
     },
-    "Support AINFs to AINF are voluntary gifts under Section 8 rules. Funds are applied to registered charitable objects (education, health, rozgar, women safety, farming, tribal welfare). Refunds are only where required by law or stated in writing.": {
-      "bn": "AINF-এ অনুদান Section 8 নিয়মে স্বেচ্ছায় দেওয়া উপহার। অর্থ নিবন্ধিত দাতব্য উদ্দেশ্যে (শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, আদিবাসী কল্যাণ) লাগে। ফেরত কেবল আইন বা লিখিত শর্তে।",
-      "hi": "AINF को दान Section 8 नियमों के तहत स्वैच्छिक उपहार हैं। धन पंजीकृत धर्मार्थ उद्देश्यों (शिक्षा, स्वास्थ्य, रोज़गार, नारी सुरक्षा, खेती, आदिवासी कल्याण) पर लगता है। वापसी केवल क़ानून या लिखित शर्त पर।"
+    "Support AINFs to AINF are voluntary donations under Section 8 rules. Funds are applied to registered charitable objects (education, health, rozgar, women safety, farming, tribal welfare). Refunds are only where required by law or stated in writing.": {
+      "bn": "AINF-এ অনুদান Section 8 নিয়মে স্বেচ্ছায় দেওয়া দান। অর্থ নিবন্ধিত দাতব্য উদ্দেশ্যে (শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, আদিবাসী কল্যাণ) লাগে। ফেরত কেবল আইন বা লিখিত শর্তে।",
+      "hi": "AINF को दान Section 8 नियमों के तहत स्वैच्छिक दान हैं। धन पंजीकृत धर्मार्थ उद्देश्यों (शिक्षा, स्वास्थ्य, रोज़गार, नारी सुरक्षा, खेती, आदिवासी कल्याण) पर लगता है। वापसी केवल क़ानून या लिखित शर्त पर।"
     },
     "At AINF, we've seen a ₹500 travel stipend keep a Jamtara student in coaching — that's often the first domino before a polytechnic seat or first job. It provides children with knowledge, skills, and opportunities that can shape a brighter future.": {
       "bn": "AINF-এ দেখেছি ₹৫০০ ভ্রমণ ভাতা এক জামতাড়ার শিক্ষার্থীকে কোচিংয়ে রাখে — পলিটেকনিক সিট বা প্রথম চাকরির আগে প্রায়ই সেই প্রথম ডোমিনো। এতে শিশুরা জ্ঞান, দক্ষতা ও উজ্জ্বল ভবিষ্যতের সুযোগ পায়।",
@@ -2205,21 +2205,21 @@
       "bn": "অনুদান",
       "hi": "दान"
     },
-    "Supporting Through Gifts": {
-      "bn": "উপহারের মাধ্যমে সহায়তা",
-      "hi": "उपहारों से सहायता"
+    "Supporting Through Donations": {
+      "bn": "দানের মাধ্যমে সহায়তা",
+      "hi": "दान से सहायता"
     },
     "AINF — All Indian Nevarlands Foundation · theainf.in": {
       "bn": "AINF — অল ইন্ডিয়ান নেভারল্যান্ডস ফাউন্ডেশন · theainf.in",
       "hi": "AINF — ऑल इंडियन नेवरलैंड्स फाउंडेशन · theainf.in"
     },
-    "Donations to AINF are voluntary gifts under Section 8 rules. Funds are applied to registered charitable objects (education, health, rozgar, women safety, farming, tribal welfare). Refunds are only where required by law or stated in writing.": {
-      "bn": "AINF-এ অনুদান Section 8 নিয়মে স্বেচ্ছায় উপহার। অর্থ নিবন্ধিত দাতব্য উদ্দেশ্যে (শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, আদিবাসী কল্যাণ) ব্যবহৃত হয়। ফেরত কেবল আইন বা লিখিত শর্তে।",
-      "hi": "AINF को दान Section 8 नियमों के तहत स्वैच्छिक उपहार हैं। राशि पंजीकृत धर्मार्थ उद्देश्यों (शिक्षा, स्वास्थ्य, रोज़गार, महिला सुरक्षा, खेती, आदिवासी कल्याण) पर लगती है। रिफंड केवल कानून या लिखित शर्त पर।"
+    "Donations to AINF are voluntary donations under Section 8 rules. Funds are applied to registered charitable objects (education, health, rozgar, women safety, farming, tribal welfare). Refunds are only where required by law or stated in writing.": {
+      "bn": "AINF-এ অনুদান Section 8 নিয়মে স্বেচ্ছায় দান। অর্থ নিবন্ধিত দাতব্য উদ্দেশ্যে (শিক্ষা, স্বাস্থ্য, রোজগার, নারী সুরক্ষা, কৃষি, আদিবাসী কল্যাণ) ব্যবহৃত হয়। ফেরত কেবল আইন বা লিখিত শর্তে।",
+      "hi": "AINF को दान Section 8 नियमों के तहत स्वैच्छिक दान हैं। राशि पंजीकृत धर्मार्थ उद्देश्यों (शिक्षा, स्वास्थ्य, रोज़गार, महिला सुरक्षा, खेती, आदिवासी कल्याण) पर लगती है। रिफंड केवल कानून या लिखित शर्त पर।"
     },
-    "Gifts allow us to organize health awareness programs, provide medical support, and connect communities with essential healthcare services. These efforts help improve overall well-being and ensure individuals receive the care they need.": {
-      "bn": "উপহার দিয়ে স্বাস্থ্য সচেতনতা কর্মসূচি, চিকিৎসা সহায়তা ও প্রয়োজনীয় সেবার সাথে সম্প্রদায়কে যুক্ত করি। এতে সামগ্রিক সুস্থতা বাড়ে এবং মানুষ প্রয়োজনীয় সেবা পায়।",
-      "hi": "उपहारों से स्वास्थ्य जागरूकता कार्यक्रम, चिकित्सा सहायता और ज़रूरी सेवाओं से समुदायों को जोड़ते हैं। इससे समग्र स्वास्थ्य सुधरता है और लोगों को ज़रूरी देखभाल मिलती है।"
+    "Donations allow us to organize health awareness programs, provide medical support, and connect communities with essential healthcare services. These efforts help improve overall well-being and ensure individuals receive the care they need.": {
+      "bn": "দান দিয়ে স্বাস্থ্য সচেতনতা কর্মসূচি, চিকিৎসা সহায়তা ও প্রয়োজনীয় সেবার সাথে সম্প্রদায়কে যুক্ত করি। এতে সামগ্রিক সুস্থতা বাড়ে এবং মানুষ প্রয়োজনীয় সেবা পায়।",
+      "hi": "दान से स्वास्थ्य जागरूकता कार्यक्रम, चिकित्सा सहायता और ज़रूरी सेवाओं से समुदायों को जोड़ते हैं। इससे समग्र स्वास्थ्य सुधरता है और लोगों को ज़रूरी देखभाल मिलती है।"
     },
     "Projects on the Ground": {
       "bn": "মাঠের প্রকল্প",
@@ -2285,7 +2285,7 @@
       "bn": "এটা কীভাবে চলে",
       "hi": "यह कैसे चलता है"
     },
-    "How a gift becomes work on the ground — with the panchayat, field sevaks, and families in the block.": {
+    "How a donation becomes work on the ground — with the panchayat, field sevaks, and families in the block.": {
       "bn": "একটি দান কীভাবে মাঠের কাজে বদলায় — পঞ্চায়েত, ফিল্ড সেবক ও ব্লকের পরিবারের সঙ্গে।",
       "hi": "एक दान कैसे ज़मीन के काम में बदलता है — पंचायत, फील्ड सेवक और ब्लॉक के परिवारों के साथ।"
     },
@@ -2377,7 +2377,7 @@
       "bn": "আমাদের ব্লকের রাত এত ঠান্ডা হয় যে শিশু স্কুলে পৌঁছাতে পারে না, বড়রা ঘুমোতে পারে না। সেই সপ্তাহ আসার আগে এই ডেস্ক কম্বল ও গরম জামা গোছায়।",
       "hi": "हमारे ब्लॉक की रातें इतनी ठंडी हो जाती हैं कि बच्चा स्कूल नहीं पहुँच पाता और बुज़ुर्ग सो नहीं पाते। वह हफ्ता आने से पहले यह डेस्क कंबल और गर्म कपड़े बाँधता है।"
     },
-    "Gifts are pooled early, then spent on blankets and warm sets bought for the blocks we already work in — not a general appeal with no address.": {
+    "Donations are pooled early, then spent on blankets and warm sets bought for the blocks we already work in — not a general appeal with no address.": {
       "bn": "দান আগে জমা হয়, তারপর সেই ব্লকের কম্বল ও গরম জামায় খরচ হয় যেখানে আমরা ইতিমধ্যে কাজ করি — ঠিকানাহীন সাধারণ আবেদন নয়।",
       "hi": "दान पहले जमा होता है, फिर उन ब्लॉक के कंबल और गर्म कपड़ों पर खर्च होता है जहाँ हम पहले से काम करते हैं — बिना पते की सामान्य अपील नहीं।"
     },

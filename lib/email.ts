@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { formatInr } from "./membership";
+import { NON_REFUNDABLE_DONATION, NON_REFUNDABLE_MEMBERSHIP, NON_REFUNDABLE_PAYMENT } from "./payment-policy";
 import type { User } from "@prisma/client";
 import {
   absoluteUrl,
@@ -150,6 +151,11 @@ function shell(
 </body></html>`;
 }
 
+/** The non-refundable small print in payment emails. */
+function policyLine(text: string): string {
+  return `<p style="margin:0;padding:10px 12px;border-radius:10px;background:#fdf5e8;font-size:13px;color:#8a5a17">${escapeHtml(text)}</p>`;
+}
+
 function greeting(user: Pick<User, "firstName">): string {
   return user.firstName ? `Hi ${escapeHtml(user.firstName)},` : "Hi,";
 }
@@ -178,11 +184,11 @@ export function sendWelcomeEmail(user: Pick<User, "email" | "firstName">) {
     html: shell(
       `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Welcome to AINF</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${greeting(user)}</p>
-       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you for creating an AINF account. From your dashboard you can verify your identity, join as a member, and keep every gift receipt in one place.</p>
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you for creating an AINF account. From your dashboard you can verify your identity, join as a member, and keep every donation receipt in one place.</p>
        <p style="margin:0;font-size:14.5px;color:#5c6660">If you did not create this account, please let us know.</p>`,
       { href, label: "Open your dashboard" }
     ),
-    text: `Welcome to AINF\n\n${user.firstName ? `Hi ${user.firstName},` : "Hi,"}\n\nThank you for creating an AINF account. From your dashboard you can verify your identity, join as a member, and keep every gift receipt in one place.\n\nOpen your dashboard: ${href}`,
+    text: `Welcome to AINF\n\n${user.firstName ? `Hi ${user.firstName},` : "Hi,"}\n\nThank you for creating an AINF account. From your dashboard you can verify your identity, join as a member, and keep every donation receipt in one place.\n\nOpen your dashboard: ${href}`,
   });
 }
 
@@ -211,10 +217,11 @@ export function sendMembershipReceiptEmail(params: {
       `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Membership active</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hi}</p>
        <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you. We have received your ${escapeHtml(term)} payment of <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> for the <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.tierName)}</strong> membership. Your badge is live until <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(until)}</strong>.</p>
-       <p style="margin:0;font-size:14.5px;color:#5c6660">Your membership card is ready to view and print from your account.</p>`,
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Your membership card is ready to view and print from your account.</p>
+       ${policyLine(NON_REFUNDABLE_MEMBERSHIP)}`,
       { href, label: "View your membership" }
     ),
-    text: `Membership active\n\n${params.firstName ? `Hi ${params.firstName},` : "Hi,"}\n\nThank you. We have received your ${term} payment of ${amount} for the ${params.tierName} membership. Your badge is live until ${until}.\n\nView your membership: ${href}`,
+    text: `Membership active\n\n${params.firstName ? `Hi ${params.firstName},` : "Hi,"}\n\nThank you. We have received your ${term} payment of ${amount} for the ${params.tierName} membership. Your badge is live until ${until}.\n\n${NON_REFUNDABLE_MEMBERSHIP}\n\nView your membership: ${href}`,
   });
 }
 
@@ -301,22 +308,22 @@ export function sendContactReplyEmail(params: {
   const originalHtml = escapeHtml(params.originalMessage).replace(/\n/g, "<br>");
   return deliver({
     to: params.to,
-    subject: "Reply from All India Nevarlands Foundation (AINF)",
+    subject: "Reply from All Indian Nevarlands Foundation (AINF)",
     html: shell(
       `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Message from AINF</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
-       <p style="margin:0 0 16px;font-size:14.5px;color:#5c6660">Thank you for writing to All India Nevarlands Foundation. Here is our reply:</p>
+       <p style="margin:0 0 16px;font-size:14.5px;color:#5c6660">Thank you for writing to All Indian Nevarlands Foundation. Here is our reply:</p>
        <div style="margin:0 0 20px;padding:14px 16px;border-radius:12px;background:#f6f8f7;border:1px solid #e2e7e4;font-size:14.5px;color:#1a1d1b">${replyHtml}</div>
        <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#8a938d">Your original message</p>
        <div style="margin:0;padding:12px 14px;border-radius:12px;background:#ffffff;border:1px dashed #d5dbd7;font-size:13.5px;color:#5c6660">${originalHtml}</div>
        <p style="margin:20px 0 0;font-size:14px;color:#5c6660">With care,<br>Team AINF<br>hello@theainf.in · Nala, Jamtara, Jharkhand</p>`
     ),
-    text: `Reply from AINF\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you for writing to All India Nevarlands Foundation. Here is our reply:\n\n${params.replyBody}\n\n—\nYour original message:\n${params.originalMessage}\n\nWith care,\nTeam AINF\nhello@theainf.in`,
+    text: `Reply from AINF\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you for writing to All Indian Nevarlands Foundation. Here is our reply:\n\n${params.replyBody}\n\n—\nYour original message:\n${params.originalMessage}\n\nWith care,\nTeam AINF\nhello@theainf.in`,
   });
 }
 
-const GIFT_NOTE =
-  "You are receiving this because you gave a gift to All India Nevarlands Foundation. This is an automated message — please do not reply.";
+const DONATION_NOTE =
+  "You are receiving this because you made a donation to All Indian Nevarlands Foundation. This is an automated message — please do not reply.";
 
 export function sendDonationReceiptEmail(params: {
   to: string;
@@ -330,20 +337,22 @@ export function sendDonationReceiptEmail(params: {
   const amount = formatInr(params.amountPaise);
   return deliver({
     to: params.to,
-    subject: `Your AINF gift receipt — ${amount}`,
+    subject: `Your AINF donation receipt — ${amount}`,
     html: shell(
-      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Gift received</h1>
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Donation received</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
-       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you. Your gift of <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> for ${escapeHtml(params.targetTitle)} has been received. This is a gift, not a membership.</p>`,
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you. Your donation of <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> for ${escapeHtml(params.targetTitle)} has been received. This is a donation, not a membership.</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#5c6660">Your receipt has a locked PDF to download, with a link anyone can use to verify the payment.</p>
+       ${policyLine(NON_REFUNDABLE_DONATION)}`,
       { href: params.receiptUrl, label: "Open your receipt" },
-      GIFT_NOTE
+      DONATION_NOTE
     ),
-    text: `Gift received\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you. Your gift of ${amount} for ${params.targetTitle} has been received. This is a gift, not a membership.\n\nReceipt: ${params.receiptUrl}`,
+    text: `Donation received\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you. Your donation of ${amount} for ${params.targetTitle} has been received. This is a donation, not a membership.\n\n${NON_REFUNDABLE_DONATION}\n\nReceipt (with a locked PDF): ${params.receiptUrl}`,
   });
 }
 
 const PAYMENT_NOTE =
-  "You are receiving this because you asked to pay All India Nevarlands Foundation. This is an automated message — please do not reply.";
+  "You are receiving this because you asked to pay All Indian Nevarlands Foundation. This is an automated message — please do not reply.";
 
 /** Sent once when someone tries to pay while online payments are paused. */
 export function sendPaymentInterestEmail(params: {
@@ -362,7 +371,8 @@ export function sendPaymentInterestEmail(params: {
       `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Thank you for your interest</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
        <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">We are not taking online payments right now, so nothing was charged. We have saved your interest in <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.what)}</strong> (${escapeHtml(amount)}).</p>
-       <p style="margin:0;font-size:14.5px;color:#5c6660">As soon as payments reopen, the AINF team will email you a secure Razorpay link to complete it.</p>`,
+       <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">As soon as payments reopen, the AINF team will email you a secure Razorpay link to complete it.</p>
+       ${policyLine(NON_REFUNDABLE_PAYMENT)}`,
       undefined,
       PAYMENT_NOTE
     ),
@@ -393,11 +403,12 @@ export function sendPaymentLinkEmail(params: {
       `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Your payment link is ready</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
        <p style="margin:0 0 12px;font-size:14.5px;color:#5c6660">Thank you for waiting. You can now complete <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.what)}</strong> for <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> through Razorpay's secure checkout.${escapeHtml(expiry)}</p>
-       <p style="margin:0;font-size:13px;color:#8a938d">If the button does not open, copy this address into your browser: ${escapeHtml(params.url)}</p>`,
+       <p style="margin:0 0 12px;font-size:13px;color:#8a938d">If the button does not open, copy this address into your browser: ${escapeHtml(params.url)}</p>
+       ${policyLine(NON_REFUNDABLE_PAYMENT)}`,
       { href: params.url, label: `Pay ${amount}` },
       PAYMENT_NOTE
     ),
-    text: `Your payment link is ready\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you for waiting. You can now complete ${params.what} for ${amount} through Razorpay's secure checkout.${expiry}\n\nPay here: ${params.url}`,
+    text: `Your payment link is ready\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThank you for waiting. You can now complete ${params.what} for ${amount} through Razorpay's secure checkout.${expiry}\n\n${NON_REFUNDABLE_PAYMENT}\n\nPay here: ${params.url}`,
   });
 }
 
@@ -440,14 +451,56 @@ export function sendDonationRefundEmail(params: {
   const amount = formatInr(params.amountPaise);
   return deliver({
     to: params.to,
-    subject: `Your AINF gift of ${amount} was returned`,
+    subject: `Your AINF donation of ${amount} was returned`,
     html: shell(
-      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Gift returned</h1>
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Donation returned</h1>
        <p style="margin:0 0 12px;font-size:14.5px">${hello}</p>
-       <p style="margin:0;font-size:14.5px;color:#5c6660">The gift of <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> for ${escapeHtml(params.targetTitle)} has been returned in full. It can take a few working days to show on your statement.</p>`,
+       <p style="margin:0;font-size:14.5px;color:#5c6660">The donation of <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(amount)}</strong> for ${escapeHtml(params.targetTitle)} has been returned in full. It can take a few working days to show on your statement.</p>`,
       undefined,
-      GIFT_NOTE
+      DONATION_NOTE
     ),
-    text: `Gift returned\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThe gift of ${amount} for ${params.targetTitle} has been returned in full.`,
+    text: `Donation returned\n\n${first ? `Dear ${first},` : "Dear friend,"}\n\nThe donation of ${amount} for ${params.targetTitle} has been returned in full.`,
+  });
+}
+
+/** An admin suspended this account: what happened, why, and for how long. */
+export function sendAccountSuspendedEmail(params: {
+  to: string;
+  firstName: string | null;
+  reason: string;
+  endLabel: string;
+}): Promise<EmailResult> {
+  const href = absoluteUrl("/contact-us");
+  const hi = params.firstName ? `Hi ${escapeHtml(params.firstName)},` : "Hi,";
+  return deliver({
+    to: params.to,
+    subject: "Your AINF account has been suspended",
+    html: shell(
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Account suspended</h1>
+       <p style="margin:0 0 12px;font-size:14.5px">${hi}</p>
+       <p style="margin:0 0 16px;font-size:14.5px;color:#5c6660">The AINF team has suspended your account <strong style="font-weight:500;color:#1a1d1b">${escapeHtml(params.endLabel)}</strong>. While it is suspended you cannot use member services.</p>
+       <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#8a938d">Reason</p>
+       <div style="margin:0 0 16px;padding:14px 16px;border-radius:12px;background:#f6f8f7;border:1px solid #e2e7e4;font-size:14.5px;color:#1a1d1b">${escapeHtml(params.reason).replace(/\n/g, "<br>")}</div>
+       <p style="margin:0;font-size:14.5px;color:#5c6660">If you think this is a mistake, write to hello@theainf.in from this email address.</p>`,
+      { href, label: "Contact AINF" }
+    ),
+    text: `Account suspended\n\n${params.firstName ? `Hi ${params.firstName},` : "Hi,"}\n\nThe AINF team has suspended your account ${params.endLabel}. While it is suspended you cannot use member services.\n\nReason: ${params.reason}\n\nIf you think this is a mistake, write to hello@theainf.in from this email address.`,
+  });
+}
+
+/** The suspension was lifted, by an admin or because its time ran out. */
+export function sendAccountReinstatedEmail(params: { to: string; firstName: string | null }): Promise<EmailResult> {
+  const href = absoluteUrl("/account");
+  const hi = params.firstName ? `Hi ${escapeHtml(params.firstName)},` : "Hi,";
+  return deliver({
+    to: params.to,
+    subject: "Your AINF account is active again",
+    html: shell(
+      `<h1 style="margin:0 0 14px;font-size:21px;font-weight:500;letter-spacing:-0.02em">Account active again</h1>
+       <p style="margin:0 0 12px;font-size:14.5px">${hi}</p>
+       <p style="margin:0;font-size:14.5px;color:#5c6660">Your AINF account is no longer suspended. You can sign in and use member services again.</p>`,
+      { href, label: "Open your dashboard" }
+    ),
+    text: `Account active again\n\n${params.firstName ? `Hi ${params.firstName},` : "Hi,"}\n\nYour AINF account is no longer suspended. You can sign in and use member services again.\n\nOpen your dashboard: ${href}`,
   });
 }

@@ -113,7 +113,7 @@ export default async function AdminSettingsPage() {
         <section className="pt-card" style={{ marginBottom: 18 }}>
           <h2 className="pt-section-title">Online payments</h2>
           <p className="pt-hint" style={{ marginTop: 0 }}>
-            Pause or reopen Razorpay checkout for gifts and plans, follow up with people who asked to
+            Pause or reopen Razorpay checkout for donations and plans, follow up with people who asked to
             pay while it was paused, and send them payment links. <code>PAYMENTS_PAUSED=true</code>{" "}
             on the host forces payments off.
           </p>

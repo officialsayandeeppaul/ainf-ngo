@@ -1,3 +1,4 @@
+import { NON_REFUNDABLE_SHORT } from "@/lib/payment-policy";
 import { BillingInterval, MembershipOrderStatus, PaymentPurpose, type MembershipTier } from "@prisma/client";
 import { z } from "zod";
 import { AuditAction, recordAudit } from "@/lib/audit";
@@ -249,7 +250,7 @@ export async function POST(request: Request) {
     name: "AINF membership",
     description: `${verb} ${tier.name} · ${input.interval === "YEARLY" ? "yearly" : "monthly"}${
       quote.creditPaise ? ` · ${quote.creditPaise / 100} credit applied` : ""
-    }`,
+    } · ${NON_REFUNDABLE_SHORT}`,
     prefill: {
       email: user.email,
       name: [user.firstName, user.lastName].filter(Boolean).join(" "),

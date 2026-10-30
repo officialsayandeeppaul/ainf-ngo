@@ -24,7 +24,7 @@ const schema = z.object({
 /** Starts a one-time Razorpay order. The amount is checked again on the server. */
 export async function POST(request: Request) {
   if (!isDatabaseConfigured) {
-    return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
+    return Response.json({ error: "not_configured", message: "Donations are temporarily unavailable." }, { status: 503 });
   }
 
   const context = contextFromRequest(request);
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     return Response.json(pausedPayload(settings, interest), { status: 409 });
   }
   if (!isRazorpayConfigured) {
-    return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
+    return Response.json({ error: "not_configured", message: "Donations are temporarily unavailable." }, { status: 503 });
   }
 
   const created = await createGiftOrder({

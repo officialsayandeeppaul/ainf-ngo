@@ -37,7 +37,7 @@ export function GiftActions({
     setBusy(null);
     setConfirm(false);
     if (!result.ok) {
-      setMessage({ text: result.message ?? "Could not return this gift.", error: true });
+      setMessage({ text: result.message ?? "Could not return this donation.", error: true });
       return;
     }
     startTransition(() => router.refresh());
@@ -73,7 +73,7 @@ export function GiftActions({
       ) : null}
       <ConfirmDialog
         open={confirm}
-        title="Return this gift in full?"
+        title="Return this donation in full?"
         body={`${amount} for ${target} goes back to ${who} through Razorpay, and they are emailed. This cannot be undone.`}
         confirmLabel="Yes, return it"
         tone="danger"

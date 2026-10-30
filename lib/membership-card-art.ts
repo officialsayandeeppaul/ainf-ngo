@@ -34,7 +34,7 @@ export const CARD_TOKEN = /^[A-Za-z0-9_-]{20,64}$/;
 export const CARD_RULES: { title: string; body: string }[] = [
   {
     title: "Inquiries & Rights",
-    body: "If you have any doubt, question, or problem, please contact the AINF Head Office. All rights are reserved to All India Nevarlands Foundation.",
+    body: "If you have any doubt, question, or problem, please contact the AINF Head Office. All rights are reserved to All Indian Nevarlands Foundation.",
   },
   {
     title: "Application Forms",
@@ -54,7 +54,7 @@ export const CARD_RULES: { title: string; body: string }[] = [
   },
   {
     title: "Liability",
-    body: "All India Nevarlands Foundation will not be responsible for any misuse of the Identity Card issued to the Members during the course of their Membership with AINF.",
+    body: "All Indian Nevarlands Foundation will not be responsible for any misuse of the Identity Card issued to the Members during the course of their Membership with AINF.",
   },
   {
     title: "Card Expiry & Renewal",

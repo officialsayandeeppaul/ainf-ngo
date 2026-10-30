@@ -156,11 +156,11 @@ function ProjectEditor({
             onChange={(event) => onChange({ acceptDonations: event.target.checked })}
           />
           <span>
-            <strong>{row.acceptDonations ? "Gifts on" : "Gifts off"}</strong>
+            <strong>{row.acceptDonations ? "Donations on" : "Donations off"}</strong>
             <small>
               {row.acceptDonations
-                ? "This project can be chosen on the gift page."
-                : "Hidden from the gift page."}
+                ? "This project can be chosen on the donation page."
+                : "Hidden from the donation page."}
             </small>
           </span>
         </label>

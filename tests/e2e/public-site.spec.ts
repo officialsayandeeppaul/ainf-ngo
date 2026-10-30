@@ -160,14 +160,45 @@ test.describe("gift window and project CTAs", () => {
     });
   }
 
-  test('"Our mission" goes to About\'s mission, not the gift window', async ({ page }) => {
+  test('"Our mission" opens the mission window, and its Support AINF swaps to the gift window', async ({ page }) => {
     await visit(page, PROJECT);
     const mission = page.locator('[data-ainf-mission="1"]').first();
     await expect(mission).toBeAttached({ timeout: 30_000 });
     await mission.scrollIntoViewIfNeeded();
     await mission.click();
-    await page.waitForURL(/\/about-us#our-mission$/);
+    const dialog = page.locator("#ainf-mission-modal");
+    await expect(dialog).toBeVisible();
     await expect(page.locator("#ainf-gift-modal")).toHaveCount(0);
+    await expect(dialog.locator(".ainf-mission-modal__line")).not.toBeEmpty();
+    await expect(dialog.locator('a[href="/about-us#our-mission"]')).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(mission).toBeFocused();
+    await mission.click();
+    await dialog.locator("[data-mission-give]").click();
+    await expect(dialog).toBeHidden();
+    await expect(page.locator("#ainf-gift-modal")).toBeVisible();
+  });
+
+  for (const route of ["/", "/donate-now", PROJECT]) {
+    test(`the page behind an open pop-up does not scroll on ${route}`, async ({ page }) => {
+      await visit(page, route);
+      await page.waitForLoadState("load");
+      await page.waitForFunction(() => typeof (window as { __ainfOpenGiftModal?: unknown }).__ainfOpenGiftModal === "function");
+      await page.evaluate(() => window.scrollTo(0, 600));
+      await page.evaluate(() => (window as unknown as { __ainfOpenGiftModal: () => void }).__ainfOpenGiftModal());
+      await expect(page.locator("#ainf-gift-modal")).toBeVisible();
+      const before = await page.evaluate(() => window.scrollY);
+      // Framer's smooth scroll (home, /donate-now) used to move the page from wheel events.
+      await page.mouse.move(8, 450);
+      for (let i = 0; i < 5; i++) await page.mouse.wheel(0, 600);
+      await page.waitForTimeout(600);
+      expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    });
+  }
+
+  test("About also serves the mission as an anchor (the window's More about AINF link)", async ({ page }) => {
+    await visit(page, "/about-us#our-mission");
     await page.waitForLoadState("load");
     await expect(page.locator("#our-mission")).toBeInViewport();
   });

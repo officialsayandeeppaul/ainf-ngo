@@ -65,7 +65,7 @@ function hrefWith(current: Query, next: Partial<Query>): string {
 
 type HistoryRow = {
   id: string;
-  kind: "Membership" | "Gift";
+  kind: "Membership" | "Donation";
   who: string;
   email: string;
   userId: string | null;
@@ -299,7 +299,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
     })),
     ...gifts.map((gift) => ({
       id: `g_${gift.id}`,
-      kind: "Gift" as const,
+      kind: "Donation" as const,
       who: gift.donorName,
       email: gift.donorEmail,
       userId: null,
@@ -420,7 +420,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
               <select id="pay-type" name="type" className="pt-select" defaultValue={historyType}>
                 <option value="all">Everything</option>
                 <option value="membership">Membership</option>
-                <option value="gift">Gifts</option>
+                <option value="gift">Donations</option>
               </select>
             </label>
             <label className="pt-label" htmlFor="pay-status">

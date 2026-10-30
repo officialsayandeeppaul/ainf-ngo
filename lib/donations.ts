@@ -1,3 +1,4 @@
+import { NON_REFUNDABLE_SHORT } from "./payment-policy";
 import { randomBytes } from "node:crypto";
 import { DonationKind, DonationStatus, type Donation, type Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -116,11 +117,11 @@ export async function resolveGiftTarget(input: {
   }
 
   const slug = (input.slug ?? "").trim().toLowerCase();
-  if (!slug) return { ok: false, message: "Choose where this gift goes." };
+  if (!slug) return { ok: false, message: "Choose where this donation goes." };
 
   if (input.kind === "MISSION") {
     const row = await db.donationMission.findUnique({ where: { slug } });
-    if (!row || !row.published) return { ok: false, message: "That mission is not accepting gifts." };
+    if (!row || !row.published) return { ok: false, message: "That mission is not accepting donations." };
     return {
       ok: true,
       kind: DonationKind.MISSION,
@@ -133,7 +134,7 @@ export async function resolveGiftTarget(input: {
 
   const row = await db.fieldProject.findUnique({ where: { slug } });
   if (!row || !row.published || !row.acceptDonations) {
-    return { ok: false, message: "That project is not accepting gifts." };
+    return { ok: false, message: "That project is not accepting donations." };
   }
   return {
     ok: true,
@@ -157,13 +158,13 @@ export async function checkGiftRequest(input: {
   const target = await resolveGiftTarget({ kind: input.kind, slug: input.slug });
   if (!target.ok) return { ok: false, status: 400, message: target.message };
   if (target.floor > settings.maxPaise) {
-    return { ok: false, status: 409, message: "Gifts are paused until the minimum is below the maximum." };
+    return { ok: false, status: 409, message: "Donations are paused until the minimum is below the maximum." };
   }
   if (!Number.isInteger(input.amountPaise) || input.amountPaise < target.floor) {
-    return { ok: false, status: 400, message: "That amount is below the minimum for this gift." };
+    return { ok: false, status: 400, message: "That amount is below the minimum for this donation." };
   }
   if (input.amountPaise > settings.maxPaise) {
-    return { ok: false, status: 400, message: "That amount is above the maximum for a gift." };
+    return { ok: false, status: 400, message: "That amount is above the maximum for a donation." };
   }
   const slug = input.kind === "GENERAL" ? null : (input.slug ?? "").trim().toLowerCase() || null;
   return { ok: true, target: { ...target, slug } };
@@ -227,14 +228,14 @@ export async function createGiftOrder(input: {
       razorpayOrderId: order.id,
       amountPaise: donation.amountPaise,
       currency: "INR",
-      description: `Gift to ${target.title}`,
+      description: `Donation to ${target.title} · ${NON_REFUNDABLE_SHORT}`,
     };
   } catch (error) {
     await db.donation.update({
       where: { id: donation.id },
       data: { status: DonationStatus.FAILED },
     });
-    const message = error instanceof Error ? error.message : "Razorpay could not start this gift.";
+    const message = error instanceof Error ? error.message : "Razorpay could not start this donation.";
     return { ok: false, status: 502, message };
   }
 }
@@ -275,10 +276,10 @@ export async function markGiftPaidFromPayment(input: {
     : input.razorpayOrderId
       ? await db.donation.findUnique({ where: { razorpayOrderId: input.razorpayOrderId } })
       : null;
-  if (!row) return { ok: false, status: 404, message: "Gift not found." };
+  if (!row) return { ok: false, status: 404, message: "Donation not found." };
 
   if (row.status === DonationStatus.REFUNDED) {
-    return { ok: false, status: 409, message: "This gift was returned." };
+    return { ok: false, status: 409, message: "This donation was returned." };
   }
   if (row.status === DonationStatus.PAID) {
     await emailReceiptOnce(row);
@@ -298,8 +299,8 @@ export async function markGiftPaidFromPayment(input: {
       status: 409,
       message:
         check.reason === "amount"
-          ? "The paid amount does not match this gift."
-          : "This payment is not a captured gift.",
+          ? "The paid amount does not match this donation."
+          : "This payment is not a captured donation.",
     };
   }
 
@@ -326,11 +327,11 @@ export async function markGiftPaidFromPayment(input: {
     if (again?.status === DonationStatus.PAID) {
       return { ok: true, receiptPath: `/donate/receipt/${again.receiptToken}`, deduplicated: true };
     }
-    return { ok: false, status: 409, message: "This gift could not be marked paid." };
+    return { ok: false, status: 409, message: "This donation could not be marked paid." };
   }
 
   const paid = await db.donation.findUnique({ where: { id: row.id } });
-  if (!paid) return { ok: false, status: 500, message: "Gift record missing after payment." };
+  if (!paid) return { ok: false, status: 500, message: "Donation record missing after payment." };
   await emailReceiptOnce(paid);
   return { ok: true, receiptPath: `/donate/receipt/${paid.receiptToken}`, deduplicated: false };
 }
@@ -420,19 +421,19 @@ export async function refundGift(donationId: string): Promise<
   | { ok: false; status: number; message: string }
 > {
   const row = await db.donation.findUnique({ where: { id: donationId } });
-  if (!row) return { ok: false, status: 404, message: "Gift not found." };
+  if (!row) return { ok: false, status: 404, message: "Donation not found." };
   if (row.status === DonationStatus.REFUNDED) {
-    return { ok: false, status: 409, message: "This gift is already returned." };
+    return { ok: false, status: 409, message: "This donation is already returned." };
   }
   if (row.status !== DonationStatus.PAID || !row.razorpayPaymentId) {
-    return { ok: false, status: 409, message: "Only a paid gift can be returned." };
+    return { ok: false, status: 409, message: "Only a paid donation can be returned." };
   }
   let refundId: string;
   try {
     const refund = await refundRazorpayPayment(row.razorpayPaymentId, row.amountPaise);
     refundId = refund.id;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Razorpay could not return this gift.";
+    const message = error instanceof Error ? error.message : "Razorpay could not return this donation.";
     return { ok: false, status: 502, message };
   }
   const updated = await markGiftRefunded({
@@ -440,7 +441,7 @@ export async function refundGift(donationId: string): Promise<
     razorpayPaymentId: row.razorpayPaymentId,
     razorpayRefundId: refundId,
   });
-  if (!updated) return { ok: false, status: 409, message: "This gift could not be marked returned." };
+  if (!updated) return { ok: false, status: 409, message: "This donation could not be marked returned." };
   return { ok: true, donation: updated };
 }
 

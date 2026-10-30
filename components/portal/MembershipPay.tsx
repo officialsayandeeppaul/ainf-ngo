@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { discountLabel, formatInr, yearlyPaise, type YearlyDiscountKind } from "@/lib/membership";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PlanBenefitStack } from "@/components/portal/PlanBenefits";
+import { NON_REFUNDABLE_MEMBERSHIP, NON_REFUNDABLE_SHORT } from "@/lib/payment-policy";
 import { parsePlanBenefits, type PlanBenefit } from "@/lib/plan-benefits";
 import type { SavedInterest } from "@/lib/saved-interests";
 
@@ -406,6 +407,9 @@ export function MembershipPay({
                     formatInr(amount)
                   )}{" "}
                   <small>/ {interval === "YEARLY" ? "year" : "month"}</small>
+                  <span className="pt-nonrefund" title={NON_REFUNDABLE_MEMBERSHIP}>
+                    {NON_REFUNDABLE_SHORT}
+                  </span>
                 </p>
                 {quote?.offerName ? (
                   <p className="pt-plan-card__meta">
@@ -442,6 +446,7 @@ export function MembershipPay({
                           ? "Choose this plan"
                           : (quote?.cta ?? "Pay with Razorpay")}
                   </button>
+                  {currentCard ? null : <p className="pt-plan-card__policy">{NON_REFUNDABLE_MEMBERSHIP}</p>}
                 </div>
               </article>
             );
@@ -499,7 +504,7 @@ export function MembershipPay({
           dialog?.type === "stop"
             ? "The badge stays until the current end date. No further charges are taken after that."
             : dialog?.type === "switch"
-              ? `Unused credit ${dialog.quote.creditLabel} is applied. The new term starts today and runs until ${dialog.quote.expiresLabel}.`
+              ? `Unused credit ${dialog.quote.creditLabel} is applied. The new term starts today and runs until ${dialog.quote.expiresLabel}. ${NON_REFUNDABLE_MEMBERSHIP}`
               : "The badge is removed immediately. Unused days are not refunded. You can join a plan again afterwards."
         }
         confirmLabel={

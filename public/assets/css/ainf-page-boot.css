@@ -627,8 +627,202 @@ body.ainf-projects-skin [data-framer-name="Point 4"]{
   }
 }
 html.ainf-modal-lock,
-html.ainf-modal-lock body{
+/* Pop-up open: the page behind never scrolls (the wheel/touch guard in
+   ainf-page-boot.js stops Framer's smooth scroll). The page is padded by the
+   hidden scrollbar's width so nothing behind the blur jumps sideways. */
+html.ainf-modal-lock,
+html.ainf-interest-open{
   overflow:hidden!important;
+  overscroll-behavior:none;
+}
+html.ainf-modal-lock body,
+html.ainf-interest-open body{
+  overflow:hidden!important;
+  overscroll-behavior:none;
+  padding-right:var(--ainf-scrollbar-gap, 0px)!important;
+}
+/* Pop-ups scroll inside themselves without showing a scrollbar. */
+.ainf-gift-modal__card,
+.ainf-gift-modal textarea,
+.ainf-join-modal__card,
+.ainf-mission-modal__card,
+.ainf-gift-menu__list,
+#ainf-interest-modal .ainf-interest__panel{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.ainf-gift-modal__card::-webkit-scrollbar,
+.ainf-gift-modal textarea::-webkit-scrollbar,
+.ainf-join-modal__card::-webkit-scrollbar,
+.ainf-mission-modal__card::-webkit-scrollbar,
+.ainf-gift-menu__list::-webkit-scrollbar,
+#ainf-interest-modal .ainf-interest__panel::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
+.ainf-mission-modal{
+  position:fixed;
+  inset:0;
+  z-index:2147483200;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  padding:20px;
+  background:rgba(16,28,22,0.42);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  animation:ainf-mission-fade .18s ease;
+}
+.ainf-mission-modal[hidden]{ display:none; }
+.ainf-mission-modal__card{
+  position:relative;
+  box-sizing:border-box;
+  width:min(620px, 100%);
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  background:#fff;
+  color:#1a1d1b;
+  border-radius:22px;
+  padding:30px 28px 24px;
+  box-shadow:0 24px 70px rgba(12,24,18,0.28);
+  font-family:Onest, Inter, system-ui, sans-serif;
+  outline:none;
+  animation:ainf-mission-rise .22s ease;
+}
+.ainf-mission-modal__close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:999px;
+  background:#f3f6f4;
+  color:#1a1d1b;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+}
+.ainf-mission-modal__close:hover{ background:#e8eeea; }
+.ainf-mission-modal__eyebrow{
+  margin:0 40px 10px 0;
+  color:#1c7d48;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.ainf-mission-modal__card h2{
+  margin:0 40px 12px 0;
+  font-size:34px;
+  font-weight:500;
+  letter-spacing:-0.03em;
+  line-height:1.1;
+}
+.ainf-mission-modal__lead{
+  margin:0 0 20px;
+  color:#1a1d1b;
+  font-size:18px;
+  line-height:1.5;
+  letter-spacing:-0.01em;
+}
+.ainf-mission-modal__project{
+  margin:0 0 20px;
+  padding:16px 18px;
+  border-radius:16px;
+  background:#f3faf6;
+  border:1px solid rgba(28,125,72,0.16);
+}
+.ainf-mission-modal__project[hidden]{ display:none; }
+.ainf-mission-modal__label{
+  margin:0 0 6px;
+  color:#1c7d48;
+  font-size:13px;
+  font-weight:600;
+}
+.ainf-mission-modal__line{
+  margin:0;
+  color:#1a1d1b;
+  font-size:16px;
+  line-height:1.45;
+}
+.ainf-mission-modal__grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:18px 22px;
+  padding-top:18px;
+  border-top:1px solid #eef1ef;
+}
+.ainf-mission-modal__text{
+  margin:0;
+  color:#5c6b64;
+  font-size:15px;
+  line-height:1.55;
+}
+.ainf-mission-modal__actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px 12px;
+  margin-top:24px;
+}
+.ainf-mission-modal__primary,
+.ainf-mission-modal__secondary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-sizing:border-box;
+  min-height:46px;
+  border-radius:999px;
+  padding:12px 20px;
+  font:inherit;
+  font-size:15px;
+  font-weight:500;
+  text-decoration:none;
+  cursor:pointer;
+}
+.ainf-mission-modal__primary{
+  border:0;
+  background:#1c7d48;
+  color:#fff;
+}
+.ainf-mission-modal__primary:hover{ background:#176a3d; }
+.ainf-mission-modal__secondary{
+  border:1px solid rgba(34,34,34,0.14);
+  background:#fff;
+  color:#1a1d1b;
+}
+.ainf-mission-modal__secondary:hover{ border-color:#b7c2bc; background:#f6f8f7; }
+.ainf-mission-modal__close:focus-visible,
+.ainf-mission-modal__primary:focus-visible,
+.ainf-mission-modal__secondary:focus-visible{
+  outline:2px solid rgba(28,125,72,0.45);
+  outline-offset:2px;
+}
+@keyframes ainf-mission-fade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes ainf-mission-rise{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+@media (max-width: 640px){
+  .ainf-mission-modal{ padding:12px; }
+  .ainf-mission-modal__card{ padding:24px 18px 18px; border-radius:18px; max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); }
+  .ainf-mission-modal__card h2{ font-size:28px; }
+  .ainf-mission-modal__lead{ font-size:16px; }
+  .ainf-mission-modal__grid{ grid-template-columns:minmax(0, 1fr); }
+  .ainf-mission-modal__actions{ flex-direction:column; align-items:stretch; }
+}
+@media (max-height: 560px){
+  .ainf-mission-modal{ padding:8px; }
+  .ainf-mission-modal__card{ max-height:calc(100vh - 16px); max-height:calc(100dvh - 16px); padding-top:20px; }
+  .ainf-mission-modal__card h2{ font-size:24px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .ainf-mission-modal, .ainf-mission-modal__card{ animation:none; }
 }
 /* /about-us#our-mission lands below the fixed nav even before scripts run. */
 [data-framer-name="Mission & Vission"]#our-mission{ scroll-margin-top:100px; }
@@ -716,7 +910,7 @@ form:has(select[name="Location"]) button[type="submit"]{
   z-index:2147483200;
   display:grid;
   place-items:center;
-  overflow:auto;
+  overflow:hidden;
   padding:20px;
   background:rgba(16,28,22,0.42);
   backdrop-filter:blur(16px);
@@ -1012,4 +1206,42 @@ form:has(select[name="Location"]) .ainf-gift-menu__trigger{
   font-family:Onest,Inter,system-ui,sans-serif!important;
   font-size:16px!important;
   line-height:1.2!important;
+}
+
+/* Payment policy: every donation form says it, in the page's language. The
+   Framer forms are re-rendered after load, so the line is CSS, not a node. */
+.ainf-gift-modal__policy{
+  margin:10px 0 0;
+  font-size:12.5px;
+  line-height:1.4;
+  color:#8a5a17;
+}
+form:has(select[name="Location"])::after,
+form:has([name="Choose The Cause"])::after{
+  content:"Donations are non-refundable once paid.";
+  display:block;
+  flex:0 0 100%;
+  grid-column:1 / -1;
+  order:999;
+  align-self:stretch;
+  width:100%;
+  /* The Framer form is a flex column with a 50px gap (30px under 810px wide);
+     this sits 12px under the button instead, aligned with it. */
+  margin-top:-38px;
+  font:400 12.5px/1.4 Onest, Inter, system-ui, sans-serif;
+  letter-spacing:0;
+  color:#8a5a17;
+  text-align:left;
+}
+@media (max-width: 809px){
+  form:has(select[name="Location"])::after,
+  form:has([name="Choose The Cause"])::after{ margin-top:-18px; }
+}
+html:lang(hi) form:has(select[name="Location"])::after,
+html:lang(hi) form:has([name="Choose The Cause"])::after{
+  content:"दान भुगतान के बाद वापस नहीं किया जाता।";
+}
+html:lang(bn) form:has(select[name="Location"])::after,
+html:lang(bn) form:has([name="Choose The Cause"])::after{
+  content:"দান পরিশোধের পর ফেরতযোগ্য নয়।";
 }

@@ -13,7 +13,7 @@ const querySchema = z.object({
 /** Public list of gift targets and the floors that apply to each. */
 export async function GET(request: Request) {
   if (!isDatabaseConfigured) {
-    return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
+    return Response.json({ error: "not_configured", message: "Donations are temporarily unavailable." }, { status: 503 });
   }
   const url = new URL(request.url);
   const query = querySchema.parse({

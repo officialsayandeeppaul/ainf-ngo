@@ -62,7 +62,7 @@ export function interestLabel(row: {
     const cycle = row.interval === "YEARLY" ? "yearly" : row.interval === "MONTHLY" ? "monthly" : null;
     return `${row.targetTitle} membership${cycle ? ` · ${cycle}` : ""}`;
   }
-  return `a gift to ${row.targetTitle}`;
+  return `a donation to ${row.targetTitle}`;
 }
 
 export async function recordPaymentInterest(

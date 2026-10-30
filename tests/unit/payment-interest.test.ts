@@ -96,7 +96,7 @@ describe("interest matching", () => {
   });
 
   it("labels gifts and plans for people and admins", () => {
-    expect(interestLabel({ purpose: "DONATION", targetTitle: "Shiksha" })).toBe("a gift to Shiksha");
+    expect(interestLabel({ purpose: "DONATION", targetTitle: "Shiksha" })).toBe("a donation to Shiksha");
     expect(interestLabel({ purpose: "MEMBERSHIP", targetTitle: "Field Sevak", interval: "YEARLY" })).toBe(
       "Field Sevak membership · yearly"
     );
@@ -154,7 +154,7 @@ describe("paused response", () => {
     expect(body).toMatchObject({
       error: "payments_paused",
       title: "Thank you for your interest",
-      interest: { id: "int_1", what: "a gift to Shiksha", amount: "₹500", email: "mina@example.com", repeat: true },
+      interest: { id: "int_1", what: "a donation to Shiksha", amount: "₹500", email: "mina@example.com", repeat: true },
     });
     expect(body.message.length).toBeGreaterThan(20);
   });

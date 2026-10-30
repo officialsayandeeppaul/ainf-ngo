@@ -1,3 +1,4 @@
+import { NON_REFUNDABLE_SHORT } from "./payment-policy";
 import {
   BillingInterval,
   DonationStatus,
@@ -83,7 +84,7 @@ function linkDescription(input: { purpose: PaymentPurpose; targetTitle: string; 
     const cycle = input.interval === BillingInterval.YEARLY ? "yearly" : "monthly";
     return `AINF ${input.targetTitle} membership (${cycle})`;
   }
-  return `Gift to AINF — ${input.targetTitle}`;
+  return `Donation to AINF — ${input.targetTitle}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -138,7 +139,7 @@ export async function createLinkForInterest(input: {
   if (interest.purpose === PaymentPurpose.DONATION) {
     const settings = await getGiftSettings();
     if (input.amountPaise > settings.maxPaise) {
-      return { ok: false, status: 400, message: "That amount is above the maximum for a gift." };
+      return { ok: false, status: 400, message: "That amount is above the maximum for a donation." };
     }
     const kind = (interest.donationKind ?? "GENERAL") as GiftKind;
     const resolved = await resolveGiftTarget({ kind, slug: interest.targetSlug });
@@ -213,7 +214,8 @@ export async function createLinkForInterest(input: {
   try {
     const created = await createRazorpayPaymentLink({
       amountPaise: input.amountPaise,
-      description,
+      // Razorpay shows this on the payment page.
+      description: `${description} · ${NON_REFUNDABLE_SHORT}`,
       referenceId: link.id,
       customer: {
         name: interest.name.slice(0, 120),
@@ -443,7 +445,7 @@ async function fulfil(link: PaymentLink, payment: LinkPayment): Promise<void> {
     if (!result.ok) throw new Error("The membership order for this link could not be marked paid.");
     return;
   }
-  throw new Error("This link is not tied to a gift or a membership.");
+  throw new Error("This link is not tied to a donation or a membership.");
 }
 
 /** Finds the local link for a Razorpay link id, our reference id, or the note we attach. */

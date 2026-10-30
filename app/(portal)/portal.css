@@ -5951,3 +5951,139 @@ a.pt-segment__btn {
     text-align: left;
   }
 }
+
+/* ---- Suspension: admin form, admin facts, member page ------------------------ */
+
+.pt-suspend-form {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 2px;
+  text-align: left;
+}
+.pt-suspend-form .pt-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 84px;
+  resize: vertical;
+}
+.pt-suspend-form__count {
+  margin: 0 0 8px;
+}
+.pt-suspend-form__periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 4px;
+}
+.pt-suspend-form__period {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.pt-suspend-form__period:hover {
+  border-color: var(--border-strong);
+}
+.pt-suspend-form__period.is-on {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pt-suspend-form__period:focus-visible {
+  outline: 2px solid var(--ainf-green-ring);
+  outline-offset: 2px;
+}
+.pt-suspend-form__notice {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+.pt-suspension-facts {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.pt-suspension-facts p {
+  margin: 0;
+  color: var(--ink);
+}
+.pt-suspension-facts span {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.pt-status-until {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.pt-suspended-facts {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+.pt-suspended-facts dt {
+  margin: 0 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.pt-suspended-facts dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Payment policy small print ----------------------------------------------- */
+
+.pt-nonrefund {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  vertical-align: 3px;
+  white-space: nowrap;
+}
+.pt-plan-card__policy,
+.pt-policy-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-faint);
+}
+.pt-plan-card__policy {
+  text-align: center;
+}
+.pt-pdf-link {
+  margin-left: 12px;
+}
+.pt-gift-receipt-link + .pt-gift-receipt-link {
+  margin-left: 12px;
+}

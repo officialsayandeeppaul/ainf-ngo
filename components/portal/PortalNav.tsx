@@ -34,7 +34,7 @@ function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[
     const members: DashItem[] = [
       { href: "/admin", label: "Overview" },
       { href: "/admin/projects", label: "Projects" },
-      { href: "/admin/gifts", label: "Gifts" },
+      { href: "/admin/donations", label: "Donations" },
       { href: "/admin/crm", label: "CRM" },
       { href: "/admin/users", label: "Users" },
       { href: "/admin/messages", label: "Messages" },
@@ -46,7 +46,7 @@ function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[
     const you: DashItem[] = [
       { href: "/account/okr", label: "OKRs" },
       { href: "/account/membership", label: "Your plan" },
-      { href: "/account/donations", label: "Your giving" },
+      { href: "/account/donations", label: "Your donations" },
       { href: "/account", label: "My account" },
     ];
     if (showVerify) you.push({ href: "/account/verify", label: "Verification" });
@@ -76,7 +76,7 @@ function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[
     const items: DashItem[] = [
       { href: "/account", label: "Overview" },
       { href: "/account/membership", label: "Your plan" },
-      { href: "/account/donations", label: "Your giving" },
+      { href: "/account/donations", label: "Your donations" },
       { href: "/account/okr", label: "OKRs" },
     ];
     if (showVerify) {

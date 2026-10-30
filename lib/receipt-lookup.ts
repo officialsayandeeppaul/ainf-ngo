@@ -55,4 +55,4 @@ export function selectRecoverableReceipts(rows: LookupRow[]): RecoverableReceipt
 
 /** The one message the lookup returns, found or not, so nothing is leaked. */
 export const RECEIPT_LOOKUP_NEUTRAL_MESSAGE =
-  "If that email has any received gifts, we've sent the receipt links to it. Please check your inbox.";
+  "If that email has any received donations, we've sent the receipt links to it. Please check your inbox.";

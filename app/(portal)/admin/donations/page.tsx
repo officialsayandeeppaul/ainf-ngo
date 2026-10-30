@@ -14,7 +14,7 @@ import { Pagination } from "@/components/portal/Pagination";
 import { PaymentRef } from "@/components/portal/PaymentRef";
 import { SetupNotice } from "@/components/portal/SetupNotice";
 
-export const metadata: Metadata = { title: "Gifts" };
+export const metadata: Metadata = { title: "Donations" };
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
@@ -45,7 +45,7 @@ function giftsHref(current: Query, next: Partial<Query>): string {
   if (merged.q) params.set("q", merged.q);
   if (merged.page && merged.page !== "1") params.set("page", merged.page);
   const query = params.toString();
-  return query ? `/admin/gifts?${query}` : "/admin/gifts";
+  return query ? `/admin/donations?${query}` : "/admin/donations";
 }
 
 export default async function AdminGiftsPage({ searchParams }: { searchParams: Promise<Query> }) {
@@ -58,7 +58,7 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
     );
   }
 
-  const { role } = await requirePageSuperAdmin("/admin/gifts");
+  const { role } = await requirePageSuperAdmin("/admin/donations");
   const query = await searchParams;
   const tab: Tab = query.tab && query.tab in TABS ? (query.tab as Tab) : "received";
   const search = (query.q ?? "").trim().slice(0, 80);
@@ -106,23 +106,23 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
     (TABS[key].statuses ?? Object.values(DonationStatus)).reduce((sum, status) => sum + (byStatus[status] ?? 0), 0);
 
   return (
-    <DashShell role={role} currentPath="/admin/gifts">
+    <DashShell role={role} currentPath="/admin/donations">
       <main className="pt-main">
-        <h1 className="pt-title">Gifts</h1>
+        <h1 className="pt-title">Donations</h1>
         <p className="pt-subtitle">
-          Set the minimum, choose which missions accept a gift, and return a paid gift in full. Project gifts are switched on inside each project.
+          Set the minimum, choose which missions accept a donation, and return a paid donation in full. Project donations are switched on inside each project.
         </p>
 
         <div className="pt-crm-kpis">
           <CrmStat
             label="Received"
             value={formatInr(received._sum.amountPaise ?? 0)}
-            hint={`${received._count._all} gift${received._count._all === 1 ? "" : "s"} on the books`}
+            hint={`${received._count._all} donation${received._count._all === 1 ? "" : "s"} on the books`}
           />
           <CrmStat
             label="Returned"
             value={formatInr(returned._sum.amountPaise ?? 0)}
-            hint={`${returned._count._all} gift${returned._count._all === 1 ? "" : "s"} given back`}
+            hint={`${returned._count._all} donation${returned._count._all === 1 ? "" : "s"} given back`}
           />
           <CrmStat
             label="Not paid"
@@ -160,12 +160,12 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
                 name="q"
                 defaultValue={search}
                 placeholder="Name, email, phone, desk, or payment id"
-                aria-label="Search gifts"
+                aria-label="Search donations"
               />
             </form>
           </div>
           <div className="pt-pay-tabs">
-            <nav className="pt-segment pt-segment--wrap" aria-label="Gift status">
+            <nav className="pt-segment pt-segment--wrap" aria-label="Donation status">
               {(Object.keys(TABS) as Tab[]).map((key) => (
                 <Link
                   key={key}
@@ -180,7 +180,7 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
           </div>
 
           {rows.length === 0 ? (
-            <p className="pt-empty">{search ? "No gifts match that search." : "No gifts here yet."}</p>
+            <p className="pt-empty">{search ? "No donations match that search." : "No donations here yet."}</p>
           ) : (
             <div className="pt-table-wrap">
               <table className="pt-table pt-table--dossier pt-pay-table">
@@ -254,6 +254,11 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
                               rel="noopener noreferrer"
                             >
                               Open receipt
+                            </a>
+                          ) : null}
+                          {row.status === DonationStatus.PAID ? (
+                            <a className="pt-link pt-gift-receipt-link" href={`/donate/receipt/${row.receiptToken}/pdf`} download>
+                              Download PDF
                             </a>
                           ) : null}
                         </td>

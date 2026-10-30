@@ -186,7 +186,7 @@ export function rateLimitResponse(result: RateLimitResult, limiter?: LimiterName
     otpSend: `You have requested too many codes. You can send another in ${formatRetry(retryAfter)}.`,
     otpVerify: "Too many code checks. Request a new code in a little while.",
     contact: "Too many contact messages from this network. Please wait a bit, then try again.",
-    donate: "Too many gift attempts from this network. Please wait a bit, then try again.",
+    donate: "Too many donation attempts from this network. Please wait a bit, then try again.",
   };
   return Response.json(
     {

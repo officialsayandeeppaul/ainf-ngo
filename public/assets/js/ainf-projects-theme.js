@@ -202,7 +202,7 @@
     ["How This Work", "How this runs"],
     [
       "A simple breakdown of the process we follow to turn support into real-world action.",
-      "How a gift becomes work on the ground — with the panchayat, field sevaks, and families in the block.",
+      "How a donation becomes work on the ground — with the panchayat, field sevaks, and families in the block.",
     ],
     ["Current Status : Live", "On the ground : Live"],
     ["100% donations used for program", "Every rupee stays on this work"],
@@ -263,7 +263,7 @@
     ],
     [
       "We begin by collecting donations from individuals, organizations, and community partners who want to support vulnerable people during the harsh winter months. These contributions allow us to carefully plan and fund our winter relief efforts, ensuring resources are used where they are needed most.",
-      "Gifts are pooled early, then spent on blankets and warm sets bought for the blocks we already work in — not a general appeal with no address.",
+      "Donations are pooled early, then spent on blankets and warm sets bought for the blocks we already work in — not a general appeal with no address.",
     ],
     [
       "Using the collected funds and in-kind donations, we procure essential winter supplies such as warm clothing, blankets, jackets, socks, and other protective items. All items are selected with durability and comfort in mind, so they provide meaningful protection against the cold.",
@@ -760,23 +760,22 @@
   function wireProjectButtons() {
     if (location.pathname.indexOf("/projects/") < 0) return;
 
-    // "Our mission" → the foundation's Mission & Vision on About. It sits at the
-    // foot of this project's own mission section, so it reads on, not to a gift
-    // ("Support AINF" opens the gift window). The CTA is a Framer span named
-    // "btn hover variation", so it is given link semantics here.
+    // "Our mission" → the foundation's mission window (ainf-page-boot.js), not
+    // the gift window that "Support AINF" opens. The CTA is a Framer span named
+    // "btn hover variation", so it is given button semantics here.
     document.querySelectorAll('[data-framer-name="Primary"],[data-framer-name="Primary btn"],[data-framer-name="btn hover variation"]').forEach(function (el) {
       var text = (el.textContent || "").replace(/\s+/g, " ").trim();
       if (!/^our mission$/i.test(text)) return;
       if (el.getAttribute("data-ainf-wired")) return;
       el.setAttribute("data-ainf-wired", "1");
       el.setAttribute("data-ainf-mission", "1");
-      el.setAttribute("role", "link");
+      el.setAttribute("role", "button");
       el.setAttribute("tabindex", "0");
-      el.setAttribute("aria-label", "Our mission, on About AINF");
+      el.setAttribute("aria-haspopup", "dialog");
       el.style.cursor = "pointer";
       // The click itself is routed by the document handler in ainf-page-boot.js.
       el.addEventListener("keydown", function (e) {
-        if (e.key !== "Enter") return;
+        if (e.key !== "Enter" && e.key !== " ") return;
         e.preventDefault();
         el.click();
       });

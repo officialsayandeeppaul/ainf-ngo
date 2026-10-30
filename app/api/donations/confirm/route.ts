@@ -18,7 +18,7 @@ const schema = z.object({
 /** Browser return from Razorpay. The payment is re-read from Razorpay before it is marked paid. */
 export async function POST(request: Request) {
   if (!isDatabaseConfigured || !isRazorpayConfigured) {
-    return Response.json({ error: "not_configured", message: "Gifts are temporarily unavailable." }, { status: 503 });
+    return Response.json({ error: "not_configured", message: "Donations are temporarily unavailable." }, { status: 503 });
   }
 
   const context = contextFromRequest(request);

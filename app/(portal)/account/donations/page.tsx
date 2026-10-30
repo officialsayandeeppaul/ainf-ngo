@@ -10,6 +10,7 @@ import { formatInr } from "@/lib/membership";
 import { getUserGiving } from "@/lib/user-donations";
 import { loadSavedInterests } from "@/lib/saved-interests";
 import { SavedInterests } from "@/components/portal/MembershipPay";
+import { NON_REFUNDABLE_DONATION } from "@/lib/payment-policy";
 
 export const metadata: Metadata = { title: "Your giving" };
 export const dynamic = "force-dynamic";
@@ -40,11 +41,15 @@ export default async function AccountDonationsPage() {
   return (
     <DashShell role={role} currentPath="/account/donations">
       <main className="pt-main">
-        <h1 className="pt-title">Your giving</h1>
+        <h1 className="pt-title">Your donations</h1>
         <p className="pt-subtitle">
-          Every gift made with <strong>{user.email}</strong>. Open a receipt to view or print it.
+          Every donation made with <strong>{user.email}</strong>. Open a receipt to view, print, or download it as a
+          locked PDF.
           Membership plans are on the{" "}
           <Link href="/account/membership" className="pt-link">Your plan</Link> page.
+        </p>
+        <p className="pt-policy-note" style={{ margin: "-6px 0 18px" }}>
+          {NON_REFUNDABLE_DONATION}
         </p>
 
         <div className="pt-grid pt-grid--3" style={{ marginBottom: 22 }}>
@@ -53,7 +58,7 @@ export default async function AccountDonationsPage() {
             <p className="pt-stat__value">{formatInr(summary.totalPaise)}</p>
           </div>
           <div className="pt-stat">
-            <p className="pt-stat__label">Gifts</p>
+            <p className="pt-stat__label">Donations</p>
             <p className="pt-stat__value">{summary.giftCount}</p>
           </div>
           <div className="pt-stat">
@@ -64,16 +69,16 @@ export default async function AccountDonationsPage() {
 
         {interests.length > 0 ? (
           <div style={{ marginBottom: 18 }}>
-            <SavedInterests rows={interests} title="Gifts you asked to make" />
+            <SavedInterests rows={interests} title="Donations you asked to make" />
           </div>
         ) : null}
 
         <section className="pt-card">
-          <h2 className="pt-section-title">Gift history</h2>
+          <h2 className="pt-section-title">Donation history</h2>
           {donations.length === 0 ? (
             <p className="pt-empty">
-              No gifts yet under this email.{" "}
-              <Link href="/donate-now" className="pt-link">Make your first gift</Link> to support a cause.
+              No donations yet under this email.{" "}
+              <Link href="/donate-now" className="pt-link">Make your first donation</Link> to support a cause.
             </p>
           ) : (
             <div className="pt-table-wrap">
@@ -112,6 +117,9 @@ export default async function AccountDonationsPage() {
                           >
                             Open
                           </a>
+                          <a href={`/donate/receipt/${gift.receiptToken}/pdf`} className="pt-link pt-pdf-link" download>
+                            PDF
+                          </a>
                         </td>
                       </tr>
                     );
@@ -122,7 +130,7 @@ export default async function AccountDonationsPage() {
           )}
           {summary.refundedCount > 0 ? (
             <p className="pt-hint" style={{ marginTop: 14 }}>
-              {summary.refundedCount} gift{summary.refundedCount === 1 ? "" : "s"} totalling{" "}
+              {summary.refundedCount} donation{summary.refundedCount === 1 ? "" : "s"} totalling{" "}
               {formatInr(summary.refundedPaise)} {summary.refundedCount === 1 ? "was" : "were"}{" "}
               returned and {summary.refundedCount === 1 ? "is" : "are"} not counted in your total.
             </p>

@@ -62,10 +62,10 @@ export function GiftsAdmin({
     const body = (await response.json().catch(() => null)) as { message?: string } | null;
     setBusy(false);
     if (!response.ok) {
-      setError(body?.message || "Could not save gift settings.");
+      setError(body?.message || "Could not save donation settings.");
       return;
     }
-    setNotice("Gift settings saved.");
+    setNotice("Donation settings saved.");
   }
 
   async function saveMission(mission: GiftMission) {
@@ -120,7 +120,7 @@ export function GiftsAdmin({
 
       <section className="pt-card">
         <h2 className="pt-section-title">Amounts</h2>
-        <p className="pt-hint">The global minimum applies to every gift. A mission or project can set a higher floor.</p>
+        <p className="pt-hint">The global minimum applies to every donation. A mission or project can set a higher floor.</p>
         <div className="pt-grid pt-grid--2">
           <label className="pt-label">
             Minimum (₹)
@@ -142,7 +142,7 @@ export function GiftsAdmin({
 
       <section className="pt-card">
         <h2 className="pt-section-title">Missions</h2>
-        <p className="pt-hint">Leave a mission minimum blank to use the global floor. Turn a mission off to hide it from the gift page.</p>
+        <p className="pt-hint">Leave a mission minimum blank to use the global floor. Turn a mission off to hide it from the donation page.</p>
         {missions.map((mission) => (
           <div key={mission.id} className="pt-grid pt-grid--2" style={{ marginBottom: 12 }}>
             <label className="pt-label">
@@ -195,7 +195,7 @@ export function GiftsAdmin({
                 }
               />
               <span>
-                <strong>{mission.published ? "On the gift page" : "Hidden"}</strong>
+                <strong>{mission.published ? "On the donation page" : "Hidden"}</strong>
               </span>
             </label>
             <button className="pt-btn" type="button" disabled={busy} onClick={() => saveMission(mission)}>

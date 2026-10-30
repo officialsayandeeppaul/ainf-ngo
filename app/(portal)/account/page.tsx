@@ -215,26 +215,26 @@ export default async function AccountPage() {
         </div>
 
         <section className="pt-card" style={{ marginTop: 18 }}>
-          <h2 className="pt-section-title">Your giving</h2>
+          <h2 className="pt-section-title">Your donations</h2>
           {giving.summary.giftCount > 0 ? (
             <>
               <dl className="pt-kv">
                 <dt>Total given</dt>
                 <dd>{formatInr(giving.summary.totalPaise)}</dd>
-                <dt>Gifts</dt>
+                <dt>Donations</dt>
                 <dd>{giving.summary.giftCount}</dd>
                 <dt>This year</dt>
                 <dd>{formatInr(giving.summary.thisYearPaise)}</dd>
                 {giving.summary.lastGiftAt ? (
                   <>
-                    <dt>Last gift</dt>
+                    <dt>Last donation</dt>
                     <dd>{formatDay(giving.summary.lastGiftAt)}</dd>
                   </>
                 ) : null}
               </dl>
               <div className="pt-btn-row" style={{ marginTop: 16 }}>
                 <Link href="/account/donations" className="pt-btn pt-btn--secondary">
-                  View gift history
+                  View donation history
                 </Link>
                 <Link href="/donate-now" className="pt-btn pt-btn--primary">
                   Give again
@@ -244,12 +244,12 @@ export default async function AccountPage() {
           ) : (
             <>
               <p className="pt-hint" style={{ marginTop: 0 }}>
-                You have not made a gift under {user.email} yet. Gifts you make with this email
+                You have not made a donation under {user.email} yet. Donations you make with this email
                 will appear here with a receipt you can open any time.
               </p>
               <div className="pt-btn-row" style={{ marginTop: 14 }}>
                 <Link href="/donate-now" className="pt-btn pt-btn--primary">
-                  Make a gift
+                  Make a donation
                 </Link>
               </div>
             </>

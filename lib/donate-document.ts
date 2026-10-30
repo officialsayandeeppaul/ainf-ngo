@@ -1,4 +1,5 @@
 import { versionedUrl } from "./asset-version";
+import { NON_REFUNDABLE_DONATION, NON_REFUNDABLE_RECEIPT } from "./payment-policy";
 
 function page(title: string, body: string): string {
   return `<!doctype html>
@@ -31,6 +32,7 @@ function page(title: string, body: string): string {
     .pay { width: 100%; border: 0; border-radius: 999px; background: #1c7d48; color: #fff; padding: 14px 18px; font: inherit; font-weight: 500; cursor: pointer; }
     .pay:disabled { opacity: 0.55; cursor: default; }
     .note { margin: 12px 0 0; color: #3d4a44; font-size: 14px; line-height: 1.45; }
+    .policy-note { margin: 10px 0 0; color: #8a5a17; font-size: 12.5px; line-height: 1.4; text-align: center; }
     .error { color: #8d2b2b; }
     footer { padding: 0 0 28px; color: #8a938d; font-size: 13px; }
     .receipt dt { color: #8a938d; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 14px; }
@@ -48,16 +50,16 @@ function page(title: string, body: string): string {
     </nav>
   </header>
   <main>${body}</main>
-  <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>
+  <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>
 </body>
 </html>`;
 }
 
 export function donatePageHtml(): string {
   return page(
-    "Give to AINF",
-    `<h1>Give to AINF</h1>
-     <p class="lead">This is a gift. It is not a Field Sevak membership, and it does not need an account.</p>
+    "Donate to AINF",
+    `<h1>Donate to AINF</h1>
+     <p class="lead">This is a donation. It is not a Field Sevak membership, and it does not need an account.</p>
      <form id="gift">
        <label>Your name<input name="name" autocomplete="name" required maxlength="80"></label>
        <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
@@ -65,7 +67,8 @@ export function donatePageHtml(): string {
        <label>Where it goes<select name="target" id="target" required></select></label>
        <div class="chips" id="chips"></div>
        <label>Amount (₹)<input name="amount" id="amount" inputmode="decimal" required></label>
-       <button class="pay" id="pay" type="submit">Give now</button>
+       <button class="pay" id="pay" type="submit">Donate now</button>
+       <p class="policy-note">${NON_REFUNDABLE_DONATION}</p>
        <p class="note" id="note"></p>
      </form>
      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -86,7 +89,7 @@ export function donatePageHtml(): string {
          var row = selected();
          chips.innerHTML = "";
          if (!row) return;
-         note.textContent = "Minimum for this gift is ₹" + rupees(row.minPaise) + ".";
+         note.textContent = "Minimum for this donation is ₹" + rupees(row.minPaise) + ".";
          (row.suggestedPaise || []).forEach(function (paise) {
            var button = document.createElement("button");
            button.type = "button";
@@ -116,7 +119,7 @@ export function donatePageHtml(): string {
            });
            paintChips();
          })
-         .catch(function () { say("Gifts could not be loaded. Refresh and try again.", true); });
+         .catch(function () { say("Donation options could not be loaded. Refresh and try again.", true); });
        target.addEventListener("change", paintChips);
        form.addEventListener("submit", function (event) {
          event.preventDefault();
@@ -149,7 +152,7 @@ export function donatePageHtml(): string {
            .then(function (result) {
              if (!result.ok || !window.Razorpay) {
                pay.disabled = false;
-               say((result.body && result.body.message) || "The gift could not be started.", true);
+               say((result.body && result.body.message) || "The donation could not be started.", true);
                return;
              }
              var checkout = new window.Razorpay({
@@ -174,11 +177,11 @@ export function donatePageHtml(): string {
                      }
                    });
                },
-               modal: { ondismiss: function () { pay.disabled = false; say("The gift was not taken.", false); } }
+               modal: { ondismiss: function () { pay.disabled = false; say("The donation was not taken.", false); } }
              });
              checkout.open();
            })
-           .catch(function () { pay.disabled = false; say("The gift could not be started.", true); });
+           .catch(function () { pay.disabled = false; say("The donation could not be started.", true); });
        });
      })();
      </script>`
@@ -328,10 +331,21 @@ function receiptDocument(title: string, body: string): string {
     }
     .actions .home { background: #1c7d48; color: #fff; border: 0; }
     .actions .plain { background: #fff; color: #1a1d1b; border: 1px solid rgba(34, 34, 34, 0.15); }
+    .policy {
+      margin: 6px 0 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fdf5e8;
+      color: #8a5a17;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .pdf-note { margin: 10px 2px 0; color: #5c6b64; font-size: 13px; line-height: 1.45; }
     footer { margin-top: 28px; color: #8a938d; font-size: 13px; line-height: 1.5; }
     @media (max-width: 640px) {
       .row { grid-template-columns: 1fr; gap: 4px; }
       .amount strong { font-size: 30px; }
+      .actions a, .actions button { flex: 1 1 auto; text-align: center; }
     }
     @media print {
       #ainf-global-nav, #ainf-support-banner, .actions { display: none !important; }
@@ -356,6 +370,8 @@ function receiptRow(label: string, value: string, soft = false): string {
 }
 
 export function receiptPageHtml(input: {
+  /** Receipt token; when set, the page offers the locked PDF download. */
+  token?: string;
   name: string;
   email: string;
   phone: string;
@@ -372,10 +388,10 @@ export function receiptPageHtml(input: {
   verifyUrl: string;
 }): string {
   const who = input.name.trim() || "friend";
-  const title = input.returned ? "Gift returned" : "Thank you";
+  const title = input.returned ? "Donation returned" : "Thank you";
   const lead = input.returned
-    ? `The gift of ${input.amount} for ${input.target} has been returned in full. It can take a few working days to show on the statement.`
-    : `Your gift of ${input.amount} for ${input.target} is received. This page stays here if you refresh it. It is a record of the gift, not a tax certificate, and not a Field Sevak membership.`;
+    ? `The donation of ${input.amount} for ${input.target} has been returned in full. It can take a few working days to show on the statement.`
+    : `Your donation of ${input.amount} for ${input.target} is received. This page stays here if you refresh it. It is a record of the donation, not a tax certificate, and not a Field Sevak membership.`;
   const mail = input.emailed
     ? ` A copy was sent to ${input.email}.`
     : "";
@@ -402,12 +418,15 @@ export function receiptPageHtml(input: {
        <dl>${rows}</dl>
        ${sealBlock}
        ${input.verified ? `<input type="hidden" name="ainf-receipt-seal" value="${escapeHtml(input.seal.replace(/\s+/g, ""))}">` : ""}
+       ${input.returned ? "" : `<p class="policy">${escapeHtml(NON_REFUNDABLE_RECEIPT)}</p>`}
      </article>
      <div class="actions">
-       <a class="home" href="/">Back to home</a>
+       ${input.token ? `<a class="home" href="/donate/receipt/${encodeURIComponent(input.token)}/pdf" download>Download PDF</a>` : ""}
+       <a class="${input.token ? "plain" : "home"}" href="/">Back to home</a>
        <button class="plain" type="button" onclick="window.print()">Print</button>
      </div>
-     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
+     ${input.token && input.verifyUrl ? `<p class="pdf-note">The PDF is locked against editing and carries a working "Verify this payment" link.</p>` : ""}
+     <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
   );
 }
 
@@ -417,11 +436,11 @@ export function receiptVerifyHtml(input: {
   lines: Array<{ label: string; value: string }>;
 }): string {
   const copy = {
-    empty: ["Receipt check", "Open a gift receipt. This website checks the seal in the background."],
+    empty: ["Receipt check", "Open a donation receipt. This website checks the seal in the background."],
     invalid: ["Seal did not open", "That code is not an AINF seal, or it was changed after it was made."],
-    verified: ["Verified payment", "This seal opened on AINF and matches the gift on record."],
-    returned: ["Verified, then returned", "This seal is genuine. The gift has since been returned in full."],
-    mismatch: ["Seal does not match", "The seal opened, but it does not match the gift now on record."],
+    verified: ["Verified payment", "This seal opened on AINF and matches the donation on record."],
+    returned: ["Verified, then returned", "This seal is genuine. The donation has since been returned in full."],
+    mismatch: ["Seal does not match", "The seal opened, but it does not match the donation now on record."],
   }[input.state];
   const rows = input.lines.map((line) => receiptRow(line.label, line.value)).join("");
   return receiptDocument(
@@ -431,7 +450,7 @@ export function receiptVerifyHtml(input: {
      <p class="lead">${escapeHtml(copy[1])}</p>
      ${rows ? `<article class="sheet"><dl>${rows}</dl></article>` : ""}
      <div class="actions"><a class="home" href="/">Back to home</a></div>
-     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
+     <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
   );
 }
 
@@ -440,9 +459,9 @@ export function receiptMissingHtml(): string {
     "Receipt not found · AINF",
     `<p class="eyebrow is-returned">Not found</p>
      <h1>Receipt not found</h1>
-     <p class="lead">That link does not match a received gift. Open the receipt from the email, or ask us to re-send it.</p>
+     <p class="lead">That link does not match a received donation. Open the receipt from the email, or ask us to re-send it.</p>
      <div class="actions"><a class="home" href="/donate/receipt">Get my receipt</a><a class="plain" href="/">Back to home</a></div>
-     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
+     <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
   );
 }
 
@@ -462,7 +481,7 @@ export function paymentNoticeHtml(input: {
      <h1>${escapeHtml(input.title)}</h1>
      <p class="lead">${escapeHtml(input.lead)}</p>
      <div class="actions">${cta}${input.cta ? `<a class="plain" href="/contact-us">Contact us</a>` : ""}</div>
-     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
+     <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>`
   );
 }
 
@@ -472,10 +491,10 @@ export function receiptLookupHtml(): string {
     "Get your receipt · AINF",
     `<p class="eyebrow">Receipt recovery</p>
      <h1>Get your receipt</h1>
-     <p class="lead">Lost the email? Enter the email you gave with and we will re-send your receipt links to it.</p>
+     <p class="lead">Lost the email? Enter the email you donated with and we will re-send your receipt links to it.</p>
      <article class="sheet">
        <form id="ainf-receipt-lookup" novalidate>
-         <label for="ainf-receipt-email" style="display:block;margin:0 0 8px;color:#5c6b64;font-size:14px;font-weight:500">Email you gave with</label>
+         <label for="ainf-receipt-email" style="display:block;margin:0 0 8px;color:#5c6b64;font-size:14px;font-weight:500">Email you donated with</label>
          <input id="ainf-receipt-email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="200" placeholder="you@example.com"
            style="width:100%;padding:13px 14px;border:1px solid #d7ded9;border-radius:12px;font:inherit;font-size:15px;background:#fff;color:#1a1d1b" />
          <div class="actions">
@@ -485,7 +504,7 @@ export function receiptLookupHtml(): string {
          <p id="ainf-receipt-msg" role="status" aria-live="polite" style="margin:14px 0 6px;color:#3d4a44;font-size:14px;line-height:1.5;min-height:1px"></p>
        </form>
      </article>
-     <footer>All India Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>
+     <footer>All Indian Nevarlands Foundation · Nala, Jamtara, Jharkhand</footer>
      <script>
        (function () {
          var form = document.getElementById("ainf-receipt-lookup");
@@ -498,7 +517,7 @@ export function receiptLookupHtml(): string {
            var value = (email.value || "").trim();
            if (!value || value.indexOf("@") < 1) {
              msg.style.color = "#8a3b32";
-             msg.textContent = "Enter the email you gave with.";
+             msg.textContent = "Enter the email you donated with.";
              return;
            }
            button.disabled = true;
@@ -515,7 +534,7 @@ export function receiptLookupHtml(): string {
                msg.style.color = "#1c7d48";
                msg.textContent =
                  (data && data.message) ||
-                 "If that email has any received gifts, we've sent the receipt links to it.";
+                 "If that email has any received donations, we've sent the receipt links to it.";
              })
              .catch(function () {
                msg.style.color = "#8a3b32";

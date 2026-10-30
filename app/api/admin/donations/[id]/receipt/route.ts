@@ -18,9 +18,9 @@ export async function POST(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
 
   const gift = await db.donation.findUnique({ where: { id } });
-  if (!gift) return Response.json({ error: "not_found", message: "Gift not found." }, { status: 404 });
+  if (!gift) return Response.json({ error: "not_found", message: "Donation not found." }, { status: 404 });
   if (gift.status !== DonationStatus.PAID) {
-    return Response.json({ error: "not_paid", message: "Only a received gift has a receipt." }, { status: 409 });
+    return Response.json({ error: "not_paid", message: "Only a received donation has a receipt." }, { status: 409 });
   }
 
   const result = await sendDonationReceiptEmail({

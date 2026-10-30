@@ -195,6 +195,7 @@
     backdrop.addEventListener("click", close);
     ok.addEventListener("click", close);
     document.addEventListener("keydown", onKey, true);
+    ainfScrollbarGap();
     document.documentElement.classList.add("ainf-interest-open");
     document.body.appendChild(root);
     ok.focus({ preventScroll: true });
@@ -204,14 +205,14 @@
     "click",
     function (event) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      if (event.target.closest && event.target.closest("#ainf-gift-modal, #ainf-join-modal, #ainf-gift-menu-drawer")) return;
-      // A project's "Our mission" CTA reads on to the foundation's mission; it is not a gift button.
+      if (event.target.closest && event.target.closest("#ainf-gift-modal, #ainf-join-modal, #ainf-mission-modal, #ainf-gift-menu-drawer")) return;
+      // A project's "Our mission" CTA explains the foundation's mission; it is not a gift button.
       var mission = location.pathname.indexOf("/projects/") === 0 && event.target.closest && event.target.closest('[data-framer-name="btn hover variation"], [data-framer-name="Primary btn"], [data-framer-name="Primary"]');
       if (mission && missionLabel(mission)) {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        window.location.assign("/about-us#our-mission");
+        openMissionModal(mission);
         return;
       }
       var link = event.target && event.target.closest && event.target.closest("a[href]");
@@ -334,16 +335,175 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootMissionAnchor);
   else bootMissionAnchor();
 
+  var AINF_POPUPS = ["ainf-gift-modal", "ainf-join-modal", "ainf-mission-modal", "ainf-pay-shield"];
+
+  // Measured while the page still shows its scrollbar (0 for overlay
+  // scrollbars on phones and macOS); the lock CSS pads the page by it.
+  function ainfScrollbarGap() {
+    var html = document.documentElement;
+    if (html.classList.contains("ainf-modal-lock") || html.classList.contains("ainf-interest-open")) return;
+    var gap = Math.max(0, window.innerWidth - html.clientWidth);
+    html.style.setProperty("--ainf-scrollbar-gap", gap + "px");
+  }
+
+  function ainfAnyPopup() {
+    return AINF_POPUPS.some(function (id) {
+      var el = document.getElementById(id);
+      return el && !el.hidden;
+    });
+  }
+
   function lockScroll(on) {
     if (on) {
+      ainfScrollbarGap();
       document.documentElement.classList.add("ainf-modal-lock");
       return;
     }
-    var gift = document.getElementById("ainf-gift-modal");
-    var join = document.getElementById("ainf-join-modal");
-    if ((!gift || gift.hidden) && (!join || join.hidden)) {
-      document.documentElement.classList.remove("ainf-modal-lock");
+    if (!ainfAnyPopup()) document.documentElement.classList.remove("ainf-modal-lock");
+  }
+
+  // Framer's Smooth Scroll (Lenis, on home and /donate-now) turns wheel events
+  // into scripted page scrolls that overflow:hidden does not stop, and iOS
+  // ignores overflow:hidden for touch. While a pop-up is open, wheel and touch
+  // never reach Lenis, and only a scroll area inside the pop-up may move.
+  // The lock class also covers a project's pay sheet (Framer's own overlay);
+  // the visible-window check covers code elsewhere dropping the class.
+  function ainfPopupOpen() {
+    var html = document.documentElement;
+    return ainfAnyPopup() || html.classList.contains("ainf-modal-lock") || html.classList.contains("ainf-interest-open");
+  }
+
+  function ainfCanScroll(target, dy) {
+    var el = target && target.nodeType === 1 ? target : target && target.parentElement;
+    if (!el || !el.closest || !el.closest("#ainf-gift-modal, #ainf-join-modal, #ainf-mission-modal, #ainf-interest-modal, .ainf-gift-menu__drawer, .ainf-pay-sheet")) return false;
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      if (el.scrollHeight <= el.clientHeight + 1) continue;
+      var overflow = getComputedStyle(el).overflowY;
+      if (overflow !== "auto" && overflow !== "scroll") continue;
+      if (dy < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1) return true;
     }
+    return false;
+  }
+
+  var ainfTouchY = 0;
+  window.addEventListener("touchstart", function (event) {
+    if (event.touches.length === 1) ainfTouchY = event.touches[0].clientY;
+  }, { capture: true, passive: true });
+
+  function ainfGuardScroll(event) {
+    if (!ainfPopupOpen()) return;
+    event.stopPropagation();
+    var dy;
+    if (event.type === "wheel") {
+      dy = event.deltaY;
+    } else {
+      if (event.touches.length !== 1) {
+        event.preventDefault();
+        return;
+      }
+      var y = event.touches[0].clientY;
+      dy = ainfTouchY - y;
+      ainfTouchY = y;
+    }
+    if (!ainfCanScroll(event.target, dy)) event.preventDefault();
+  }
+  window.addEventListener("wheel", ainfGuardScroll, { capture: true, passive: false });
+  window.addEventListener("touchmove", ainfGuardScroll, { capture: true, passive: false });
+
+  // "Our mission" on a project page: the foundation's mission, vision and
+  // reach (About copy), with this project's own mission line from the page.
+  var missionReturn = null;
+  var MISSION_COPY = {
+    mission: "Help every learner in our blocks reach a classroom, a skill, and a first job — with health, safety, and farm support around them.",
+    vision: "Eastern India where a student's postcode does not decide their degree, their job, or their dignity.",
+    reach: "We walk with learners and families from Jamtara outward — classrooms, skill labs, health camps, and fair work under one roof."
+  };
+
+  function missionProjectLine() {
+    var section = document.getElementById("our-mission");
+    var line = section && section.querySelector("h2");
+    var text = line ? line.textContent.replace(/\s+/g, " ").trim() : "";
+    var h1 = document.querySelector("h1");
+    return { title: h1 ? h1.textContent.replace(/\s+/g, " ").trim() : "", text: text };
+  }
+
+  function openMissionModal(trigger) {
+    missionReturn = trigger || document.activeElement;
+    var root = document.getElementById("ainf-mission-modal");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "ainf-mission-modal";
+      root.className = "ainf-mission-modal";
+      root.hidden = true;
+      root.innerHTML =
+        '<div class="ainf-mission-modal__card" role="dialog" aria-modal="true" aria-labelledby="ainf-mission-title" tabindex="-1">' +
+        '<button type="button" class="ainf-mission-modal__close" data-close aria-label="Close">×</button>' +
+        '<p class="ainf-mission-modal__eyebrow">All Indian Nevarlands Foundation</p>' +
+        '<h2 id="ainf-mission-title">Our mission</h2>' +
+        '<p class="ainf-mission-modal__lead"></p>' +
+        '<div class="ainf-mission-modal__project" hidden><p class="ainf-mission-modal__label"></p><p class="ainf-mission-modal__line"></p></div>' +
+        '<div class="ainf-mission-modal__grid">' +
+        '<div><p class="ainf-mission-modal__label">Our vision</p><p class="ainf-mission-modal__text" data-vision></p></div>' +
+        '<div><p class="ainf-mission-modal__label">Where we work</p><p class="ainf-mission-modal__text" data-reach></p></div>' +
+        "</div>" +
+        '<div class="ainf-mission-modal__actions">' +
+        '<button type="button" class="ainf-mission-modal__primary" data-mission-give><span class="ainf-gift-modal__dot" aria-hidden="true"></span>Support AINF</button>' +
+        '<a class="ainf-mission-modal__secondary" href="/about-us#our-mission">More about AINF</a>' +
+        "</div></div>";
+      root.querySelector(".ainf-mission-modal__lead").textContent = MISSION_COPY.mission;
+      root.querySelector("[data-vision]").textContent = MISSION_COPY.vision;
+      root.querySelector("[data-reach]").textContent = MISSION_COPY.reach;
+      document.body.appendChild(root);
+      root.addEventListener("click", function (event) {
+        if (event.target === root || (event.target.closest && event.target.closest("[data-close]"))) {
+          closeMissionModal(true);
+          return;
+        }
+        if (event.target.closest && event.target.closest("[data-mission-give]")) {
+          // One window at a time: this one closes before the gift window opens.
+          closeMissionModal(false);
+          if (missionReturn && missionReturn.focus) missionReturn.focus({ preventScroll: true });
+          openGiftModal();
+        }
+      });
+      document.addEventListener("keydown", function (event) {
+        if (root.hidden) return;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeMissionModal(true);
+          return;
+        }
+        if (event.key !== "Tab") return;
+        var items = Array.prototype.slice.call(root.querySelectorAll("a[href], button"));
+        var first = items[0];
+        var last = items[items.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === root.firstElementChild)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+    }
+    var project = missionProjectLine();
+    var box = root.querySelector(".ainf-mission-modal__project");
+    box.hidden = !project.text;
+    box.querySelector(".ainf-mission-modal__label").textContent = project.title ? "This project · " + project.title : "This project";
+    box.querySelector(".ainf-mission-modal__line").textContent = project.text;
+    var card = root.querySelector(".ainf-mission-modal__card");
+    card.scrollTop = 0;
+    root.hidden = false;
+    lockScroll(true);
+    card.focus({ preventScroll: true });
+  }
+
+  function closeMissionModal(restoreFocus) {
+    var root = document.getElementById("ainf-mission-modal");
+    if (!root || root.hidden) return;
+    root.hidden = true;
+    lockScroll(false);
+    if (restoreFocus && missionReturn && missionReturn.focus) missionReturn.focus({ preventScroll: true });
   }
 
   var joinReturn = null;
@@ -376,7 +536,7 @@
     root.innerHTML =
       '<div class="ainf-join-modal__card" role="dialog" aria-modal="true" aria-labelledby="ainf-join-title">' +
       '<h2 id="ainf-join-title">Account needed</h2>' +
-      "<p>Joining as a Field Sevak needs an account, then identity verification, then a membership plan. A gift to AINF does not.</p>" +
+      "<p>Joining as a Field Sevak needs an account, then identity verification, then a membership plan. A donation to AINF does not.</p>" +
       '<div class="ainf-join-modal__actions">' +
       '<a class="ainf-join-modal__primary" href="/sign-in?redirect_url=%2Faccount%2Fmembership">Sign in</a>' +
       '<a href="/sign-up?redirect_url=%2Faccount%2Fmembership">Create account</a>' +
@@ -683,6 +843,7 @@
         "</div>" +
         '<p class="ainf-gift-note" data-note hidden></p>' +
         '<button type="submit" class="ainf-gift-modal__submit"><span class="ainf-gift-modal__dot" aria-hidden="true"></span>Support AINF</button>' +
+        '<p class="ainf-gift-modal__policy">Donations are non-refundable once paid.</p>' +
         "</form></div>";
       document.body.appendChild(root);
       var card = root.querySelector(".ainf-gift-modal__card");
@@ -781,7 +942,7 @@
     var early = earlyGiftLabel();
     if (lead) {
       lead.textContent = early
-        ? "This gift goes to " + early + ". You can change the cause. A receipt comes after payment."
+        ? "This donation goes to " + early + ". You can change the cause. A receipt comes after payment."
         : "Fill the form below — you’ll receive a receipt once the amount is confirmed.";
     }
     loadGiftTargets(root);
@@ -907,7 +1068,7 @@
     var lead = root.querySelector(".ainf-gift-modal__lead");
     if (lead) {
       lead.textContent = row
-        ? "This gift goes to " + giftPlainTitle(row) + ". You can change the cause. A receipt comes after payment."
+        ? "This donation goes to " + giftPlainTitle(row) + ". You can change the cause. A receipt comes after payment."
         : "Fill the form below — you’ll receive a receipt once the amount is confirmed.";
     }
     if (!chips) return;
@@ -1007,7 +1168,7 @@
       return;
     }
     if (paise > giftMaxPaise) {
-      giftNote(root, "The maximum for a gift is ₹" + giftRupees(giftMaxPaise) + ".", true);
+      giftNote(root, "The maximum for a donation is ₹" + giftRupees(giftMaxPaise) + ".", true);
       if (amount) amount.focus();
       return;
     }
@@ -1060,7 +1221,7 @@
         if (!result.ok) {
           giftBusy = false;
           if (button) button.disabled = false;
-          giftNote(root, ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);
+          giftNote(root, ainfWithRetryWait((result.body && result.body.message) || "The donation could not be started.", result.body), true);
           return;
         }
         whenRazorpay(function () {
@@ -1099,7 +1260,7 @@
                 ainfRzpThaw();
                 giftBusy = false;
                 if (button) button.disabled = false;
-                giftNote(root, "The gift was not taken.", false);
+                giftNote(root, "The donation was not taken.", false);
               }
             }
           });
@@ -1114,7 +1275,7 @@
       .catch(function () {
         giftBusy = false;
         if (button) button.disabled = false;
-        giftNote(root, "The gift could not be started.", true);
+        giftNote(root, "The donation could not be started.", true);
       });
   }
 
@@ -1251,7 +1412,7 @@
     ],
     [
       "yourfinancialsupporthelpsusprovidefoodeducationhealthcaretothosewhoneedit",
-      "Your gift covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families.",
+      "Your donation covers stipends, study kits, counselling, and emergency relief — delivered straight to students and families.",
     ],
     [
       "giveyourtimeandskillstosupportourinitiativesanddirectlyimpactlivesinyourcommunity",
@@ -2740,9 +2901,8 @@
     var shield = document.getElementById("ainf-pay-shield");
     if (!on) {
       if (shield) shield.hidden = true;
-      var gift = document.getElementById("ainf-gift-modal");
-      var join = document.getElementById("ainf-join-modal");
-      if ((!gift || gift.hidden) && (!join || join.hidden)) document.documentElement.classList.remove("ainf-modal-lock");
+      // Releases the page only when no other pop-up (gift, join, mission) is open.
+      lockScroll(false);
       ["ainf-global-nav", "ainf-site-footer"].forEach(function (id) {
         var node = document.getElementById(id);
         if (node) node.removeAttribute("inert");
@@ -2761,7 +2921,7 @@
       });
     }
     shield.hidden = false;
-    document.documentElement.classList.add("ainf-modal-lock");
+    lockScroll(true);
     ["ainf-global-nav", "ainf-site-footer"].forEach(function (id) {
       var node = document.getElementById(id);
       if (node) node.setAttribute("inert", "");
@@ -2817,7 +2977,7 @@
     if (raiseProjectBackdrop(fixed)) {
       var shield = document.getElementById("ainf-pay-shield");
       if (shield) shield.hidden = true;
-      document.documentElement.classList.add("ainf-modal-lock");
+      lockScroll(true);
       ["ainf-global-nav", "ainf-site-footer"].forEach(function (id) {
         var node = document.getElementById(id);
         if (node) node.setAttribute("inert", "");
@@ -3524,7 +3684,7 @@
         if (!match) {
           form.removeAttribute("data-ainf-paying");
           if (button) button.disabled = false;
-          projectPayNote(form, "That cause is not open for a gift yet.");
+          projectPayNote(form, "That cause is not open for donations yet.");
           return;
         }
         var paise = Math.round(Number(raw) * 100);
@@ -3561,7 +3721,7 @@
         if (!result.ok) {
           form.removeAttribute("data-ainf-paying");
           if (button) button.disabled = false;
-          projectPayNote(form, ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body));
+          projectPayNote(form, ainfWithRetryWait((result.body && result.body.message) || "The donation could not be started.", result.body));
           return;
         }
         whenRazorpay(function () {
@@ -3624,7 +3784,7 @@
       .catch(function () {
         form.removeAttribute("data-ainf-paying");
         if (button) button.disabled = false;
-        projectPayNote(form, "The gift could not be started. Try again.");
+        projectPayNote(form, "The donation could not be started. Try again.");
       });
   }
 
@@ -3833,7 +3993,7 @@
           }
           if (!result.ok) {
             busy = false;
-            note(ainfWithRetryWait((result.body && result.body.message) || "The gift could not be started.", result.body), true);
+            note(ainfWithRetryWait((result.body && result.body.message) || "The donation could not be started.", result.body), true);
             return;
           }
           // Checkout loads on first use outside /donate-now, so wait for it here.
@@ -3844,7 +4004,7 @@
         })
         .catch(function () {
           busy = false;
-          note("The gift could not be started.", true);
+          note("The donation could not be started.", true);
         });
     }
 
@@ -3878,7 +4038,7 @@
             modal: {
               ondismiss: function () {
                 busy = false;
-                note("The gift was not taken.", false);
+                note("The donation was not taken.", false);
               }
             }
           });

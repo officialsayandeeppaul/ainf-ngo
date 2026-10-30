@@ -210,10 +210,10 @@ export default async function AdminRevenuePage({
       email: gift.donorEmail,
       userId: null,
       what: gift.targetTitle,
-      detail: "Gift",
+      detail: "Donation",
       amountPaise: gift.amountPaise,
       creditPaise: 0,
-      kind: "Gift",
+      kind: "Donation",
       how: gift.paymentLink ? "Payment link" : "Checkout",
       at: gift.paidAt ?? gift.createdAt,
       paymentId: gift.razorpayPaymentId,
@@ -275,7 +275,7 @@ export default async function AdminRevenuePage({
             hint={`${snapshot.membershipCount} plan payment${snapshot.membershipCount === 1 ? "" : "s"}`}
           />
           <CrmStat
-            label="Gifts"
+            label="Donations"
             value={formatInr(snapshot.giftPaise)}
             hint={`${snapshot.giftCount} gift${snapshot.giftCount === 1 ? "" : "s"}${
               refunded._count._all ? ` · ${formatInr(snapshot.refundedGiftPaise)} returned` : ""
@@ -297,8 +297,8 @@ export default async function AdminRevenuePage({
 
         <div className="pt-grid pt-grid--2" style={{ marginBottom: 16 }}>
           <section className="pt-card">
-            <h2 className="pt-section-title">Gifts by desk</h2>
-            {snapshot.byDesk.length ? <CrmBars items={snapshot.byDesk} /> : <p className="pt-hint">No gifts in view.</p>}
+            <h2 className="pt-section-title">Donations by desk</h2>
+            {snapshot.byDesk.length ? <CrmBars items={snapshot.byDesk} /> : <p className="pt-hint">No donations in view.</p>}
           </section>
           <section className="pt-card">
             <h2 className="pt-section-title">Members</h2>
@@ -336,7 +336,7 @@ export default async function AdminRevenuePage({
             </dl>
           </section>
           <section className="pt-card">
-            <h2 className="pt-section-title">Gift checkouts</h2>
+            <h2 className="pt-section-title">Donation checkouts</h2>
             <dl className="pt-kv">
               <dt>Opened, not paid</dt>
               <dd>{giftsAbandoned}</dd>

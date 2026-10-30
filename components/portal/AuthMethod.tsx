@@ -65,7 +65,7 @@ export function AuthMethod({
       {mode === "sign-up" ? (
         <p className="pt-hint" style={{ textAlign: "center", maxWidth: 400, margin: "18px auto 0" }}>
           A standard account lets you follow projects and manage your profile. Identity verification is required before a
-          Field Sevak plan. A gift to AINF does not need an account.
+          Field Sevak plan. A donation to AINF does not need an account.
         </p>
       ) : null}
     </>

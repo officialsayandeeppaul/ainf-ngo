@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
+import { NON_REFUNDABLE_PAYMENT } from "@/lib/payment-policy";
 
 export type InterestRow = {
   id: string;
@@ -315,7 +316,7 @@ export function PaymentsAdmin({
               {settings.envPaused
                 ? "Paused by the PAYMENTS_PAUSED environment variable. Remove it on the host to use this switch."
                 : settings.open
-                  ? "Gifts and membership plans open Razorpay checkout as normal."
+                  ? "Donations and membership plans open Razorpay checkout as normal."
                   : `Paused${settings.pausedAt ? ` since ${new Date(settings.pausedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}` : ""}. Anyone who tries to pay sees a thank-you window and lands in the queue below.`}
             </p>
           </div>
@@ -408,7 +409,7 @@ export function PaymentsAdmin({
                 className={`pt-segment__btn${queue.purpose === key ? " is-on" : ""}`}
                 aria-current={queue.purpose === key ? "page" : undefined}
               >
-                {key === "all" ? "Gifts and plans" : key === "gift" ? "Gifts" : "Plans"}
+                {key === "all" ? "Donations and plans" : key === "gift" ? "Donations" : "Plans"}
               </Link>
             ))}
           </nav>
@@ -458,7 +459,7 @@ export function PaymentsAdmin({
                       <td>
                         <div className="pt-dossier-plan">{row.what}</div>
                         <div className="pt-dossier-meta">
-                          {row.purpose === "MEMBERSHIP" ? "Membership" : "Gift"}
+                          {row.purpose === "MEMBERSHIP" ? "Membership" : "Donation"}
                           {row.attempts > 1 ? ` · tried ${row.attempts} times` : ""}
                           {row.source ? ` · ${row.source}` : ""}
                         </div>
@@ -677,7 +678,7 @@ export function PaymentsAdmin({
         title={switchTo ? "Turn online payments back on?" : "Pause online payments?"}
         body={
           switchTo
-            ? "Gift and membership checkout opens again for everyone. People in the queue are not charged automatically; send each of them a payment link."
+            ? "Donation and membership checkout opens again for everyone. People in the queue are not charged automatically; send each of them a payment link."
             : "Nobody can pay through the site until you turn this back on. Anyone who tries sees a thank-you window, their request is saved here, and you can send them a payment link later."
         }
         confirmLabel={switchTo ? "Yes, turn on" : "Yes, pause payments"}
@@ -718,9 +719,12 @@ export function PaymentsAdmin({
               </p>
             ) : (
               <p className="pt-hint" style={{ margin: "6px 0 0" }}>
-                Paying records the gift and emails the receipt, exactly like a checkout.
+                Paying records the donation and emails the receipt, exactly like a checkout.
               </p>
             )}
+            <p className="pt-hint" style={{ margin: "4px 0 0" }}>
+              The email and the Razorpay page both say: {NON_REFUNDABLE_PAYMENT}
+            </p>
 
             <p className="pt-label" style={{ margin: "14px 0 6px" }}>
               Link works for
