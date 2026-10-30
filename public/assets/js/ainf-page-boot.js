@@ -1117,12 +1117,12 @@
     giftNote(root, "", false);
     var token = ++giftLoad;
     giftLoading = true;
-    // One quiet retry before telling the visitor the list failed.
+    // Two quiet retries (after 1.2 s, then 2.4 s) before telling the visitor.
     function retry() {
-      if (attempt >= 2 || root.hidden) return false;
+      if (attempt >= 3 || root.hidden) return false;
       setTimeout(function () {
         if (token === giftLoad && !root.hidden) loadGiftTargets(root, attempt + 1);
-      }, 1200);
+      }, 1200 * attempt);
       return true;
     }
     // A request that hangs on a poor line is cut off and retried like a failure.
@@ -1168,7 +1168,7 @@
           pending.textContent = "Select Cause";
           pending.classList.add("is-placeholder");
         }
-        giftNote(root, giftTargets.length ? "" : "The cause list could not be loaded. Close this and try again.", true);
+        giftNote(root, giftTargets.length ? "" : "The cause list could not be loaded. Tap Desk / Vertical to try again.", true);
       });
   }
 
