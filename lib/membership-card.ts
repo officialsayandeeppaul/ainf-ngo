@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { AuditAction, recordAudit } from "./audit";
+import { cardPhotoDataUri } from "./card-photo";
 import { randomToken } from "./crypto";
 import { db, membershipCardDelegate } from "./db";
 import { absoluteUrl } from "./env";
@@ -105,12 +106,16 @@ async function readPhotoDataUri(abs: string): Promise<string | null> {
   }
 }
 
-async function photoHrefFor(input: {
+/** The card photo as a data URI: Postgres first, then a file left by older local installs. */
+export async function photoHrefFor(input: {
+  userId: string;
   cardPhotoPath?: string | null;
   regNo?: string | null;
 }): Promise<string | null> {
+  const stored = await cardPhotoDataUri(input.userId);
+  if (stored) return stored;
   const candidates: string[] = [];
-  if (input.cardPhotoPath) {
+  if (input.cardPhotoPath && input.cardPhotoPath.startsWith(`/${CARD_PUBLIC_DIR}/`)) {
     candidates.push(
       path.isAbsolute(input.cardPhotoPath)
         ? input.cardPhotoPath
@@ -141,6 +146,7 @@ type StoredCard = {
 };
 
 type LookupRow = {
+  userId: string;
   expiresAt: Date | string;
   regNo: string | null;
   firstName: string | null;
@@ -260,7 +266,7 @@ export async function issueMembershipCard(userId: string): Promise<IssuedMembers
     fatherName: user.fatherName,
     address: user.address,
     imageUrl: user.imageUrl,
-    photoHref: await photoHrefFor({ cardPhotoPath: user.cardPhotoPath, regNo }),
+    photoHref: await photoHrefFor({ userId, cardPhotoPath: user.cardPhotoPath, regNo }),
     regNo,
     token,
     tierName: user.membershipTier.name,
@@ -413,6 +419,32 @@ async function upsertMembershipCard(input: {
   return rows[0];
 }
 
+/**
+ * The front of a member's card as they hold it. When the membership has
+ * lapsed, the tier and dates printed on the card itself are used, so a scan
+ * still shows the card (the page marks it inactive).
+ */
+async function liveFrontSvg(userId: string): Promise<string | null> {
+  try {
+    const member = await loadUserMembership(userId);
+    if (!member?.membershipCard) return null;
+    const preview = previewMembershipCard({
+      ...member,
+      membershipTier: member.membershipTier ?? { name: member.membershipCard.tierName },
+      membershipExpiresAt: member.membershipExpiresAt ?? member.membershipCard.expiresAt,
+      photoHref: await photoHrefFor({
+        userId,
+        cardPhotoPath: member.cardPhotoPath,
+        regNo: member.membershipCard.regNo,
+      }),
+    });
+    return preview?.frontSvg ?? null;
+  } catch (error) {
+    console.error("[membership-card] could not draw card for check", error);
+    return null;
+  }
+}
+
 export async function lookupMembershipCard(token: string | null | undefined) {
   const empty = {
     ...cardVerifyVerdict({ token, card: null }),
@@ -427,6 +459,7 @@ export async function lookupMembershipCard(token: string | null | undefined) {
   try {
     const rows = await db.$queryRaw<LookupRow[]>`
       SELECT
+        c."userId",
         c."expiresAt",
         c."regNo",
         u."firstName",
@@ -447,30 +480,10 @@ export async function lookupMembershipCard(token: string | null | undefined) {
     const card = cardFromLookupRow(row);
     const verdict = cardVerifyVerdict({ token, card, now: new Date() });
     const regNo = row?.regNo?.trim() || null;
-    let photoUrl: string | null = null;
-    let frontSvg: string | null = null;
-    let frontUrl: string | null = null;
-    if (row?.cardPhotoPath) {
-      photoUrl = row.cardPhotoPath.startsWith("/") ? row.cardPhotoPath : `/${row.cardPhotoPath}`;
-    } else if (regNo) {
-      const onDisk = path.join(cardRootDir(), regNo, "photo.jpg");
-      try {
-        await readFile(onDisk);
-        photoUrl = `/${CARD_PUBLIC_DIR}/${regNo}/photo.jpg`;
-      } catch {
-        photoUrl = null;
-      }
-    }
-    if (regNo && parseCardRegNo(regNo)) {
-      const files = cardFilePaths(regNo);
-      frontUrl = files.frontUrl;
-      try {
-        frontSvg = await readFile(files.frontPath, "utf8");
-      } catch {
-        frontSvg = null;
-      }
-    }
-    return { ...verdict, card, regNo, photoUrl, frontSvg, frontUrl, dbError: false };
+    // The card is drawn from the database on every check (photo included), so
+    // it shows the same card the member holds; nothing depends on cached files.
+    const frontSvg = row && card && regNo && parseCardRegNo(regNo) ? await liveFrontSvg(row.userId) : null;
+    return { ...verdict, card, regNo, photoUrl: null, frontSvg, frontUrl: null, dbError: false };
   } catch (error) {
     console.error("[membership-card] lookup failed", error);
     return { ...empty, dbError: true };

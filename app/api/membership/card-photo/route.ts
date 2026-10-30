@@ -1,9 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import sharp from "sharp";
 import { guardApi } from "@/lib/auth/guard";
+import { loadCardPhoto, ownCardPhotoUrl, saveCardPhoto } from "@/lib/card-photo";
 import { db } from "@/lib/db";
-import { CARD_PUBLIC_DIR, cardFilePaths, ensureMembershipCard, loadUserMembership } from "@/lib/membership-card";
+import { ensureMembershipCard, loadUserMembership } from "@/lib/membership-card";
 import { CARD_PHOTO_MAX_BYTES, inspectCardPhoto, PASSPORT_PHOTO_ASPECT } from "@/lib/membership-card-art";
 import { membershipIsLive } from "@/lib/membership-state";
 
@@ -76,9 +75,6 @@ export async function POST(request: Request) {
     if (file.size > CARD_PHOTO_MAX_BYTES) {
       return Response.json({ error: "invalid_photo", message: "Photo must be under 2 MB." }, { status: 400 });
     }
-    const files = cardFilePaths(member.membershipCard.regNo);
-    const filename = "photo.jpg";
-    await mkdir(files.folder, { recursive: true });
     const raw = Buffer.from(await file.arrayBuffer());
     let passport: Buffer;
     try {
@@ -89,8 +85,15 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    await writeFile(path.join(files.folder, filename), passport);
-    data.cardPhotoPath = `/${CARD_PUBLIC_DIR}/${member.membershipCard.regNo}/${filename}`;
+    try {
+      data.cardPhotoPath = ownCardPhotoUrl(await saveCardPhoto(member.id, passport));
+    } catch (error) {
+      console.error("[card-photo] save failed", error);
+      return Response.json(
+        { error: "save_failed", message: "The photo could not be saved. Please try again in a moment." },
+        { status: 503 }
+      );
+    }
   }
 
   await db.user.update({ where: { id: member.id }, data });
@@ -98,5 +101,17 @@ export async function POST(request: Request) {
   return Response.json({
     ok: true,
     regNo: card?.regNo ?? member.membershipCard.regNo,
+    photoUrl: data.cardPhotoPath ?? member.cardPhotoPath ?? null,
+  });
+}
+
+/** The signed-in member's own card photo (the editor's preview). */
+export async function GET() {
+  const guard = await guardApi({});
+  if (!guard.ok) return guard.response;
+  const photo = await loadCardPhoto(guard.ctx.user.id);
+  if (!photo) return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+  return new Response(new Uint8Array(photo.bytes), {
+    headers: { "content-type": photo.mime, "cache-control": "private, max-age=31536000, immutable" },
   });
 }

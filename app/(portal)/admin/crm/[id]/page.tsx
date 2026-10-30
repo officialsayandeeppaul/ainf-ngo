@@ -11,7 +11,7 @@ import { formatDay, formatDayTime } from "@/lib/format-date";
 import { paidByMonth } from "@/lib/crm-metrics";
 import { formatInr } from "@/lib/membership";
 import { CrmSpark, CrmStat } from "@/components/portal/CrmCharts";
-import { ensureMembershipCard, findMembershipCardByUserId, previewMembershipCard } from "@/lib/membership-card";
+import { ensureMembershipCard, findMembershipCardByUserId, photoHrefFor, previewMembershipCard } from "@/lib/membership-card";
 import { expireMembershipIfNeeded } from "@/lib/membership-pay";
 import { membershipIsLive } from "@/lib/membership-state";
 import { buildUserJourney } from "@/lib/user-journey";
@@ -234,6 +234,9 @@ export default async function AdminCrmDossierPage({
     previewMembershipCard({
       ...member,
       membershipCard: storedCard,
+      photoHref: storedCard
+        ? await photoHrefFor({ userId: member.id, cardPhotoPath: member.cardPhotoPath, regNo: storedCard.regNo })
+        : null,
     });
   const paidOrders = member.membershipOrders.filter((order) => order.status === "PAID");
   const spentPaise = paidOrders.reduce((sum, order) => sum + order.amountPaise, 0);
@@ -357,10 +360,35 @@ export default async function AdminCrmDossierPage({
               <dt>Status</dt>
               <dd>
                 <UserStatusBadge status={member.status} />
-                {member.suspendedReason ? (
-                  <span className="pt-hint" style={{ display: "block", marginTop: 4 }}>
-                    {member.suspendedReason}
-                  </span>
+                {member.status !== "ACTIVE" ? (
+                  <div className="pt-suspension-facts">
+                    {member.suspendedReason ? (
+                      <p>
+                        <span>Reason</span>
+                        {member.suspendedReason}
+                      </p>
+                    ) : null}
+                    <p>
+                      <span>Lasts</span>
+                      {member.status === "BANNED"
+                        ? "Permanently closed"
+                        : member.suspendedUntil
+                          ? `Until ${formatDayTime(member.suspendedUntil)}, then lifts by itself`
+                          : "Until an admin reinstates it"}
+                    </p>
+                    {member.suspendedAt ? (
+                      <p>
+                        <span>Since</span>
+                        {formatDayTime(member.suspendedAt)}
+                      </p>
+                    ) : null}
+                    <p>
+                      <span>Member told</span>
+                      {member.suspensionNoticeSentAt && member.suspensionNoticeChannel
+                        ? `By ${member.suspensionNoticeChannel === "sms" ? "SMS" : "email"} on ${formatDayTime(member.suspensionNoticeSentAt)}`
+                        : "Not delivered. They still see the reason when they sign in."}
+                    </p>
+                  </div>
                 ) : null}
               </dd>
               <dt>Joined</dt>
@@ -380,6 +408,7 @@ export default async function AdminCrmDossierPage({
                 role={member.role}
                 status={member.status}
                 isSelf={member.id === viewer.id}
+                contact={{ email: member.email, phone: member.phone }}
               />
             </div>
           </section>

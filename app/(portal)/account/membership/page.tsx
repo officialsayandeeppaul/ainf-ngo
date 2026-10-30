@@ -100,7 +100,7 @@ export default async function AccountMembershipPage({
               fatherName={member?.fatherName ?? ""}
               address={member?.address ?? ""}
               mobile={member?.phone ?? ""}
-              savedPhoto={member?.cardPhotoPath ?? null}
+              savedPhoto={member?.cardPhotoPath?.startsWith("/api/membership/card-photo") ? member.cardPhotoPath : null}
             />
           </>
         ) : null}
@@ -129,7 +129,7 @@ export default async function AccountMembershipPage({
             <p className="pt-hint">
               {live
                 ? "Your membership is active. To change or renew a plan online, verify your identity first."
-                : "A Field Sevak plan needs an approved identity before Razorpay opens. A gift to AINF does not."}
+                : "A Field Sevak plan needs an approved identity before Razorpay opens. A donation to AINF does not."}
             </p>
             <p style={{ marginTop: 14 }}>
               <Link href="/account/verify" className="pt-btn pt-btn--primary">

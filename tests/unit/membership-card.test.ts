@@ -141,6 +141,7 @@ describe("scan verdict", () => {
 
   it("maps a SQL lookup row onto the same verdict shape", () => {
     const card = cardFromLookupRow({
+      userId: "user_1",
       expiresAt: user.membershipExpiresAt,
       regNo: "AINF-2026-0007",
       firstName: "Ada",
@@ -155,6 +156,7 @@ describe("scan verdict", () => {
     expect(cardVerifyVerdict({ token, card, now })).toMatchObject({ kind: "live", live: true });
     expect(cardFromLookupRow(null)).toBeNull();
     const fromSqlStrings = cardFromLookupRow({
+      userId: "user_1",
       expiresAt: "2026-10-03T10:00:00.000Z",
       regNo: "AINF-2026-0007",
       firstName: "Ada",

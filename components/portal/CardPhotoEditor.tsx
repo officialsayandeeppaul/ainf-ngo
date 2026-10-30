@@ -3,6 +3,33 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+/** What the server takes (lib/membership-card-art.ts CARD_PHOTO_TYPES, 2 MB). */
+const UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const SHRINK_ABOVE_BYTES = 1_500_000;
+
+/**
+ * Phone photos are often 3–8 MB (or HEIC), over the 2 MB limit and the host's
+ * request cap. Big or unusual files are redrawn as a JPEG of at most 1600 px
+ * first; the server still crops it to the passport slot.
+ */
+async function shrinkPhoto(file: File): Promise<File> {
+  if (file.size <= SHRINK_ABOVE_BYTES && UPLOAD_TYPES.includes(file.type)) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.88));
+    return blob ? new File([blob], "photo.jpg", { type: "image/jpeg" }) : file;
+  } catch {
+    // The browser cannot read it (e.g. HEIC on Windows); the server explains.
+    return file;
+  }
+}
+
 export function CardPhotoEditor({
   fatherName,
   address,
@@ -26,11 +53,23 @@ export function CardPhotoEditor({
     setError(null);
     setNote(null);
     const form = new FormData(event.currentTarget);
-    const result = await fetch("/api/membership/card-photo", { method: "POST", body: form });
+    const photo = form.get("photo");
+    if (photo instanceof File && photo.size > 0) form.set("photo", await shrinkPhoto(photo));
+    let result: Response;
+    try {
+      result = await fetch("/api/membership/card-photo", { method: "POST", body: form });
+    } catch {
+      setBusy(false);
+      setError("The connection dropped. Check your network and try again.");
+      return;
+    }
     const payload = await result.json().catch(() => ({}));
     setBusy(false);
     if (!result.ok) {
-      setError(payload.message ?? "Could not update the ID card.");
+      setError(
+        payload.message ??
+          (result.status === 413 ? "That photo is too large. Use one under 2 MB." : "Could not update the ID card. Please try again.")
+      );
       return;
     }
     setNote("ID card updated — passport photo is cropped into the red frame.");
@@ -63,7 +102,7 @@ export function CardPhotoEditor({
             <input
               name="photo"
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (!file) {
