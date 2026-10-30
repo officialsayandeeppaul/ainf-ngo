@@ -1125,11 +1125,15 @@
       }, 1200);
       return true;
     }
-    fetch("/api/donations/targets" + giftQuery(), { headers: { accept: "application/json" } })
+    // A request that hangs on a poor line is cut off and retried like a failure.
+    var abort = typeof AbortController === "function" ? new AbortController() : null;
+    var cutoff = abort ? setTimeout(function () { abort.abort(); }, 8000) : 0;
+    fetch("/api/donations/targets" + giftQuery(), { headers: { accept: "application/json" }, signal: abort ? abort.signal : undefined })
       .then(function (response) {
         return response.json().then(function (body) { return { ok: response.ok, body: body }; });
       })
       .then(function (result) {
+        clearTimeout(cutoff);
         if (token !== giftLoad) return;
         giftLoading = false;
         if (!result.ok) {
@@ -1155,6 +1159,7 @@
         }
       })
       .catch(function () {
+        clearTimeout(cutoff);
         if (token !== giftLoad) return;
         giftLoading = false;
         if (!giftTargets.length && retry()) return;
