@@ -586,6 +586,7 @@
   var giftTargets = [];
   var giftMaxPaise = 10000000;
   var giftLoad = 0;
+  var giftLoading = false;
   var giftCauseTouched = false;
 
   function ensureCheckout() {
@@ -858,6 +859,7 @@
       });
       function close() {
         if (giftBusy) return;
+        root.__ainfMenuWanted = false;
         closeGiftMenu(root);
         root.hidden = true;
         lockScroll(false);
@@ -994,7 +996,13 @@
   function openGiftMenu(root) {
     var drawer = giftDrawer();
     var trigger = root.querySelector(".ainf-gift-menu__trigger");
-    if (!drawer || !giftTargets.length) return;
+    if (!drawer) return;
+    if (!giftTargets.length) {
+      // Tapped before the causes arrived (slow line): open as soon as they do.
+      root.__ainfMenuWanted = true;
+      if (!giftLoading) loadGiftTargets(root);
+      return;
+    }
     if (drawer.parentElement !== document.body) document.body.appendChild(drawer);
     drawer.hidden = false;
     if (trigger) {
@@ -1090,7 +1098,8 @@
     markGiftChips(root);
   }
 
-  function loadGiftTargets(root) {
+  function loadGiftTargets(root, attempt) {
+    attempt = attempt || 1;
     var input = root.querySelector('input[name="cause"]');
     var button = root.querySelector('button[type="submit"]');
     var pending = root.querySelector(".ainf-gift-menu__label");
@@ -1107,13 +1116,24 @@
     }
     giftNote(root, "", false);
     var token = ++giftLoad;
+    giftLoading = true;
+    // One quiet retry before telling the visitor the list failed.
+    function retry() {
+      if (attempt >= 2 || root.hidden) return false;
+      setTimeout(function () {
+        if (token === giftLoad && !root.hidden) loadGiftTargets(root, attempt + 1);
+      }, 1200);
+      return true;
+    }
     fetch("/api/donations/targets" + giftQuery(), { headers: { accept: "application/json" } })
       .then(function (response) {
         return response.json().then(function (body) { return { ok: response.ok, body: body }; });
       })
       .then(function (result) {
         if (token !== giftLoad) return;
+        giftLoading = false;
         if (!result.ok) {
+          if (result.body && result.body.error !== "payments_paused" && !giftTargets.length && retry()) return;
           if (button) button.disabled = !giftTargets.length;
           if (pending && !giftTargets.length) {
             pending.textContent = "Select Cause";
@@ -1129,9 +1149,15 @@
         if (button) button.disabled = false;
         giftNote(root, "", false);
         paintGiftModal(root);
+        if (root.__ainfMenuWanted && !root.hidden && giftTargets.length) {
+          root.__ainfMenuWanted = false;
+          openGiftMenu(root);
+        }
       })
       .catch(function () {
         if (token !== giftLoad) return;
+        giftLoading = false;
+        if (!giftTargets.length && retry()) return;
         if (button) button.disabled = !giftTargets.length;
         if (pending && !giftTargets.length) {
           pending.textContent = "Select Cause";
