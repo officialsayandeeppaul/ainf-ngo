@@ -145,3 +145,30 @@ async function notify(action: () => Promise<unknown>): Promise<void> {
     console.error("[kyc] notification failed", error);
   }
 }
+
+/**
+ * A reviewer edited the verification data in Didit ("data.updated"). The
+ * status is unchanged, so only the stored decision is refreshed: no role
+ * change and no message to the member.
+ */
+export async function applyDiditDataEdit(params: {
+  sessionId: string;
+  decision?: unknown;
+  scheme: string;
+  trustsPayload: boolean;
+}): Promise<{ applied: boolean; reason?: string }> {
+  let decision = params.trustsPayload ? (params.decision ?? null) : null;
+  if (!params.trustsPayload) {
+    try {
+      decision = await fetchSessionDecision(params.sessionId);
+    } catch (error) {
+      console.error("[kyc] decision re-fetch failed", error);
+    }
+  }
+  if (!decision) return { applied: false, reason: "no_decision" };
+  const { count } = await db.kycVerification.updateMany({
+    where: { diditSessionId: params.sessionId },
+    data: { decision: decision as object, signatureScheme: params.scheme },
+  });
+  return count ? { applied: true } : { applied: false, reason: "unknown_session" };
+}

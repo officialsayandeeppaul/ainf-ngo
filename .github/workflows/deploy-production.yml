@@ -1,0 +1,80 @@
+# Production deploy to the client's Vercel project without sharing the source.
+#
+# The site is built here, from this private repository, and only the build
+# output is uploaded (`vercel deploy --prebuilt`). The client's Vercel project
+# has no Git connection, so the client sees deployments, logs, domains and
+# environment variables, but never this repository.
+#
+# Set up once (docs/PRODUCTION.md, "Deploy to the client's Vercel account"):
+#   Repository -> Settings -> Secrets and variables -> Actions -> New secret
+#     VERCEL_TOKEN       token the client creates for their Vercel team
+#     VERCEL_ORG_ID      the client's Team ID
+#     VERCEL_PROJECT_ID  the client's Project ID
+# Until those exist this workflow skips itself instead of failing.
+#
+# Migrations: `vercel build` runs `npm run vercel-build` (vercel.json), which
+# applies pending Prisma migrations to the production database before building.
+# A failed migration fails the run and the live site stays on the old version.
+
+name: Deploy production (client Vercel)
+
+on:
+  push:
+    branches: [release/v1]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check deploy secrets
+        id: ready
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Deploy secrets are not set yet; skipping. See docs/PRODUCTION.md."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.go == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.go == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.ready.outputs.go == 'true'
+        run: npm ci
+
+      - name: Unit tests
+        if: steps.ready.outputs.go == 'true'
+        run: npm test
+
+      - name: Pull production settings from the client's project
+        if: steps.ready.outputs.go == 'true'
+        run: npx --yes vercel@63.1.2 pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build (applies migrations first)
+        if: steps.ready.outputs.go == 'true'
+        run: npx --yes vercel@63.1.2 build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy the build output only
+        if: steps.ready.outputs.go == 'true'
+        run: |
+          url=$(npx --yes vercel@63.1.2 deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "Deployed: $url"
+          echo "### Deployed to production: $url" >> "$GITHUB_STEP_SUMMARY"

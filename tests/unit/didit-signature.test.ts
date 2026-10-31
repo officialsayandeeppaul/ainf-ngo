@@ -149,6 +149,71 @@ describe("X-Signature-V2 (canonical JSON)", () => {
   });
 });
 
+describe("freshness comes from the signed body timestamp", () => {
+  const signedV2 = (body: Record<string, unknown>, headerTs: number) =>
+    verifyWebhookSignature({
+      rawBody: JSON.stringify(body),
+      headers: headersFor({
+        "x-timestamp": String(headerTs),
+        "x-signature-v2": sign(SECRET, canonicalJson(body)),
+      }),
+      secret: SECRET,
+    });
+
+  it("rejects an old signed event resent with a freshened X-Timestamp header", () => {
+    const old = { ...payload, timestamp: nowSeconds() - 3600 };
+    expect(signedV2(old, nowSeconds())).toEqual({ ok: false, reason: "stale_or_missing_timestamp" });
+  });
+
+  it("accepts a fresh signed body even when the unsigned header lags", () => {
+    const fresh = { ...payload, timestamp: nowSeconds() };
+    expect(signedV2(fresh, nowSeconds() - 3600)).toEqual({ ok: true, scheme: "V2", trustsPayload: true });
+  });
+
+  it("checks the signature before freshness, so a forgery never learns about time", () => {
+    const old = { ...payload, timestamp: nowSeconds() - 3600 };
+    const result = verifyWebhookSignature({
+      rawBody: JSON.stringify(old),
+      headers: headersFor({ "x-timestamp": String(nowSeconds()), "x-signature-v2": "0".repeat(64) }),
+      secret: SECRET,
+    });
+    expect(result).toEqual({ ok: false, reason: "signature_mismatch_v2" });
+  });
+
+  it("RAW: a stale body timestamp is rejected", () => {
+    const raw = JSON.stringify({ ...payload, timestamp: nowSeconds() - 3600 });
+    const result = verifyWebhookSignature({
+      rawBody: raw,
+      headers: headersFor({ "x-timestamp": String(nowSeconds()), "x-signature": sign(SECRET, Buffer.from(raw)) }),
+      secret: SECRET,
+    });
+    expect(result).toEqual({ ok: false, reason: "stale_or_missing_timestamp" });
+  });
+
+  it("SIMPLE: accepts the body timestamp as the signed one, and rejects it when stale", () => {
+    const ts = nowSeconds();
+    const body = { ...payload, timestamp: ts };
+    const sig = sign(SECRET, `${ts}:${payload.session_id}:${payload.status}:${payload.webhook_type}`);
+    expect(
+      verifyWebhookSignature({
+        rawBody: JSON.stringify(body),
+        headers: headersFor({ "x-timestamp": String(ts + 7), "x-signature-simple": sig }),
+        secret: SECRET,
+      })
+    ).toEqual({ ok: true, scheme: "SIMPLE", trustsPayload: false });
+
+    const oldTs = ts - 3600;
+    const oldSig = sign(SECRET, `${oldTs}:${payload.session_id}:${payload.status}:${payload.webhook_type}`);
+    expect(
+      verifyWebhookSignature({
+        rawBody: JSON.stringify({ ...payload, timestamp: oldTs }),
+        headers: headersFor({ "x-timestamp": String(ts), "x-signature-simple": oldSig }),
+        secret: SECRET,
+      })
+    ).toEqual({ ok: false, reason: "stale_or_missing_timestamp" });
+  });
+});
+
 describe("X-Signature (raw bytes)", () => {
   it("accepts a signature over the exact received bytes", () => {
     // Whitespace that JSON.stringify would not produce, to prove the raw bytes

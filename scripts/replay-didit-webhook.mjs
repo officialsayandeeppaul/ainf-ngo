@@ -109,6 +109,8 @@ async function main() {
     vendor_data: vendor,
     workflow_id: process.env.DIDIT_WORKFLOW_ID ?? null,
     created_at: now(),
+    // Signed dispatch time, as Didit sends it; the server judges freshness on this.
+    timestamp: now(),
     decision: {
       kyc: { status, document_type: "PAN" },
       reason: status === "Declined" ? "document_unreadable" : null,
@@ -160,14 +162,14 @@ async function main() {
   });
 
   {
-    // Correctly signed but timestamped outside the freshness window: the shape
-    // a captured-and-resent request takes.
-    const body = JSON.stringify(buildPayload());
+    // Correctly signed an hour ago and resent with a freshened X-Timestamp
+    // header: the header is unsigned, so the signed body timestamp decides.
     const stale = now() - 3600;
+    const body = JSON.stringify(buildPayload({ created_at: stale, timestamp: stale }));
     await send({
       label: "valid signature, stale timestamp",
       body,
-      headers: signatureHeaders({ scheme: "V2", secret, body, timestamp: stale }),
+      headers: signatureHeaders({ scheme: "V2", secret, body, timestamp: now() }),
       expect: REJECT,
     });
   }

@@ -253,8 +253,8 @@ export function isFreshTimestamp(
 /**
  * Verifies a Didit webhook against the shared secret.
  *
- * Order matters: freshness first (cheap, kills replays), then the strongest
- * available signature. `rawBody` must be the exact bytes received — any
+ * Order matters: the strongest available signature first, then freshness of
+ * the signed body timestamp (kills replays). `rawBody` must be the exact bytes received — any
  * re-serialisation invalidates the RAW scheme.
  */
 export function verifyWebhookSignature(params: {
@@ -266,56 +266,71 @@ export function verifyWebhookSignature(params: {
   const secret = params.secret ?? env.DIDIT_WEBHOOK_SECRET;
   if (!secret) return { ok: false, reason: "webhook_secret_missing" };
 
+  // X-Timestamp is outside every signature, so a replay can carry a fresh one.
+  // Freshness is judged on the body's own `timestamp` (signed), and only after
+  // the signature holds; the header is a fallback for bodies without one.
   const timestampHeader = params.headers.get("x-timestamp");
-  if (!isFreshTimestamp(timestampHeader, params.nowSeconds)) {
-    return { ok: false, reason: "stale_or_missing_timestamp" };
-  }
+  const fresh = (signedTimestamp: string | null) =>
+    isFreshTimestamp(signedTimestamp ?? timestampHeader, params.nowSeconds);
 
   const raw = Buffer.isBuffer(params.rawBody) ? params.rawBody : Buffer.from(params.rawBody, "utf8");
+  let parsed: any;
+  const parse = () => {
+    try {
+      parsed = JSON.parse(raw.toString("utf8"));
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const v2 = params.headers.get("x-signature-v2");
   if (v2) {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(raw.toString("utf8"));
-    } catch {
-      return { ok: false, reason: "invalid_json" };
-    }
+    if (!parse()) return { ok: false, reason: "invalid_json" };
     const expected = hmacSha256Hex(secret, canonicalJson(parsed));
-    if (safeEqualHex(expected, v2)) {
-      return { ok: true, scheme: "V2", trustsPayload: true };
-    }
-    return { ok: false, reason: "signature_mismatch_v2" };
+    if (!safeEqualHex(expected, v2)) return { ok: false, reason: "signature_mismatch_v2" };
+    if (!fresh(bodyTimestamp(parsed))) return { ok: false, reason: "stale_or_missing_timestamp" };
+    return { ok: true, scheme: "V2", trustsPayload: true };
   }
 
   const rawSignature = params.headers.get("x-signature");
   if (rawSignature) {
     const expected = hmacSha256Hex(secret, raw);
-    if (safeEqualHex(expected, rawSignature)) {
-      return { ok: true, scheme: "RAW", trustsPayload: true };
+    if (!safeEqualHex(expected, rawSignature)) return { ok: false, reason: "signature_mismatch_raw" };
+    if (!fresh(parse() ? bodyTimestamp(parsed) : null)) {
+      return { ok: false, reason: "stale_or_missing_timestamp" };
     }
-    return { ok: false, reason: "signature_mismatch_raw" };
+    return { ok: true, scheme: "RAW", trustsPayload: true };
   }
 
   const simple = params.headers.get("x-signature-simple");
   if (simple) {
-    let parsed: any;
-    try {
-      parsed = JSON.parse(raw.toString("utf8"));
-    } catch {
-      return { ok: false, reason: "invalid_json" };
+    if (!parse()) return { ok: false, reason: "invalid_json" };
+    // The timestamp is part of the signed string here: whichever value
+    // reproduces the signature is authenticated, and that one is checked.
+    const candidates = [bodyTimestamp(parsed), timestampHeader].filter((t): t is string => Boolean(t));
+    const signedWith = candidates.find((ts) =>
+      safeEqualHex(
+        hmacSha256Hex(secret, `${ts}:${parsed?.session_id}:${parsed?.status}:${parsed?.webhook_type}`),
+        simple
+      )
+    );
+    if (!signedWith) return { ok: false, reason: "signature_mismatch_simple" };
+    if (!isFreshTimestamp(signedWith, params.nowSeconds)) {
+      return { ok: false, reason: "stale_or_missing_timestamp" };
     }
-    const message = `${timestampHeader}:${parsed?.session_id}:${parsed?.status}:${parsed?.webhook_type}`;
-    const expected = hmacSha256Hex(secret, message);
-    if (safeEqualHex(expected, simple)) {
-      // Only the four fields above are authenticated. The decision body that
-      // arrived alongside them is not, so the caller must re-fetch it.
-      return { ok: true, scheme: "SIMPLE", trustsPayload: false };
-    }
-    return { ok: false, reason: "signature_mismatch_simple" };
+    // Only the four fields above are authenticated. The decision body that
+    // arrived alongside them is not, so the caller must re-fetch it.
+    return { ok: true, scheme: "SIMPLE", trustsPayload: false };
   }
 
   return { ok: false, reason: "no_signature_header" };
+}
+
+/** The body's `timestamp` (Unix seconds) as a string, or null when absent. */
+function bodyTimestamp(body: unknown): string | null {
+  const value = (body as { timestamp?: unknown } | null)?.timestamp;
+  return typeof value === "number" || (typeof value === "string" && value.trim() !== "") ? String(value) : null;
 }
 
 export function assertDiditReady(): void {

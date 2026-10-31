@@ -2,7 +2,7 @@ import { AuditAction, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { mapDiditStatus, verifyWebhookSignature } from "@/lib/didit";
 import { isDatabaseConfigured, isDiditWebhookConfigured } from "@/lib/env";
-import { applyDiditDecision } from "@/lib/kyc-apply";
+import { applyDiditDataEdit, applyDiditDecision } from "@/lib/kyc-apply";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { contextFromRequest } from "@/lib/request-context";
 
@@ -52,6 +52,13 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
+  const webhookType: string = payload?.webhook_type ?? "status.updated";
+  // Entity, activity and transaction events carry no verification session.
+  // Acknowledge them so Didit does not retry; nothing here acts on them.
+  if (webhookType !== "status.updated" && webhookType !== "data.updated") {
+    return Response.json({ ok: true, ignored: webhookType });
+  }
+
   const sessionId: string | undefined = payload?.session_id;
   const rawStatus: string | undefined = payload?.status;
   if (!sessionId || !rawStatus) {
@@ -59,7 +66,14 @@ export async function POST(request: Request) {
   }
 
   const status = mapDiditStatus(rawStatus);
-  const eventType = `${payload?.webhook_type ?? "status.updated"}:${status}`;
+  const eventId: string | null = typeof payload?.event_id === "string" ? payload.event_id : null;
+  // Status changes dedupe on (session, status) so a second "Approved" can never
+  // re-promote or re-notify. Data edits keep the same status, so each event_id
+  // is its own row and every edit lands.
+  const dataEdit = webhookType === "data.updated";
+  const eventType = dataEdit
+    ? `${webhookType}:${status}:${eventId ?? Date.now()}`
+    : `${webhookType}:${status}`;
 
   try {
     await db.webhookEvent.create({
@@ -71,18 +85,34 @@ export async function POST(request: Request) {
       },
     });
   } catch {
-    return Response.json({ ok: true, deduplicated: true });
+    // A delivery that failed (or died mid-way) is retried by Didit; claim it
+    // back so the retry is processed instead of being dropped as a duplicate.
+    const { count } = await db.webhookEvent.updateMany({
+      where: {
+        provider: "didit",
+        externalId: sessionId,
+        eventType,
+        processedAt: null,
+        OR: [{ error: { not: null } }, { receivedAt: { lt: new Date(Date.now() - 2 * 60 * 1000) } }],
+      },
+      data: { error: null, payload },
+    });
+    if (count === 0) return Response.json({ ok: true, deduplicated: true });
   }
 
   try {
-    await applyDiditDecision({
-      sessionId,
-      status,
-      decision: payload?.decision ?? null,
-      scheme: verification.scheme,
-      trustsPayload: verification.trustsPayload,
-      context,
-    });
+    if (dataEdit) {
+      await applyDiditDataEdit({ sessionId, decision: payload?.decision ?? null, scheme: verification.scheme, trustsPayload: verification.trustsPayload });
+    } else {
+      await applyDiditDecision({
+        sessionId,
+        status,
+        decision: payload?.decision ?? null,
+        scheme: verification.scheme,
+        trustsPayload: verification.trustsPayload,
+        context,
+      });
+    }
     await db.webhookEvent.updateMany({
       where: { provider: "didit", externalId: sessionId, eventType },
       data: { processedAt: new Date() },
