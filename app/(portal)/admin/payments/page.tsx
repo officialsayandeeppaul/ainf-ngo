@@ -24,6 +24,7 @@ import { PaymentRef } from "@/components/portal/PaymentRef";
 import { PaymentsAdmin, type InterestRow, type LinkRow } from "@/components/portal/PaymentsAdmin";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { SetupNotice } from "@/components/portal/SetupNotice";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export const metadata: Metadata = { title: "Payments" };
 export const dynamic = "force-dynamic";
@@ -491,7 +492,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                         <div className="pt-dossier-meta">{row.kind}</div>
                       </td>
                       <td>
-                        <span className="pt-money">{formatInr(row.amountPaise)}</span>
+                        <span className="pt-money">{formatInr(row.amountPaise)}<RefundStar /></span>
                       </td>
                       <td>
                         <span className="pt-pill">{row.how}</span>
@@ -509,6 +510,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
               </table>
             </div>
           )}
+          {history.length > 0 ? <RefundFootnote inset /> : null}
           <div style={{ padding: "12px 16px 16px" }}>
             <Pagination
               page={Math.min(page, historyPages)}

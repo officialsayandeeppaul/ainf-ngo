@@ -15,6 +15,8 @@ import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PlanBenefitEditor, PlanBenefitStack } from "@/components/portal/PlanBenefits";
 import { PortalSelect } from "@/components/portal/PortalSelect";
 import { parsePlanBenefits, type PlanBenefit } from "@/lib/plan-benefits";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
+import { NON_REFUNDABLE_MEMBERSHIP } from "@/lib/payment-policy";
 
 type StudioSettings = {
   yearlyDiscountKind: YearlyDiscountKind;
@@ -277,7 +279,7 @@ export function MembershipStudio({
               <label className="pt-label" htmlFor="plan-name">
                 Name
               </label>
-              <input
+              <input maxLength={60}
                 id="plan-name"
                 className="pt-input"
                 required
@@ -290,7 +292,7 @@ export function MembershipStudio({
               <label className="pt-label" htmlFor="plan-badge">
                 Badge
               </label>
-              <input
+              <input maxLength={24}
                 id="plan-badge"
                 className="pt-input"
                 value={draft.badge}
@@ -365,7 +367,7 @@ export function MembershipStudio({
           <label className="pt-label" htmlFor="plan-desc" style={{ marginTop: 14 }}>
             Short summary
           </label>
-          <textarea
+          <textarea maxLength={280}
             id="plan-desc"
             className="pt-textarea"
             rows={2}
@@ -442,10 +444,12 @@ export function MembershipStudio({
                 <h3 className="pt-plan-card__title">{tier.name}</h3>
                 {tier.description ? <p className="pt-plan-card__desc">{tier.description}</p> : null}
                 <p className="pt-plan-card__price">
-                  {formatInr(tier.monthlyPaise)} <small>/ month</small>
+                  {formatInr(tier.monthlyPaise)}
+                  <RefundStar /> <small>/ month</small>
                 </p>
                 <p className="pt-plan-card__meta">
-                  {formatInr(yearlyPaise(pricing))} / year · {discountLabel(tier.yearlyDiscountKind, tier.yearlyDiscountValue)}
+                  {formatInr(yearlyPaise(pricing))}
+                  <RefundStar /> / year · {discountLabel(tier.yearlyDiscountKind, tier.yearlyDiscountValue)}
                 </p>
                 <PlanBenefitStack benefits={parsePlanBenefits(tier.benefits)} />
                 <div className="pt-plan-card__cta">
@@ -463,6 +467,7 @@ export function MembershipStudio({
           })}
         </div>
       )}
+      {tiers.length > 0 ? <RefundFootnote text={NON_REFUNDABLE_MEMBERSHIP} /> : null}
       <ConfirmDialog
         open={Boolean(removeId)}
         title="Remove this member type?"

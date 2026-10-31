@@ -1,10 +1,12 @@
 import sharp from "sharp";
 import { guardApi } from "@/lib/auth/guard";
+import { CARD_ADDRESS_MAX, CARD_FATHER_NAME_MAX } from "@/lib/card-fields";
 import { loadCardPhoto, ownCardPhotoUrl, saveCardPhoto } from "@/lib/card-photo";
 import { db } from "@/lib/db";
 import { ensureMembershipCard, loadUserMembership } from "@/lib/membership-card";
 import { CARD_PHOTO_MAX_BYTES, inspectCardPhoto, PASSPORT_PHOTO_ASPECT } from "@/lib/membership-card-art";
 import { membershipIsLive } from "@/lib/membership-state";
+import { e164India, indianMobile } from "@/lib/mobile-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -51,9 +53,16 @@ export async function POST(request: Request) {
   }
 
   const form = await request.formData();
-  const fatherName = String(form.get("fatherName") ?? "").trim().slice(0, 80);
-  const address = String(form.get("address") ?? "").trim().slice(0, 160);
-  const mobile = String(form.get("mobile") ?? "").trim().slice(0, 24);
+  const fatherName = String(form.get("fatherName") ?? "").trim().replace(/\s+/g, " ").slice(0, CARD_FATHER_NAME_MAX);
+  const address = String(form.get("address") ?? "").trim().replace(/\s+/g, " ").slice(0, CARD_ADDRESS_MAX);
+  const mobileRaw = String(form.get("mobile") ?? "").trim().slice(0, 24);
+  const mobile = mobileRaw ? indianMobile(mobileRaw) : null;
+  if (mobileRaw && !mobile) {
+    return Response.json(
+      { error: "invalid_mobile", message: "Enter a 10-digit Indian mobile number starting with 6, 7, 8 or 9." },
+      { status: 400 }
+    );
+  }
   const file = form.get("photo");
 
   const data: {
@@ -65,7 +74,7 @@ export async function POST(request: Request) {
     fatherName: fatherName || null,
     address: address || null,
   };
-  if (mobile) data.phone = mobile;
+  if (mobile) data.phone = e164India(mobile);
 
   if (file instanceof File && file.size > 0) {
     const check = inspectCardPhoto({ type: file.type, size: file.size });

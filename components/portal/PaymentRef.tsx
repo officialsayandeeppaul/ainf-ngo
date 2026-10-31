@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { shortId } from "@/lib/audit-display";
 import { formatInr } from "@/lib/membership";
 import { CopyId } from "./CopyId";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 type PaymentDetail = {
   id: string;
@@ -248,7 +249,7 @@ export function PaymentRef({
                     </dd>
                     <dt>Amount</dt>
                     <dd>
-                      <span className="pt-money">{formatInr(detail.amountPaise)}</span>
+                      <span className="pt-money">{formatInr(detail.amountPaise)}<RefundStar /></span>
                       {detail.currency && detail.currency !== "INR" ? ` · ${detail.currency}` : ""}
                     </dd>
                     <dt>Method</dt>

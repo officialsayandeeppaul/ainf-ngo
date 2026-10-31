@@ -87,7 +87,7 @@ export function BootstrapForm({
           <label className="pt-label" htmlFor="bootstrap-key">
             Admin bootstrap key
           </label>
-          <input
+          <input maxLength={512}
             id="bootstrap-key"
             className="pt-input pt-input--mono"
             type="password"

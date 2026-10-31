@@ -180,7 +180,7 @@ export function ContactMessageActions({
 
         <label className="pt-label" htmlFor={`reply-${id}`} style={{ marginTop: 14 }}>
           Your reply
-          <textarea
+          <textarea maxLength={6000}
             id={`reply-${id}`}
             className="pt-input pt-textarea"
             rows={7}

@@ -19,6 +19,7 @@ import { Pagination } from "@/components/portal/Pagination";
 import { PaymentRef } from "@/components/portal/PaymentRef";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { SetupNotice } from "@/components/portal/SetupNotice";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export const metadata: Metadata = { title: "Revenue" };
 export const dynamic = "force-dynamic";
@@ -234,8 +235,8 @@ export default async function AdminRevenuePage({
           <div>
             <h1 className="pt-title">Revenue</h1>
             <p className="pt-subtitle">
-              Every captured payment: membership plans and gifts, by checkout or payment link. Returned
-              gifts are left out of the totals. Filter by period; charts use up to {CHART_CAP} paid rows
+              Every captured payment: membership plans and donations, by checkout or payment link. Returned
+              donations are left out of the totals. Filter by period; charts use up to {CHART_CAP} paid rows
               of each kind and the table is paginated.
             </p>
           </div>
@@ -366,12 +367,13 @@ export default async function AdminRevenuePage({
                       <td>{row.label}</td>
                       <td>{row.count}</td>
                       <td>
-                        <span className="pt-money">{formatInr(row.paise)}</span>
+                        <span className="pt-money">{formatInr(row.paise)}<RefundStar /></span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           </section>
         ) : null}
@@ -421,7 +423,7 @@ export default async function AdminRevenuePage({
                         <div className="pt-dossier-meta">{row.detail}</div>
                       </td>
                       <td>
-                        <span className="pt-money">{formatInr(row.amountPaise)}</span>
+                        <span className="pt-money">{formatInr(row.amountPaise)}<RefundStar /></span>
                         {row.creditPaise > 0 ? (
                           <div className="pt-dossier-meta">Credit {formatInr(row.creditPaise)}</div>
                         ) : null}
@@ -438,6 +440,7 @@ export default async function AdminRevenuePage({
                   ))}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           )}
           <div style={{ padding: "12px 16px 16px" }}>

@@ -124,15 +124,15 @@ export function GiftsAdmin({
         <div className="pt-grid pt-grid--2">
           <label className="pt-label">
             Minimum (₹)
-            <input className="pt-input" value={minRupees} onChange={(event) => setMinRupees(event.target.value)} />
+            <input maxLength={9} className="pt-input" value={minRupees} onChange={(event) => setMinRupees(event.target.value)} />
           </label>
           <label className="pt-label">
             Maximum (₹)
-            <input className="pt-input" value={maxRupees} onChange={(event) => setMaxRupees(event.target.value)} />
+            <input maxLength={9} className="pt-input" value={maxRupees} onChange={(event) => setMaxRupees(event.target.value)} />
           </label>
           <label className="pt-label">
             Suggested amounts (₹)
-            <input className="pt-input" value={chips} onChange={(event) => setChips(event.target.value)} />
+            <input maxLength={60} className="pt-input" value={chips} onChange={(event) => setChips(event.target.value)} />
           </label>
         </div>
         <button className="pt-btn pt-btn--primary" type="button" disabled={busy} onClick={saveSettings}>
@@ -147,7 +147,7 @@ export function GiftsAdmin({
           <div key={mission.id} className="pt-grid pt-grid--2" style={{ marginBottom: 12 }}>
             <label className="pt-label">
               Title
-              <input
+              <input maxLength={80}
                 className="pt-input"
                 value={mission.title}
                 onChange={(event) =>
@@ -159,7 +159,7 @@ export function GiftsAdmin({
             </label>
             <label className="pt-label">
               Slug
-              <input
+              <input maxLength={80}
                 className="pt-input"
                 value={mission.slug}
                 onChange={(event) =>
@@ -171,7 +171,7 @@ export function GiftsAdmin({
             </label>
             <label className="pt-label">
               Minimum (₹)
-              <input
+              <input maxLength={9}
                 className="pt-input"
                 placeholder="Global"
                 value={paiseField(mission.minPaise)}
@@ -206,15 +206,15 @@ export function GiftsAdmin({
         <div className="pt-grid pt-grid--2">
           <label className="pt-label">
             New mission
-            <input className="pt-input" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
+            <input maxLength={80} className="pt-input" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
           </label>
           <label className="pt-label">
             Slug
-            <input className="pt-input" value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} />
+            <input maxLength={80} className="pt-input" value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} />
           </label>
           <label className="pt-label">
             Minimum (₹)
-            <input className="pt-input" value={draft.min} onChange={(event) => setDraft({ ...draft, min: event.target.value })} />
+            <input maxLength={9} className="pt-input" value={draft.min} onChange={(event) => setDraft({ ...draft, min: event.target.value })} />
           </label>
         </div>
         <button className="pt-btn" type="button" disabled={busy} onClick={addMission}>

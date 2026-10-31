@@ -8,6 +8,7 @@ import { PlanBenefitStack } from "@/components/portal/PlanBenefits";
 import { NON_REFUNDABLE_MEMBERSHIP, NON_REFUNDABLE_SHORT } from "@/lib/payment-policy";
 import { parsePlanBenefits, type PlanBenefit } from "@/lib/plan-benefits";
 import type { SavedInterest } from "@/lib/saved-interests";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 type Plan = {
   id: string;
@@ -89,6 +90,7 @@ export function SavedInterests({ rows, title = "Your saved requests" }: { rows: 
             <div className="pt-activity__row" key={row.id}>
               <span className="pt-activity__action">
                 {row.what} · {row.amount}
+                <RefundStar />
                 {row.payUntil ? <span className="pt-hint"> · link valid until {row.payUntil}</span> : null}
               </span>
               <span className="pt-activity__time">{row.when}</span>
@@ -103,6 +105,7 @@ export function SavedInterests({ rows, title = "Your saved requests" }: { rows: 
           );
         })}
       </div>
+      <RefundFootnote inset />
     </section>
   );
 }
@@ -405,7 +408,8 @@ export function MembershipPay({
                     </>
                   ) : (
                     formatInr(amount)
-                  )}{" "}
+                  )}
+                  <RefundStar />{" "}
                   <small>/ {interval === "YEARLY" ? "year" : "month"}</small>
                   <span className="pt-nonrefund" title={NON_REFUNDABLE_MEMBERSHIP}>
                     {NON_REFUNDABLE_SHORT}
@@ -446,7 +450,7 @@ export function MembershipPay({
                           ? "Choose this plan"
                           : (quote?.cta ?? "Pay with Razorpay")}
                   </button>
-                  {currentCard ? null : <p className="pt-plan-card__policy">{NON_REFUNDABLE_MEMBERSHIP}</p>}
+                  {currentCard ? null : <RefundFootnote text={NON_REFUNDABLE_MEMBERSHIP} />}
                 </div>
               </article>
             );
@@ -468,6 +472,7 @@ export function MembershipPay({
               <div className="pt-activity__row" key={row.id}>
                 <span className="pt-activity__action">
                   {row.tierName} · {row.interval === "YEARLY" ? "yearly" : "monthly"} · {row.amount}
+                  <RefundStar />
                   {row.granted ? " · granted by AINF" : changeLabel(row.changeKind) ? ` · ${changeLabel(row.changeKind)}` : ""}
                   {row.recurring ? " · recurring" : ""}
                 </span>
@@ -489,6 +494,7 @@ export function MembershipPay({
             ))}
           </div>
         )}
+        {payments.length > 0 ? <RefundFootnote text={NON_REFUNDABLE_MEMBERSHIP} inset /> : null}
       </section>
 
       <ConfirmDialog

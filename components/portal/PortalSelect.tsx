@@ -207,7 +207,7 @@ export function PortalSelect({
           >
             {canSearch ? (
               <div className="pt-menu__search">
-                <input
+                <input maxLength={60}
                   ref={searchRef}
                   className="pt-input pt-menu__search-input"
                   type="search"

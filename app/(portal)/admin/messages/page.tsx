@@ -100,7 +100,7 @@ export default async function AdminMessagesPage({
         <form className="pt-card pt-crm-period" method="get" style={{ marginBottom: 16 }}>
           <label className="pt-label" htmlFor="msg-q">
             Search
-            <input
+            <input maxLength={100}
               id="msg-q"
               className="pt-input"
               name="q"

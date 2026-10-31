@@ -169,7 +169,7 @@ export function UserJourney({
             ))}
           </div>
           <div className="pt-crm-lifehead__tools">
-            <input
+            <input maxLength={100}
               className="pt-input pt-crm-lifehead__search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

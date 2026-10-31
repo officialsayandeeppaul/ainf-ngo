@@ -19,6 +19,67 @@
     return message + " You can try again in about " + wait + ".";
   }
 
+  // India-only mobile numbers. +91 is fixed (drawn before every phone box by
+  // ainf-page-boot.css) and the box keeps ten digits, whatever is typed,
+  // pasted or autofilled: "+91 98765 43210" becomes 9876543210. Framer's
+  // inputs are React-controlled, so the cleaned value goes through the native
+  // setter; assigning .value would update React's tracker and React would put
+  // the old value back.
+  var AINF_PHONE_FIELD = 'input[type="tel"], input[name="Phone"], input[name="phone"], input[name="Phone Number"]';
+  var AINF_VALUE_SETTER = (Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value") || {}).set;
+
+  function ainfMobileDigits(raw) {
+    var digits = String(raw || "").replace(/\D/g, "");
+    if (digits.length === 12 && digits.slice(0, 2) === "91") digits = digits.slice(2);
+    else if (digits.length === 11 && digits.charAt(0) === "0") digits = digits.slice(1);
+    return digits.slice(0, 10);
+  }
+
+  function ainfMobileOk(raw) {
+    return /^[6-9]\d{9}$/.test(ainfMobileDigits(raw));
+  }
+
+  // Length caps that match what the server accepts, set when a field is first
+  // focused (Framer re-renders drop attributes, focus puts them back).
+  function ainfCapField(el) {
+    if (el.tagName === "TEXTAREA") {
+      if (el.maxLength < 0) el.maxLength = 2000;
+      return;
+    }
+    if (el.tagName !== "INPUT" || el.maxLength >= 0) return;
+    var type = (el.type || "text").toLowerCase();
+    if (type === "email") el.maxLength = 200;
+    else if (type === "text" || type === "search") el.maxLength = /amount/i.test(el.name || "") ? 9 : 80;
+  }
+
+  document.addEventListener(
+    "focusin",
+    function (event) {
+      var el = event.target;
+      if (!el || !el.tagName) return;
+      if (el.tagName === "INPUT" && el.matches(AINF_PHONE_FIELD)) {
+        if (el.getAttribute("inputmode") !== "numeric") el.setAttribute("inputmode", "numeric");
+        if (el.getAttribute("autocomplete") !== "tel-national") el.setAttribute("autocomplete", "tel-national");
+        return;
+      }
+      ainfCapField(el);
+    },
+    true
+  );
+
+  document.addEventListener(
+    "input",
+    function (event) {
+      var el = event.target;
+      if (!el || el.tagName !== "INPUT" || !el.matches(AINF_PHONE_FIELD)) return;
+      var clean = ainfMobileDigits(el.value);
+      if (clean === el.value) return;
+      if (AINF_VALUE_SETTER) AINF_VALUE_SETTER.call(el, clean);
+      else el.value = clean;
+    },
+    true
+  );
+
   // Framer hydrates the gift and project forms a moment after load and swaps
   // their inputs, wiping anything typed in that window (the /donate-now form
   // is above the fold, so people do type that early). What a person types is
@@ -646,22 +707,32 @@
     line.className = isError ? "ainf-gift-note is-error" : "ainf-gift-note";
   }
 
+  // The message goes under the whole field: for the phone that is the +91 box,
+  // not the input inside it.
+  function giftFieldHost(el) {
+    var box = el.closest && el.closest(".ainf-phone");
+    return box ? box.parentElement : el.parentElement;
+  }
+
   function clearGiftFieldError(el) {
     if (!el) return;
     el.removeAttribute("data-gift-error");
-    var msg = el.parentElement && el.parentElement.querySelector(".ainf-gift-field-error");
+    var host = giftFieldHost(el);
+    var msg = host && host.querySelector(".ainf-gift-field-error");
     if (msg) msg.remove();
   }
 
   function setGiftFieldError(el, text) {
     if (!el) return;
     el.setAttribute("data-gift-error", "1");
-    var existing = el.parentElement && el.parentElement.querySelector(".ainf-gift-field-error");
+    var host = giftFieldHost(el);
+    if (!host) return;
+    var existing = host.querySelector(".ainf-gift-field-error");
     if (existing) { existing.textContent = text; return; }
     var msg = document.createElement("span");
     msg.className = "ainf-gift-field-error";
     msg.textContent = text;
-    el.parentElement.appendChild(msg);
+    host.appendChild(msg);
   }
 
   function validateGiftField(root, el) {
@@ -672,8 +743,7 @@
     } else if (n === "email") {
       if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { setGiftFieldError(el, "Enter a valid email address."); return false; }
     } else if (n === "phone") {
-      var digits = v.replace(/[^\d]/g, "");
-      if (digits.length !== 10) { setGiftFieldError(el, "Enter your 10-digit mobile number."); return false; }
+      if (!ainfMobileOk(v)) { setGiftFieldError(el, "Enter your 10-digit mobile number."); return false; }
     } else if (n === "amount") {
       if (v && !/^\d+(\.\d{1,2})?$/.test(v)) { setGiftFieldError(el, "Enter a number, e.g. 500"); return false; }
     }
@@ -828,8 +898,8 @@
         '<p class="ainf-gift-modal__lead">Fill the form below — you’ll receive a receipt once the amount is confirmed.</p>' +
         '<form class="ainf-gift-modal__form" novalidate>' +
         '<div class="ainf-gift-modal__grid">' +
-        '<label>Full Name<input name="name" autocomplete="name" placeholder="Enter Your Name"></label>' +
-        '<label>Email ID<input name="email" type="email" autocomplete="email" placeholder="Enter Your Email"></label>' +
+        '<label>Full Name<input name="name" autocomplete="name" maxlength="80" placeholder="Enter Your Name"></label>' +
+        '<label>Email ID<input name="email" type="email" autocomplete="email" maxlength="200" placeholder="Enter Your Email"></label>' +
         '<label>Desk / Vertical<div class="ainf-gift-menu">' +
         '<button type="button" class="ainf-gift-menu__trigger" aria-haspopup="listbox" aria-expanded="false">' +
         '<span class="ainf-gift-menu__label is-placeholder">Select Cause</span>' +
@@ -837,10 +907,10 @@
         '<div class="ainf-gift-menu__drawer" id="ainf-gift-menu-drawer" hidden><ul class="ainf-gift-menu__list" role="listbox"></ul></div>' +
         '<input type="hidden" name="cause" value="">' +
         "</div></label>" +
-        '<label>Amount (INR)<input name="amount" inputmode="decimal" autocomplete="off" placeholder="Support AINF Amount"></label>' +
+        '<label><span class="ainf-gift-modal__title">Amount (INR)<span class="ainf-refund-star" aria-hidden="true">*</span></span><input name="amount" inputmode="decimal" autocomplete="off" maxlength="9" placeholder="Support AINF Amount"></label>' +
         '<div class="ainf-gift-modal__chips" data-chips></div>' +
-        '<label class="ainf-gift-modal__span">Phone<input name="phone" type="tel" autocomplete="tel" placeholder="Enter Your Phone"></label>' +
-        '<label class="ainf-gift-modal__span">Note (optional)<textarea name="note" rows="3" placeholder="Enter Your Message"></textarea></label>' +
+        '<label class="ainf-gift-modal__span">Phone<span class="ainf-phone"><input name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" pattern="[6-9][0-9]{9}" placeholder="Enter Your Phone"></span></label>' +
+        '<label class="ainf-gift-modal__span">Note (optional)<textarea name="note" rows="3" maxlength="500" placeholder="Enter Your Message"></textarea></label>' +
         "</div>" +
         '<p class="ainf-gift-note" data-note hidden></p>' +
         '<button type="submit" class="ainf-gift-modal__submit"><span class="ainf-gift-modal__dot" aria-hidden="true"></span>Support AINF</button>' +
@@ -883,7 +953,7 @@
       });
       form.querySelector('[name="phone"]').addEventListener("input", function () {
         var v = this.value;
-        var cleaned = v.replace(/[^\d]/g, "").slice(0, 10);
+        var cleaned = ainfMobileDigits(v);
         if (cleaned !== v) this.value = cleaned;
         clearGiftFieldError(this);
       });
@@ -1218,8 +1288,7 @@
       if (email) email.focus();
       return;
     }
-    var phoneDigits = phone ? phone.value.replace(/[^\d]/g, "") : "";
-    if (phoneDigits.length !== 10) {
+    if (!phone || !ainfMobileOk(phone.value)) {
       giftNote(root, "Enter your 10-digit mobile number.", true);
       if (phone) phone.focus();
       return;
@@ -1236,7 +1305,7 @@
         amountPaise: paise,
         name: name.value.trim(),
         email: email.value.trim(),
-        phone: phone.value.trim(),
+        phone: ainfMobileDigits(phone.value),
         source: "gift-window"
       })
     })
@@ -1267,7 +1336,7 @@
             name: "AINF",
             description: result.body.description,
             order_id: result.body.razorpayOrderId,
-            prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
+            prefill: { name: name.value.trim(), email: email.value.trim(), contact: "+91" + ainfMobileDigits(phone.value) },
             handler: function (response) {
               ainfRzpThaw();
               fetch("/api/donations/confirm", {
@@ -2683,7 +2752,7 @@
       return {
         name: nameEl ? String(nameEl.value || "").trim() : "",
         email: emailEl ? String(emailEl.value || "").trim() : "",
-        phone: phoneEl ? String(phoneEl.value || "").trim() : "",
+        phone: phoneEl ? ainfMobileDigits(phoneEl.value) : "",
         message: msgEl ? String(msgEl.value || "").trim() : "",
       };
     }
@@ -2704,6 +2773,10 @@
 
       if (payload.name.length < 2 || !payload.email || payload.message.length < 5) {
         show("Please fill your name, email, and a short message.", false);
+        return;
+      }
+      if (payload.phone && !ainfMobileOk(payload.phone)) {
+        show("Enter your 10-digit mobile number.", false);
         return;
       }
 
@@ -3107,7 +3180,7 @@
     var field = clone.querySelector("input, textarea, select");
     if (!field || field.tagName !== "INPUT") return;
     field.name = name;
-    field.type = "text";
+    field.type = inputMode === "tel" ? "tel" : "text";
     field.placeholder = placeholder;
     field.value = "";
     field.required = true;
@@ -3389,7 +3462,7 @@
     if (amountError) issues.push({ input: amount, text: amountError });
     if (!name || name.value.trim().length < 2) issues.push({ input: name, text: "Enter your full name." });
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) issues.push({ input: email, text: "Enter a valid email." });
-    if (!phone || phone.value.replace(/[^\d]/g, "").length < 8) issues.push({ input: phone, text: "Enter a phone number we can reach." });
+    if (!phone || !ainfMobileOk(phone.value)) issues.push({ input: phone, text: "Enter your 10-digit mobile number." });
     if (!cause || !String(cause.value || "").trim()) issues.push({ input: trigger || cause, text: "Choose a cause." });
     return issues;
   }
@@ -3739,7 +3812,7 @@
             amountPaise: paise,
             name: name.value.trim(),
             email: email.value.trim(),
-            phone: phone.value.trim(),
+            phone: ainfMobileDigits(phone.value),
             source: "project-page"
           })
         }).then(function (response) {
@@ -3769,7 +3842,7 @@
               name: "AINF",
               description: result.body.description,
               order_id: result.body.razorpayOrderId,
-              prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
+              prefill: { name: name.value.trim(), email: email.value.trim(), contact: "+91" + ainfMobileDigits(phone.value) },
               theme: { color: "#1c7d48" },
               handler: function (response) {
                 ainfRzpThaw();
@@ -3998,8 +4071,8 @@
         note("Name and email are required.", true);
         return;
       }
-      if (!phone || phone.value.replace(/[^\d]/g, "").length < 8) {
-        note("Enter a phone number we can reach.", true);
+      if (!phone || !ainfMobileOk(phone.value)) {
+        note("Enter your 10-digit mobile number.", true);
         return;
       }
       busy = true;
@@ -4013,7 +4086,7 @@
           amountPaise: paise,
           name: name.value.trim(),
           email: email.value.trim(),
-          phone: phone.value.trim(),
+          phone: ainfMobileDigits(phone.value),
           source: giftPath() === "/donate-now" ? "donate-page" : giftPath() === "/" ? "home-form" : "page-form:" + giftPath()
         })
       })
@@ -4055,7 +4128,7 @@
             name: "AINF",
             description: result.body.description,
             order_id: result.body.razorpayOrderId,
-            prefill: { name: name.value.trim(), email: email.value.trim(), contact: phone.value.trim() },
+            prefill: { name: name.value.trim(), email: email.value.trim(), contact: "+91" + ainfMobileDigits(phone.value) },
             handler: function (response) {
               fetch("/api/donations/confirm", {
                 method: "POST",

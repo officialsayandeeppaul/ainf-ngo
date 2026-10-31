@@ -130,7 +130,7 @@ export default async function AdminUsersPage({
               <label className="pt-label" htmlFor="q">
                 Search
               </label>
-              <input
+              <input maxLength={100}
                 id="q"
                 name="q"
                 className="pt-input"

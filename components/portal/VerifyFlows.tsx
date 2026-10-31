@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { LockedArt } from "./VerifyArt";
+import { PhoneField, isMobileDigits, mobileDigits } from "./PhoneField";
 type ApiError = { error: string; message?: string; retryable?: boolean; keys?: string[] };
 
 async function postJson(url: string, body?: unknown) {
@@ -249,7 +250,7 @@ export function PanFlow({
           <label className="pt-label" htmlFor="pan-name">
             Full name as printed on the PAN card
           </label>
-          <input
+          <input maxLength={120}
             id="pan-name"
             className="pt-input"
             value={name}
@@ -262,7 +263,7 @@ export function PanFlow({
           <label className="pt-label" htmlFor="pan-dob">
             Date of birth
           </label>
-          <input
+          <input maxLength={10}
             id="pan-dob"
             className="pt-input pt-input--mono"
             value={dob}
@@ -305,12 +306,12 @@ type OtpState =
 
 export function OtpFlow({ phoneHint }: { phoneHint?: string | null }) {
   const router = useRouter();
-  const [phone, setPhone] = useState(phoneHint ?? "");
+  const [phone, setPhone] = useState(() => mobileDigits(phoneHint));
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [state, setState] = useState<OtpState>({ kind: "idle" });
 
-  const phoneOk = /^[6-9]\d{9}$/.test(phone.replace(/\D/g, "").replace(/^91/, "").slice(-10));
+  const phoneOk = isMobileDigits(phone);
 
   async function send(event: React.FormEvent) {
     event.preventDefault();
@@ -369,15 +370,7 @@ export function OtpFlow({ phoneHint }: { phoneHint?: string | null }) {
               <label className="pt-label" htmlFor="otp-phone">
                 Mobile number
               </label>
-              <input
-                id="otp-phone"
-                className="pt-input pt-input--mono"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 12))}
-                placeholder="9876543210"
-                inputMode="numeric"
-                autoComplete="tel"
-              />
+              <PhoneField id="otp-phone" value={phone} onChange={setPhone} placeholder="9876543210" />
             </div>
             <button type="submit" className="pt-btn pt-btn--secondary" disabled={!phoneOk || busy}>
               {busy && state.kind !== "sent" ? "Sending…" : "Send code"}

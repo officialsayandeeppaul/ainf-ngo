@@ -36,6 +36,7 @@ import { getVerificationPolicy } from "@/lib/verification-policy";
 import { getUserGiving } from "@/lib/user-donations";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { VerifyMethodStack } from "@/components/portal/VerifyMethods";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export const metadata: Metadata = { title: "CRM dossier" };
 export const dynamic = "force-dynamic";
@@ -554,7 +555,7 @@ export default async function AdminCrmDossierPage({
                         ) : null}
                       </td>
                       <td>
-                        <span className="pt-money">{formatInr(row.amountPaise)}</span>
+                        <span className="pt-money">{formatInr(row.amountPaise)}<RefundStar /></span>
                       </td>
                       <td>{row.attempts}</td>
                       <td className="pt-dossier-when">{formatDayTime(row.lastAttemptAt)}</td>
@@ -567,6 +568,7 @@ export default async function AdminCrmDossierPage({
                   ))}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           </section>
         ) : null}
@@ -684,7 +686,7 @@ export default async function AdminCrmDossierPage({
                         </div>
                       </td>
                       <td>
-                        <span className="pt-money">{formatInr(order.amountPaise)}</span>
+                        <span className="pt-money">{formatInr(order.amountPaise)}<RefundStar /></span>
                         {order.listPaise != null && order.listPaise !== order.amountPaise ? (
                           <div className="pt-dossier-meta">List {formatInr(order.listPaise)}</div>
                         ) : null}
@@ -726,6 +728,7 @@ export default async function AdminCrmDossierPage({
                   ))}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           )}
         </section>
@@ -734,7 +737,7 @@ export default async function AdminCrmDossierPage({
           <section className="pt-card pt-card--flush" style={{ marginTop: 16 }}>
             <div className="pt-card__head">
               <h2 className="pt-section-title" style={{ margin: 0 }}>
-                Gifts
+                Donations
               </h2>
               <span className="pt-hint" style={{ margin: 0 }}>
                 Matched by {member.email}
@@ -761,7 +764,7 @@ export default async function AdminCrmDossierPage({
                         </a>
                       </td>
                       <td>
-                        <span className="pt-money">{formatInr(gift.amountPaise)}</span>
+                        <span className="pt-money">{formatInr(gift.amountPaise)}<RefundStar /></span>
                       </td>
                       <td className="pt-dossier-when">{formatDayTime(gift.at)}</td>
                       <td>
@@ -776,6 +779,7 @@ export default async function AdminCrmDossierPage({
                   ))}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           </section>
         ) : null}

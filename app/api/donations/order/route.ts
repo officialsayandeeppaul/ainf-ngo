@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getAuthContext } from "@/lib/auth/session";
 import { checkGiftRequest, createGiftOrder } from "@/lib/donations";
 import { env, isDatabaseConfigured, isRazorpayConfigured } from "@/lib/env";
+import { e164India, indianMobile } from "@/lib/mobile-auth";
 import { pausedPayload, recordPaymentInterest } from "@/lib/payment-interest";
 import { getPaymentSettings, paymentsOpenFor } from "@/lib/payment-settings";
 import { checkRateLimit, rateLimitResponse } from "@/lib/ratelimit";
@@ -41,10 +42,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const digits = input.phone.replace(/[^\d]/g, "");
-  if (digits.length < 8 || digits.length > 15) {
-    return Response.json({ error: "invalid_input", message: "Enter a phone number we can reach." }, { status: 400 });
+  const mobile = indianMobile(input.phone);
+  if (!mobile) {
+    return Response.json(
+      { error: "invalid_input", message: "Enter your 10-digit mobile number, starting with 6, 7, 8 or 9." },
+      { status: 400 }
+    );
   }
+  input.phone = e164India(mobile);
 
   const settings = await getPaymentSettings();
   if (!paymentsOpenFor(settings)) {

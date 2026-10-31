@@ -3,6 +3,7 @@ import { AuditAction, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { sendAdminAlertEmail } from "@/lib/email";
 import { isDatabaseConfigured } from "@/lib/env";
+import { e164India, indianMobile } from "@/lib/mobile-auth";
 import { checkRateLimit, rateLimitResponse } from "@/lib/ratelimit";
 import { contextFromRequest } from "@/lib/request-context";
 
@@ -76,8 +77,15 @@ export async function POST(request: Request) {
   if (data.name.length > 120 || data.email.length > 200 || data.body.length > 4000) {
     return Response.json({ error: "invalid_input", message: "One of the fields is too long." }, { status: 400 });
   }
-  if (data.phone && data.phone.length > 40) {
-    return Response.json({ error: "invalid_input", message: "Phone number is too long." }, { status: 400 });
+  if (data.phone) {
+    const mobile = indianMobile(data.phone.slice(0, 40));
+    if (!mobile) {
+      return Response.json(
+        { error: "invalid_input", message: "Enter a 10-digit mobile number, or leave the phone blank." },
+        { status: 400 }
+      );
+    }
+    data.phone = e164India(mobile);
   }
 
   const row = await db.contactMessage.create({

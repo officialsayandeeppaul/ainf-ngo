@@ -3,6 +3,7 @@
 import { useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import { PhoneField } from "./PhoneField";
 
 function formatWait(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));
@@ -189,27 +190,19 @@ export function MobileAuth({
           {mode === "sign-up" && step === "phone" ? (
             <label className="pt-label">
               Name
-              <input className="pt-input" value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="name" />
+              <input maxLength={40} className="pt-input" value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="name" />
             </label>
           ) : null}
           {(mode === "sign-in" || step === "phone") ? (
             <label className="pt-label">
               Mobile number
-              <input
-                className="pt-input"
-                inputMode="numeric"
-                autoComplete="tel"
-                placeholder="10-digit mobile"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                required
-              />
+              <PhoneField value={phone} onChange={setPhone} required />
             </label>
           ) : null}
           {step === "code" ? (
             <label className="pt-label">
               Text code
-              <input
+              <input maxLength={6}
                 className="pt-input"
                 inputMode="numeric"
                 autoComplete="one-time-code"
@@ -223,7 +216,7 @@ export function MobileAuth({
           {(mode === "sign-in" || step === "password") ? (
             <label className="pt-label">
               Password
-              <input
+              <input maxLength={72}
                 className="pt-input"
                 type="password"
                 autoComplete={mode === "sign-in" ? "current-password" : "new-password"}

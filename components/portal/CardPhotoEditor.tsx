@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CARD_ADDRESS_MAX, CARD_FATHER_NAME_MAX } from "@/lib/card-fields";
+import { PhoneField } from "./PhoneField";
 
 /** What the server takes (lib/membership-card-art.ts CARD_PHOTO_TYPES, 2 MB). */
 const UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -46,6 +48,8 @@ export function CardPhotoEditor({
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(savedPhoto);
+  const [father, setFather] = useState(() => fatherName.slice(0, CARD_FATHER_NAME_MAX));
+  const [home, setHome] = useState(() => address.slice(0, CARD_ADDRESS_MAX));
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -87,15 +91,34 @@ export function CardPhotoEditor({
         <div>
           <label className="pt-card-editor__field">
             <span>Father&apos;s name</span>
-            <input name="fatherName" defaultValue={fatherName} maxLength={80} />
+            <input
+              name="fatherName"
+              value={father}
+              onChange={(event) => setFather(event.target.value)}
+              maxLength={CARD_FATHER_NAME_MAX}
+              autoComplete="off"
+            />
+            <span className="pt-field-count">
+              {father.length}/{CARD_FATHER_NAME_MAX}
+            </span>
           </label>
           <label className="pt-card-editor__field">
             <span>Address</span>
-            <input name="address" defaultValue={address} maxLength={160} />
+            <input
+              name="address"
+              value={home}
+              onChange={(event) => setHome(event.target.value)}
+              maxLength={CARD_ADDRESS_MAX}
+              autoComplete="street-address"
+              placeholder="Village / town, district, PIN"
+            />
+            <span className="pt-field-count">
+              {home.length}/{CARD_ADDRESS_MAX}
+            </span>
           </label>
           <label className="pt-card-editor__field">
             <span>Mobile</span>
-            <input name="mobile" defaultValue={mobile} maxLength={24} placeholder="+91 …" />
+            <PhoneField name="mobile" defaultValue={mobile} />
           </label>
           <label className="pt-card-editor__field">
             <span>Passport photo</span>

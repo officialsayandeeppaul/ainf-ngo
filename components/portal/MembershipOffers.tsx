@@ -147,7 +147,7 @@ export function MembershipOffers({
             <label className="pt-label" htmlFor="offer-name">
               Name
             </label>
-            <input
+            <input maxLength={80}
               id="offer-name"
               className="pt-input"
               required

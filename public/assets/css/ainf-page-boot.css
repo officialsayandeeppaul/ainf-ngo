@@ -1218,7 +1218,7 @@ form:has(select[name="Location"]) .ainf-gift-menu__trigger{
 }
 form:has(select[name="Location"])::after,
 form:has([name="Choose The Cause"])::after{
-  content:"Donations are non-refundable once paid.";
+  content:"* Donations are non-refundable once paid.";
   display:block;
   flex:0 0 100%;
   grid-column:1 / -1;
@@ -1239,9 +1239,67 @@ form:has([name="Choose The Cause"])::after{
 }
 html:lang(hi) form:has(select[name="Location"])::after,
 html:lang(hi) form:has([name="Choose The Cause"])::after{
-  content:"दान भुगतान के बाद वापस नहीं किया जाता।";
+  content:"* दान भुगतान के बाद वापस नहीं किया जाता।";
 }
 html:lang(bn) form:has(select[name="Location"])::after,
 html:lang(bn) form:has([name="Choose The Cause"])::after{
-  content:"দান পরিশোধের পর ফেরতযোগ্য নয়।";
+  content:"* দান পরিশোধের পর ফেরতযোগ্য নয়।";
+}
+
+/* The asterisk beside an amount points at the policy line under the form. */
+.ainf-gift-modal__policy::before{ content:"* "; }
+.ainf-gift-modal__title{ display:block; }
+.ainf-refund-star{ margin-left:1px; color:#b26a00; }
+form:has(select[name="Location"]) label:has(input[name="Support AINF Amount"]) p::after,
+form:has([name="Choose The Cause"]) label:has(input[name="Amount"]) p::after{
+  content:"*";
+  margin-left:1px;
+  color:#b26a00;
+}
+
+/* India-only mobile: +91 is fixed in front of every phone box and the box
+   keeps ten digits (ainf-page-boot.js). CSS, so it survives Framer redraws. */
+.ainf-phone{
+  position:relative;
+  display:block;
+}
+.ainf-phone::before{
+  content:"+91";
+  position:absolute;
+  top:1px;
+  bottom:1px;
+  left:1px;
+  display:flex;
+  align-items:center;
+  padding:0 10px 0 14px;
+  border-right:1px solid rgba(34,34,34,0.12);
+  border-radius:11px 0 0 11px;
+  background:#f6f8f7;
+  color:#5f6661;
+  font-weight:400;
+  pointer-events:none;
+}
+.ainf-gift-modal .ainf-phone input{ padding-left:64px; }
+label > div:has(> input[type="tel"]),
+label > div:has(> input[name="Phone"]),
+label > div:has(> input[name="Phone Number"]){
+  display:flex!important;
+  align-items:center;
+}
+label > div:has(> input[type="tel"])::before,
+label > div:has(> input[name="Phone"])::before,
+label > div:has(> input[name="Phone Number"])::before{
+  content:"+91";
+  flex:none;
+  margin-right:10px;
+  padding-right:10px;
+  border-right:1px solid rgba(34,34,34,0.16);
+  color:#5f6661;
+  font:400 16px/1.2 Onest, Inter, system-ui, sans-serif;
+}
+label > div > input[type="tel"],
+label > div > input[name="Phone"],
+label > div > input[name="Phone Number"]{
+  flex:1 1 auto;
+  min-width:0;
 }

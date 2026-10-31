@@ -285,7 +285,7 @@ export function KycReviewActions({ kycId }: { kycId: string }) {
         <label className="pt-label" htmlFor={`note-approve-${kycId}`}>
           Note (optional)
         </label>
-        <textarea
+        <textarea maxLength={500}
           id={`note-approve-${kycId}`}
           className="pt-textarea"
           rows={2}
@@ -314,7 +314,7 @@ export function KycReviewActions({ kycId }: { kycId: string }) {
         <label className="pt-label" htmlFor={`note-decline-${kycId}`}>
           Reason
         </label>
-        <textarea
+        <textarea maxLength={500}
           id={`note-decline-${kycId}`}
           className="pt-textarea"
           rows={2}

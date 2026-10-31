@@ -92,7 +92,7 @@ function ProjectEditor({
         <p className="pt-hint">JPG, PNG, or WebP, under 8 MB. This photo is the card and the page banner.</p>
         <details className="pt-project-address">
           <summary>Photo address</summary>
-          <input
+          <input maxLength={300}
             className="pt-input"
             value={row.imageUrl}
             aria-label="Photo address"
@@ -103,25 +103,25 @@ function ProjectEditor({
       <div className="pt-project-fields">
         <label className="pt-label pt-span">
           Title
-          <input className="pt-input" value={row.title} onChange={(event) => onChange({ title: event.target.value })} />
+          <input maxLength={80} className="pt-input" value={row.title} onChange={(event) => onChange({ title: event.target.value })} />
         </label>
         <label className="pt-label pt-span">
           Summary
-          <textarea className="pt-input" rows={3} value={row.summary} onChange={(event) => onChange({ summary: event.target.value })} />
+          <textarea maxLength={400} className="pt-input" rows={3} value={row.summary} onChange={(event) => onChange({ summary: event.target.value })} />
         </label>
         <label className="pt-label">
           Raised
-          <input className="pt-input" value={row.raisedLabel} onChange={(event) => onChange({ raisedLabel: event.target.value })} />
+          <input maxLength={20} className="pt-input" value={row.raisedLabel} onChange={(event) => onChange({ raisedLabel: event.target.value })} />
         </label>
         <label className="pt-label">
           Goal
-          <input className="pt-input" value={row.goalLabel} onChange={(event) => onChange({ goalLabel: event.target.value })} />
+          <input maxLength={20} className="pt-input" value={row.goalLabel} onChange={(event) => onChange({ goalLabel: event.target.value })} />
         </label>
         <label className="pt-label pt-span">
           Page address
           <span className="pt-project-slug">
             <span>/projects/</span>
-            <input
+            <input maxLength={80}
               className="pt-input"
               value={row.slug}
               onChange={(event) => onChange({ slug: event.target.value })}
@@ -130,7 +130,7 @@ function ProjectEditor({
         </label>
         <label className="pt-label">
           Order
-          <input
+          <input maxLength={2}
             className="pt-input"
             type="number"
             min={0}
@@ -165,8 +165,8 @@ function ProjectEditor({
           </span>
         </label>
         <label className="pt-label">
-          Gift minimum (₹)
-          <input
+          Donation minimum (₹)
+          <input maxLength={9}
             className="pt-input"
             inputMode="decimal"
             placeholder="Use the global minimum"
@@ -197,16 +197,16 @@ function ProjectEditor({
           <div className="pt-project-block__body">
           <label className="pt-label">
             Label
-            <input className="pt-input" value={row.detail.howEyebrow} onChange={(event) => patchDetail({ howEyebrow: event.target.value })} />
+            <input maxLength={40} className="pt-input" value={row.detail.howEyebrow} onChange={(event) => patchDetail({ howEyebrow: event.target.value })} />
           </label>
           <label className="pt-label">
             Intro
-            <textarea className="pt-input" rows={2} value={row.detail.howIntro} onChange={(event) => patchDetail({ howIntro: event.target.value })} />
+            <textarea maxLength={280} className="pt-input" rows={2} value={row.detail.howIntro} onChange={(event) => patchDetail({ howIntro: event.target.value })} />
           </label>
           {row.detail.howParagraphs.map((line, index) => (
             <label className="pt-label" key={`how-${index}`}>
               Step {index + 1}
-              <textarea className="pt-input" rows={3} value={line} onChange={(event) => setLines("howParagraphs", index, event.target.value)} />
+              <textarea maxLength={500} className="pt-input" rows={3} value={line} onChange={(event) => setLines("howParagraphs", index, event.target.value)} />
             </label>
           ))}
           </div>
@@ -221,16 +221,16 @@ function ProjectEditor({
           <div className="pt-project-block__body">
           <label className="pt-label">
             Label
-            <input className="pt-input" value={row.detail.missionEyebrow} onChange={(event) => patchDetail({ missionEyebrow: event.target.value })} />
+            <input maxLength={40} className="pt-input" value={row.detail.missionEyebrow} onChange={(event) => patchDetail({ missionEyebrow: event.target.value })} />
           </label>
           <label className="pt-label">
             Heading
-            <textarea className="pt-input" rows={2} value={row.detail.missionTitle} onChange={(event) => patchDetail({ missionTitle: event.target.value })} />
+            <textarea maxLength={200} className="pt-input" rows={2} value={row.detail.missionTitle} onChange={(event) => patchDetail({ missionTitle: event.target.value })} />
           </label>
           {row.detail.missionPoints.map((line, index) => (
             <label className="pt-label" key={`mission-${index}`}>
               Point {index + 1}
-              <textarea className="pt-input" rows={2} value={line} onChange={(event) => setLines("missionPoints", index, event.target.value)} />
+              <textarea maxLength={280} className="pt-input" rows={2} value={line} onChange={(event) => setLines("missionPoints", index, event.target.value)} />
             </label>
           ))}
           <div className="pt-project-side">
@@ -261,12 +261,12 @@ function ProjectEditor({
           <div className="pt-project-block__body">
           <label className="pt-label">
             Heading
-            <input className="pt-input" value={row.detail.impactTitle} onChange={(event) => patchDetail({ impactTitle: event.target.value })} />
+            <input maxLength={80} className="pt-input" value={row.detail.impactTitle} onChange={(event) => patchDetail({ impactTitle: event.target.value })} />
           </label>
           {row.detail.impactPoints.map((line, index) => (
             <label className="pt-label" key={`impact-${index}`}>
               Result {index + 1}
-              <input className="pt-input" value={line} onChange={(event) => setLines("impactPoints", index, event.target.value)} />
+              <input maxLength={140} className="pt-input" value={line} onChange={(event) => setLines("impactPoints", index, event.target.value)} />
             </label>
           ))}
           <div className="pt-project-side">

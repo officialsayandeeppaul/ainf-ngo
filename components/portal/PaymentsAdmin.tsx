@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { NON_REFUNDABLE_PAYMENT } from "@/lib/payment-policy";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export type InterestRow = {
   id: string;
@@ -378,7 +379,7 @@ export function PaymentsAdmin({
           <form className="pt-pay-search" method="get" role="search">
             {queue.current !== "active" ? <input type="hidden" name="queue" value={queue.current} /> : null}
             {queue.purpose !== "all" ? <input type="hidden" name="purpose" value={queue.purpose} /> : null}
-            <input
+            <input maxLength={100}
               className="pt-input"
               type="search"
               name="q"
@@ -481,7 +482,7 @@ export function PaymentsAdmin({
                         ) : null}
                       </td>
                       <td>
-                        <span className="pt-money">{row.link ? row.link.amountLabel : row.amountLabel}</span>
+                        <span className="pt-money">{row.link ? row.link.amountLabel : row.amountLabel}<RefundStar /></span>
                       </td>
                       <td className="pt-dossier-when">
                         {row.lastLabel}
@@ -586,6 +587,7 @@ export function PaymentsAdmin({
                 })}
               </tbody>
             </table>
+            <RefundFootnote inset />
           </div>
         )}
       </section>
@@ -629,7 +631,7 @@ export function PaymentsAdmin({
                       ) : null}
                     </td>
                     <td>
-                      <span className="pt-money">{link.amountLabel}</span>
+                      <span className="pt-money">{link.amountLabel}<RefundStar /></span>
                     </td>
                     <td className="pt-dossier-when">
                       {link.createdLabel}
@@ -669,6 +671,7 @@ export function PaymentsAdmin({
                 ))}
               </tbody>
             </table>
+            <RefundFootnote inset />
           </div>
         )}
       </section>
@@ -706,7 +709,7 @@ export function PaymentsAdmin({
             <label className="pt-label" htmlFor="pay-link-amount">
               Amount (₹)
             </label>
-            <input
+            <input maxLength={9}
               id="pay-link-amount"
               className="pt-input"
               inputMode="decimal"

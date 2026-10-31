@@ -339,19 +339,59 @@ function wrapWords(text: string, maxChars: number): string[] {
   return lines;
 }
 
-/** Values stop before the passport frame so a long address cannot run into the photo. */
-const VALUE_MAX = 22;
+/** Values run from x=316 to just before the passport frame (x=813). */
+const VALUE_X = 316;
+const VALUE_ROOM = 800 - VALUE_X;
+const FIELD_MIN_SIZE = 18;
+const VALUE_TRACKING = -0.6;
+
+/**
+ * Advance widths of public/assets/fonts/tahoma.ttf for ASCII 32–126, in
+ * hundredths of an em (measured in Chrome with the card's @font-face; it's a
+ * single face, so weight 700 draws these same widths). Anything else counts as 90.
+ */
+const CARD_GLYPH_WIDTHS = [
+  31, 33, 40, 73, 55, 98, 67, 21, 38, 38, 55, 73, 26, 36, 25, 38, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 35, 35, 73,
+  73, 73, 47, 91, 60, 59, 60, 68, 56, 52, 67, 68, 37, 42, 59, 50, 77, 67, 71, 55, 71, 62, 56, 60, 66, 60, 90, 58, 58,
+  56, 38, 38, 38, 73, 55, 55, 53, 55, 46, 55, 53, 37, 55, 56, 23, 31, 50, 23, 84, 56, 54, 55, 55, 36, 45, 33, 56, 50,
+  74, 50, 50, 44, 48, 38, 48, 73,
+];
+
+function cardTextWidth(text: string, size: number): number {
+  let em = 0;
+  let count = 0;
+  for (const ch of text) {
+    const code = ch.charCodeAt(0);
+    em += code >= 32 && code < 127 ? CARD_GLYPH_WIDTHS[code - 32] : 90;
+    count += 1;
+  }
+  return (em / 100) * size + VALUE_TRACKING * (size / FIELD_SIZE) * count;
+}
+
+/**
+ * A long value is set smaller (down to 18px) so it stays on its line beside
+ * the photo; past that it ends in an ellipsis instead of running under the frame.
+ */
+export function fitCardValue(display: string): { text: string; size: number } {
+  const full = cardTextWidth(display, FIELD_SIZE);
+  if (full <= VALUE_ROOM) return { text: display, size: FIELD_SIZE };
+  const size = Math.max(FIELD_MIN_SIZE, Math.floor(((FIELD_SIZE * VALUE_ROOM) / full) * 10) / 10);
+  if (cardTextWidth(display, size) <= VALUE_ROOM) return { text: display, size };
+  let text = display;
+  while (text.length > 1 && cardTextWidth(`${text}…`, size) > VALUE_ROOM) text = text.slice(0, -1);
+  return { text: `${text.trimEnd()}…`, size };
+}
 
 /** Word front: Tahoma label, colon column, uppercase value. Same blue as the docx runs. */
 function fieldLine(label: string, value: string, y: number): string {
   const raw = blank(value);
   const display = raw === "—" ? "—" : raw.toUpperCase();
-  const short = display.length > VALUE_MAX ? `${display.slice(0, VALUE_MAX - 1)}…` : display;
-  const size = FIELD_SIZE;
+  const fit = fitCardValue(display);
+  const tracking = Math.round(VALUE_TRACKING * (fit.size / FIELD_SIZE) * 100) / 100;
   return [
-    `<text x="46" y="${y}" font-size="${size}" font-weight="700" letter-spacing="-0.4" fill="${LABEL_BLUE}" font-family="${TAHOM}">${escapeXml(label)}</text>`,
-    `<text x="292" y="${y}" font-size="${size}" font-weight="700" fill="${LABEL_BLUE}" font-family="${TAHOM}">:</text>`,
-    `<text x="316" y="${y}" font-size="${size}" font-weight="700" letter-spacing="-0.6" fill="${VALUE_BLUE}" font-family="${TAHOM}" clip-path="url(#ainfFieldValues)">${escapeXml(short)}</text>`,
+    `<text x="46" y="${y}" font-size="${FIELD_SIZE}" font-weight="700" letter-spacing="-0.4" fill="${LABEL_BLUE}" font-family="${TAHOM}">${escapeXml(label)}</text>`,
+    `<text x="292" y="${y}" font-size="${FIELD_SIZE}" font-weight="700" fill="${LABEL_BLUE}" font-family="${TAHOM}">:</text>`,
+    `<text x="${VALUE_X}" y="${y}" font-size="${fit.size}" font-weight="700" letter-spacing="${tracking}" fill="${VALUE_BLUE}" font-family="${TAHOM}" clip-path="url(#ainfFieldValues)">${escapeXml(fit.text)}</text>`,
   ].join("");
 }
 

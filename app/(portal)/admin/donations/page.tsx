@@ -13,6 +13,7 @@ import { GiftsAdmin } from "@/components/portal/GiftsAdmin";
 import { Pagination } from "@/components/portal/Pagination";
 import { PaymentRef } from "@/components/portal/PaymentRef";
 import { SetupNotice } from "@/components/portal/SetupNotice";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export const metadata: Metadata = { title: "Donations" };
 export const dynamic = "force-dynamic";
@@ -154,7 +155,7 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
             </h2>
             <form className="pt-pay-search" method="get" role="search">
               {tab !== "received" ? <input type="hidden" name="tab" value={tab} /> : null}
-              <input
+              <input maxLength={100}
                 className="pt-input"
                 type="search"
                 name="q"
@@ -211,7 +212,7 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
                           <div className="pt-dossier-meta">{row.paymentLink ? "Payment link" : "Checkout"}</div>
                         </td>
                         <td>
-                          <span className="pt-money">{formatInr(row.amountPaise)}</span>
+                          <span className="pt-money">{formatInr(row.amountPaise)}<RefundStar /></span>
                         </td>
                         <td className="pt-dossier-when">
                           {formatDayTime(row.refundedAt ?? row.paidAt ?? row.createdAt)}
@@ -267,6 +268,7 @@ export default async function AdminGiftsPage({ searchParams }: { searchParams: P
                   })}
                 </tbody>
               </table>
+              <RefundFootnote inset />
             </div>
           )}
           <div style={{ padding: "12px 16px 16px" }}>

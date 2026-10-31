@@ -11,6 +11,7 @@ import { getUserGiving } from "@/lib/user-donations";
 import { loadSavedInterests } from "@/lib/saved-interests";
 import { SavedInterests } from "@/components/portal/MembershipPay";
 import { NON_REFUNDABLE_DONATION } from "@/lib/payment-policy";
+import { RefundFootnote, RefundStar } from "@/components/portal/RefundNote";
 
 export const metadata: Metadata = { title: "Your giving" };
 export const dynamic = "force-dynamic";
@@ -49,13 +50,16 @@ export default async function AccountDonationsPage() {
           <Link href="/account/membership" className="pt-link">Your plan</Link> page.
         </p>
         <p className="pt-policy-note" style={{ margin: "-6px 0 18px" }}>
-          {NON_REFUNDABLE_DONATION}
+          <span aria-hidden="true">*</span> {NON_REFUNDABLE_DONATION}
         </p>
 
         <div className="pt-grid pt-grid--3" style={{ marginBottom: 22 }}>
           <div className="pt-stat">
             <p className="pt-stat__label">Total given</p>
-            <p className="pt-stat__value">{formatInr(summary.totalPaise)}</p>
+            <p className="pt-stat__value">
+              {formatInr(summary.totalPaise)}
+              <RefundStar />
+            </p>
           </div>
           <div className="pt-stat">
             <p className="pt-stat__label">Donations</p>
@@ -63,7 +67,10 @@ export default async function AccountDonationsPage() {
           </div>
           <div className="pt-stat">
             <p className="pt-stat__label">This year</p>
-            <p className="pt-stat__value">{formatInr(summary.thisYearPaise)}</p>
+            <p className="pt-stat__value">
+              {formatInr(summary.thisYearPaise)}
+              <RefundStar />
+            </p>
           </div>
         </div>
 
@@ -101,6 +108,7 @@ export default async function AccountDonationsPage() {
                         <td>{gift.targetTitle}</td>
                         <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                           {formatInr(gift.amountPaise)}
+                          <RefundStar />
                         </td>
                         <td>
                           <span className={badge.className}>

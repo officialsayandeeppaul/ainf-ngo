@@ -33,6 +33,10 @@ function page(title: string, body: string): string {
     .pay:disabled { opacity: 0.55; cursor: default; }
     .note { margin: 12px 0 0; color: #3d4a44; font-size: 14px; line-height: 1.45; }
     .policy-note { margin: 10px 0 0; color: #8a5a17; font-size: 12.5px; line-height: 1.4; text-align: center; }
+    .star { margin-left: 1px; color: #b26a00; }
+    .phone { position: relative; display: block; margin-top: 6px; }
+    .phone::before { content: "+91"; position: absolute; left: 1px; top: 1px; bottom: 1px; display: flex; align-items: center; padding: 0 10px 0 14px; border-right: 1px solid #e2e7e4; border-radius: 11px 0 0 11px; background: #f6f8f7; color: #5f6661; pointer-events: none; }
+    .phone input { margin-top: 0; padding-left: 64px; }
     .error { color: #8d2b2b; }
     footer { padding: 0 0 28px; color: #8a938d; font-size: 13px; }
     .receipt dt { color: #8a938d; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 14px; }
@@ -63,12 +67,12 @@ export function donatePageHtml(): string {
      <form id="gift">
        <label>Your name<input name="name" autocomplete="name" required maxlength="80"></label>
        <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
-       <label>Phone<input name="phone" type="tel" autocomplete="tel" required maxlength="20"></label>
+       <label>Phone<span class="phone"><input name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" pattern="[6-9][0-9]{9}" placeholder="10-digit mobile" required></span></label>
        <label>Where it goes<select name="target" id="target" required></select></label>
        <div class="chips" id="chips"></div>
-       <label>Amount (₹)<input name="amount" id="amount" inputmode="decimal" required></label>
+       <label>Amount (₹)<span class="star" aria-hidden="true">*</span><input name="amount" id="amount" inputmode="decimal" maxlength="9" required></label>
        <button class="pay" id="pay" type="submit">Donate now</button>
-       <p class="policy-note">${NON_REFUNDABLE_DONATION}</p>
+       <p class="policy-note"><span aria-hidden="true">*</span> ${NON_REFUNDABLE_DONATION}</p>
        <p class="note" id="note"></p>
      </form>
      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -121,10 +125,24 @@ export function donatePageHtml(): string {
          })
          .catch(function () { say("Donation options could not be loaded. Refresh and try again.", true); });
        target.addEventListener("change", paintChips);
+       function mobile(raw) {
+         var digits = String(raw || "").replace(/\\D/g, "");
+         if (digits.length === 12 && digits.slice(0, 2) === "91") digits = digits.slice(2);
+         else if (digits.length === 11 && digits.charAt(0) === "0") digits = digits.slice(1);
+         return digits.slice(0, 10);
+       }
+       form.phone.addEventListener("input", function () {
+         var clean = mobile(form.phone.value);
+         if (clean !== form.phone.value) form.phone.value = clean;
+       });
        form.addEventListener("submit", function (event) {
          event.preventDefault();
          var row = selected();
          if (!row) return;
+         if (!/^[6-9]\\d{9}$/.test(mobile(form.phone.value))) {
+           say("Enter your 10-digit mobile number.", true);
+           return;
+         }
          var raw = String(amount.value || "").trim();
          if (!/^\\d+(\\.\\d{1,2})?$/.test(raw)) {
            say("Enter an amount in rupees, with up to two decimals.", true);
@@ -146,7 +164,7 @@ export function donatePageHtml(): string {
              amountPaise: paise,
              name: form.name.value,
              email: form.email.value,
-             phone: form.phone.value
+             phone: mobile(form.phone.value)
            })
          }).then(function (response) { return response.json().then(function (body) { return { ok: response.ok, body: body }; }); })
            .then(function (result) {
@@ -162,7 +180,7 @@ export function donatePageHtml(): string {
                name: "AINF",
                description: result.body.description,
                order_id: result.body.razorpayOrderId,
-               prefill: { name: form.name.value, email: form.email.value, contact: form.phone.value },
+               prefill: { name: form.name.value, email: form.email.value, contact: "+91" + mobile(form.phone.value) },
                handler: function (response) {
                  fetch("/api/donations/confirm", {
                    method: "POST",
