@@ -19,6 +19,8 @@ import { formatDay } from "@/lib/format-date";
 import { expireDueMemberships } from "@/lib/membership-pay";
 import { membershipIsLive } from "@/lib/membership-state";
 import { UserRowActions } from "@/components/portal/AdminActions";
+import { contactLine } from "@/lib/account-contact";
+import { suspensionForAdmin } from "@/lib/suspension";
 import { PortalSelect } from "@/components/portal/PortalSelect";
 import { VerifyMethodStack } from "@/components/portal/VerifyMethods";
 
@@ -164,34 +166,34 @@ export default async function AdminUsersPage({
           {users.length === 0 ? (
             <p className="pt-empty">No users match these filters.</p>
           ) : (
-            <div className="pt-table-wrap">
+            <div className="pt-table-wrap pt-users-wrap">
               <table className="pt-table pt-table--users">
                 <thead>
                   <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>Membership</th>
-                    <th>Verification</th>
-                    <th>Status</th>
-                    <th>Joined</th>
-                    <th style={{ textAlign: "right" }}>Actions</th>
+                    <th className="pt-ut-user">User</th>
+                    <th className="pt-ut-role">Role</th>
+                    <th className="pt-ut-plan">Membership</th>
+                    <th className="pt-ut-verify">Verification</th>
+                    <th className="pt-ut-status">Status</th>
+                    <th className="pt-ut-joined">Joined</th>
+                    <th className="pt-ut-actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
                     <tr key={user.id}>
-                      <td>
+                      <td className="pt-ut-user">
                         <Link href={`/admin/crm/${user.id}`} className="pt-user-link">
                           <div style={{ fontSize: 13.5 }}>
                             {[user.firstName, user.lastName].filter(Boolean).join(" ") || "—"}
                           </div>
-                          <div style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>{user.email}</div>
+                          <div className="pt-users-contact">{contactLine(user)}</div>
                         </Link>
                       </td>
-                      <td>
+                      <td className="pt-ut-role">
                         <RoleBadge role={user.role} />
                       </td>
-                      <td>
+                      <td className="pt-ut-plan">
                         {membershipIsLive(user) && user.membershipTier ? (
                           <span
                             className="pt-plan-badge"
@@ -206,7 +208,7 @@ export default async function AdminUsersPage({
                           <span className="pt-pill pt-pill--muted">No plan</span>
                         )}
                       </td>
-                      <td>
+                      <td className="pt-ut-verify">
                         <VerifyMethodStack
                           compact
                           summary={summariseUserVerification({
@@ -218,7 +220,7 @@ export default async function AdminUsersPage({
                           })}
                         />
                       </td>
-                      <td>
+                      <td className="pt-ut-status">
                         <UserStatusBadge status={user.status} />
                         {user.status === "SUSPENDED" ? (
                           <span className="pt-status-until">
@@ -226,16 +228,16 @@ export default async function AdminUsersPage({
                           </span>
                         ) : null}
                       </td>
-                      <td style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>
-                        {formatDay(user.createdAt)}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
+                      <td className="pt-ut-joined">{formatDay(user.createdAt)}</td>
+                      <td className="pt-ut-actions">
                         <UserRowActions
                           userId={user.id}
                           role={user.role}
                           status={user.status}
                           isSelf={user.id === viewer.id}
                           contact={{ email: user.email, phone: user.phone }}
+                          firstName={user.firstName}
+                          suspension={suspensionForAdmin(user)}
                         />
                       </td>
                     </tr>

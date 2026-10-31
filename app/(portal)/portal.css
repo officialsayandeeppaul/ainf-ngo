@@ -2471,22 +2471,6 @@ body.ainf-portal b {
   white-space: normal;
 }
 
-.pt-table--users th:nth-child(2),
-.pt-table--users td:nth-child(2) {
-  width: 13%;
-}
-
-.pt-table--users th:nth-child(3),
-.pt-table--users td:nth-child(3) {
-  width: 11%;
-}
-
-.pt-table--users th:nth-child(4),
-.pt-table--users td:nth-child(4) {
-  width: 34%;
-  min-width: 220px;
-}
-
 .pt-table__mono {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -6020,7 +6004,8 @@ a.pt-segment__btn {
   margin: 0;
   color: var(--ink);
 }
-.pt-suspension-facts span {
+.pt-suspension-facts > p > span,
+.pt-suspension-facts__tell > span {
   display: block;
   font-size: 11.5px;
   letter-spacing: 0.04em;
@@ -6181,4 +6166,243 @@ a.pt-segment__btn {
   font-size: 12px;
   line-height: 1.35;
   color: var(--danger);
+}
+
+/* ---- Users table: a table when there is room, one card per user when not.
+   Measured on the table's own box, so the sidebar and browser zoom count. -- */
+.pt-users-wrap {
+  container-type: inline-size;
+}
+.pt-users-contact {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+.pt-table--users .pt-ut-user { width: 17%; }
+.pt-table--users .pt-ut-role { width: 11%; }
+.pt-table--users .pt-ut-plan { width: 9%; }
+.pt-table--users .pt-ut-verify { width: 28%; }
+.pt-table--users .pt-ut-status { width: 10%; }
+.pt-table--users .pt-ut-joined { width: 9%; font-size: 12.5px; color: var(--ink-faint); }
+.pt-table--users .pt-ut-actions { width: 16%; text-align: right; }
+
+.pt-row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+.pt-row-actions__main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.pt-row-actions .pt-menu--sm,
+.pt-row-actions .pt-menu--sm .pt-menu__trigger {
+  max-width: 100%;
+}
+.pt-row-actions .pt-menu__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pt-row-actions__error {
+  max-width: 240px;
+  font-size: 12px;
+  color: var(--danger);
+  text-align: right;
+}
+/* In the table the role menu and the button stack, so neither spills into Joined. */
+.pt-table--users .pt-row-actions__main {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+@container (max-width: 1099px) {
+  .pt-table--users,
+  .pt-table--users tbody {
+    display: block;
+    width: 100%;
+  }
+  .pt-table--users thead {
+    display: none;
+  }
+  .pt-table--users tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pt-table--users tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .pt-table--users td {
+    display: block;
+    width: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  .pt-table--users .pt-ut-user { order: 1; flex: 1 1 calc(100% - 330px); min-width: 0; align-self: flex-start; }
+  .pt-table--users .pt-ut-actions { order: 2; flex: 0 1 auto; margin-left: auto; align-self: flex-start; }
+  /* Line break after name + actions, so the badges always start a new row. */
+  .pt-table--users tr::after {
+    content: "";
+    order: 3;
+    flex: 0 0 100%;
+    height: 0;
+    margin-top: -10px;
+  }
+  .pt-table--users .pt-ut-role { order: 4; }
+  .pt-table--users .pt-ut-plan { order: 5; }
+  .pt-table--users .pt-ut-status { order: 6; }
+  .pt-table--users .pt-ut-joined { order: 7; }
+  .pt-table--users .pt-ut-joined::before { content: "Joined "; }
+  .pt-table--users .pt-ut-verify { order: 8; flex: 1 1 100%; }
+  .pt-table--users .pt-ut-status .pt-status-until { display: inline; margin: 0 0 0 6px; }
+  .pt-table--users .pt-row-actions__main { flex-direction: row; }
+}
+
+@container (max-width: 560px) {
+  .pt-table--users .pt-ut-user { flex-basis: 100%; }
+  .pt-table--users .pt-ut-actions { order: 9; flex: 1 1 100%; margin-left: 0; }
+  .pt-table--users .pt-row-actions,
+  .pt-table--users .pt-row-actions__main {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .pt-table--users .pt-row-actions__error { text-align: left; }
+}
+
+/* "Told by WhatsApp" / "Not told yet · Tell member" under the row actions. */
+.pt-told {
+  font-size: 12px;
+  color: var(--ainf-green-dark);
+}
+button.pt-told {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: inherit;
+}
+.pt-told--pending {
+  color: var(--warning);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---- Telling a suspended member ---------------------------------------------- */
+.pt-notice-tools {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  text-align: left;
+}
+.pt-notice-tools__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.pt-notice-tools__dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--warning);
+}
+.pt-notice-tools__status.is-told .pt-notice-tools__dot {
+  background: var(--ainf-green);
+}
+.pt-notice-tools__why {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+.pt-notice-tools__message {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.pt-notice-tools__message summary {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.pt-notice-tools__message pre {
+  margin: 0;
+  padding: 0 12px 12px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.pt-notice-tools__row,
+.pt-notice-tools__mark {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.pt-notice-tools__mark > span {
+  margin-right: 2px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+.pt-notice-tools__chip {
+  appearance: none;
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.pt-notice-tools__chip:hover:not(:disabled) {
+  border-color: var(--ainf-green);
+  background: var(--ainf-green-soft);
+}
+.pt-notice-tools__chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.pt-notice-tools__retry {
+  justify-self: start;
+}
+.pt-btn--whatsapp {
+  border: 1px solid #1da851;
+  background: #25d366;
+  color: #0b3d1f;
+}
+.pt-btn--whatsapp:hover {
+  background: #1fbe5a;
+  color: #0b3d1f;
+}
+.pt-suspension-facts__tell {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }

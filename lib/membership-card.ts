@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { displayPhone } from "./account-contact";
 import { AuditAction, recordAudit } from "./audit";
 import { cardPhotoDataUri } from "./card-photo";
 import { randomToken } from "./crypto";
@@ -56,11 +57,7 @@ export function cardVerifyUrl(token: string): string {
 
 /** Indian numbers print as "+91 9876543210" whether stored with or without the code. */
 export function cardMobile(phone: string | null | undefined): string {
-  const raw = phone?.trim();
-  if (!raw) return "—";
-  const digits = raw.replace(/\D/g, "");
-  const local = digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits.length === 10 ? digits : null;
-  return local ? `+91 ${local}` : raw;
+  return displayPhone(phone) ?? "—";
 }
 
 export function cardArtworkForUser(input: {

@@ -1,3 +1,4 @@
+import { isMobileAccountEmail } from "./account-contact";
 import { formatDayTime } from "./format-date";
 
 /**
@@ -44,14 +45,12 @@ export function suspensionEndLabel(until: Date | null): string {
   return until ? `until ${formatDayTime(until)} (India time)` : "until AINF reinstates it";
 }
 
-const MOBILE_ACCOUNT_EMAIL = /@mobile\.theainf\.in$/i;
-
 /**
  * How to tell a member about their account. People who signed up with a
  * mobile number carry a placeholder address, so they get an SMS instead.
  */
 export function suspensionNoticeChannel(user: { email: string; phone: string | null }): "email" | "sms" | null {
-  if (!MOBILE_ACCOUNT_EMAIL.test(user.email.trim())) return "email";
+  if (!isMobileAccountEmail(user.email)) return "email";
   return user.phone && user.phone.replace(/\D/g, "").length >= 10 ? "sms" : null;
 }
 
@@ -68,4 +67,76 @@ export function suspensionSmsText(input: { reason: string; until: Date | null })
 
 export function reinstatedSmsText(): string {
   return "AINF: Your account is active again. You can sign in at theainf.in. Contact hello@theainf.in";
+}
+
+/**
+ * Ways an admin can tell a member themselves when email or SMS cannot reach
+ * them (no DLT template for SMS, email in test mode): WhatsApp or email from
+ * their own phone or inbox, a call, or anything else they note down.
+ */
+export const MANUAL_NOTICE_CHANNELS = ["whatsapp", "call", "email", "other"] as const;
+export type ManualNoticeChannel = (typeof MANUAL_NOTICE_CHANNELS)[number];
+
+const CHANNEL_LABEL: Record<string, string> = {
+  email: "email",
+  sms: "SMS",
+  whatsapp: "WhatsApp",
+  call: "phone call",
+  other: "another way",
+};
+
+/** "WhatsApp", "email", "phone call"… for "Told by …". */
+export function noticeChannelLabel(channel: string | null | undefined): string {
+  return (channel && CHANNEL_LABEL[channel]) || "another way";
+}
+
+/** Why the automatic notice did not go, in words an admin can act on. */
+export function noticeErrorLabel(error: string | null | undefined): string | null {
+  if (!error) return null;
+  if (error === "no_contact") return "There is no email or mobile number on this account.";
+  if (error === "sms_template_missing")
+    return "Text messages need a DLT template registered for this notice, so no SMS was sent.";
+  if (error === "not_configured" || error === "no_sender_id") return "Text messages are not set up on this site.";
+  if (/test mode/i.test(error)) return "Email sending is in test mode, so the email only reaches the AINF inbox.";
+  if (error === "invalid_number") return "The mobile number on this account is not valid.";
+  return "The automatic message could not be delivered.";
+}
+
+/** The full message for WhatsApp, email drafts and copying. No length limit, unlike the SMS. */
+export function suspensionMessage(input: { firstName: string | null; reason: string; until: Date | null }): string {
+  const name = input.firstName?.trim() || "there";
+  const reason = input.reason.replace(/\s+/g, " ").trim().replace(/[.\s]+$/, "");
+  return [
+    `Hello ${name},`,
+    "",
+    `This is AINF (All Indian Nevarlands Foundation). Your AINF account has been suspended ${suspensionEndLabel(input.until)}.`,
+    "",
+    `Reason: ${reason || "not recorded"}.`,
+    "",
+    "While it is suspended you cannot use member services. You can still sign in at theainf.in to see these details. If you think this is a mistake, reply to this message or write to hello@theainf.in.",
+  ].join("\n");
+}
+
+export function reinstatedMessage(firstName: string | null): string {
+  const name = firstName?.trim() || "there";
+  return `Hello ${name},\n\nThis is AINF. Your AINF account is active again, and you can sign in at theainf.in as usual. Thank you for your patience.`;
+}
+
+/** The current suspension as the admin screens need it (dates as ISO strings for client components). */
+export function suspensionForAdmin(user: {
+  status: string;
+  suspendedReason: string | null;
+  suspendedUntil: Date | null;
+  suspensionNoticeChannel: string | null;
+  suspensionNoticeSentAt: Date | null;
+}): { reason: string | null; until: string | null; notice: { channel: string | null; sentAt: string | null } } | null {
+  if (user.status === "ACTIVE") return null;
+  return {
+    reason: user.suspendedReason,
+    until: user.suspendedUntil ? user.suspendedUntil.toISOString() : null,
+    notice: {
+      channel: user.suspensionNoticeChannel,
+      sentAt: user.suspensionNoticeSentAt ? user.suspensionNoticeSentAt.toISOString() : null,
+    },
+  };
 }

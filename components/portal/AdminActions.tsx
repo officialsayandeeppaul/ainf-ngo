@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { Role, UserStatus } from "@/lib/prisma-enums-client";
 import { ConfirmDialog } from "@/components/portal/ConfirmDialog";
 import { PortalSelect } from "@/components/portal/PortalSelect";
+import { SuspensionNoticeTools, type SuspensionNoticeState } from "@/components/portal/SuspensionNotice";
+import { displayPhone } from "@/lib/account-contact";
 import {
   SUSPENSION_PERIODS,
   SUSPENSION_REASON_MAX,
   SUSPENSION_REASON_MIN,
+  noticeChannelLabel,
   suspensionNoticeChannel,
   type SuspensionPeriod,
 } from "@/lib/suspension";
@@ -32,6 +35,10 @@ async function patchUser(id: string, body: unknown) {
     body: JSON.stringify(body),
   });
   const payload = await response.json().catch(() => ({}));
+  // A lapsed session answers with the sign-in page, not JSON: not a success.
+  if (response.ok && payload?.ok !== true) {
+    return { ok: false, payload: { message: "That did not save. Refresh the page, sign in again if asked, and retry." } };
+  }
   return { ok: response.ok, payload };
 }
 
@@ -42,6 +49,8 @@ export function UserRowActions({
   status,
   isSelf,
   contact,
+  firstName = null,
+  suspension = null,
 }: {
   userId: string;
   role: Role;
@@ -49,6 +58,9 @@ export function UserRowActions({
   isSelf: boolean;
   /** Where the suspension notice goes; shown to the admin before they confirm. */
   contact?: { email: string; phone: string | null };
+  firstName?: string | null;
+  /** The current suspension, so the admin can see and finish telling the member. */
+  suspension?: { reason: string | null; until: string | null; notice: SuspensionNoticeState } | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -59,6 +71,12 @@ export function UserRowActions({
   const [reinstateOpen, setReinstateOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [period, setPeriod] = useState<SuspensionPeriod>("7d");
+  const [tell, setTell] = useState<{
+    reason: string;
+    until: string | null;
+    notice: SuspensionNoticeState;
+    fresh?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     setNextRole(null);
@@ -73,9 +91,9 @@ export function UserRowActions({
   const channel = contact ? suspensionNoticeChannel(contact) : null;
   const noticeHint =
     channel === "email"
-      ? `They are emailed at ${contact!.email}.`
+      ? `They are emailed at ${contact!.email}. Next you can also send it on WhatsApp or from your own inbox.`
       : channel === "sms"
-        ? `They signed up with a mobile number, so they get an SMS at ${contact!.phone}.`
+        ? `They signed up with a mobile number (${displayPhone(contact!.phone)}). Next you can send the message on WhatsApp or call them.`
         : contact
           ? "This account has no email or mobile on file, so no notice can be sent. They see the reason when they sign in."
           : "They are emailed, or sent an SMS if they signed up with a mobile number.";
@@ -84,19 +102,39 @@ export function UserRowActions({
     return <span style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>Your own account</span>;
   }
 
-  async function run(body: unknown) {
+  async function run(body: unknown): Promise<Record<string, unknown> | null> {
     setBusy(true);
     setError(null);
-    const { ok, payload } = await patchUser(userId, body);
+    let result: { ok: boolean; payload: Record<string, unknown> };
+    try {
+      result = await patchUser(userId, body);
+    } catch {
+      setBusy(false);
+      setError("The connection dropped. Try again.");
+      return null;
+    }
     setBusy(false);
-    if (!ok) {
-      setError(payload?.message ?? "Action failed.");
-      return;
+    if (!result.ok) {
+      setError((result.payload?.message as string) ?? "Action failed.");
+      return null;
     }
     setNextRole(null);
     setSuspendOpen(false);
     setReinstateOpen(false);
     startTransition(() => router.refresh());
+    return result.payload;
+  }
+
+  async function suspendNow() {
+    const text = reason.trim();
+    const payload = await run({ action: "setStatus", status: UserStatus.SUSPENDED, reason: text, period });
+    if (!payload) return;
+    setTell({
+      reason: text,
+      until: (payload.suspendedUntil as string | null) ?? null,
+      notice: (payload.notice as SuspensionNoticeState | null) ?? { channel: null, sentAt: null, error: null },
+      fresh: true,
+    });
   }
 
   const suspended = status !== UserStatus.ACTIVE;
@@ -104,8 +142,8 @@ export function UserRowActions({
   const rolePending = Boolean(nextRole && nextRole !== role);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+    <div className="pt-row-actions">
+      <div className="pt-row-actions__main">
         <PortalSelect
           size="sm"
           value={nextRole ?? role}
@@ -131,10 +169,23 @@ export function UserRowActions({
           {suspended ? "Reinstate" : "Suspend"}
         </button>
       </div>
+      {suspended && suspension && contact ? (
+        suspension.notice.sentAt ? (
+          <span className="pt-told">Told by {noticeChannelLabel(suspension.notice.channel)}</span>
+        ) : (
+          <button
+            type="button"
+            className="pt-told pt-told--pending"
+            onClick={() =>
+              setTell({ reason: suspension.reason ?? "", until: suspension.until, notice: suspension.notice })
+            }
+          >
+            Not told yet · Tell member
+          </button>
+        )
+      ) : null}
       {error ? (
-        <span style={{ fontSize: 12, color: "var(--danger)", textAlign: "right", maxWidth: 220 }}>
-          {error}
-        </span>
+        <span className="pt-row-actions__error">{error}</span>
       ) : null}
 
       <ConfirmDialog
@@ -167,7 +218,7 @@ export function UserRowActions({
           setError(null);
         }}
         onConfirm={() => {
-          if (!reasonShort) void run({ action: "setStatus", status: UserStatus.SUSPENDED, reason: reason.trim(), period });
+          if (!reasonShort) void suspendNow();
         }}
       >
         <div className="pt-suspend-form">
@@ -215,6 +266,25 @@ export function UserRowActions({
         onCancel={() => setReinstateOpen(false)}
         onConfirm={() => void run({ action: "setStatus", status: UserStatus.ACTIVE })}
       />
+      <ConfirmDialog
+        open={tell !== null && Boolean(contact)}
+        title={tell?.fresh ? "Suspended. Now tell the member" : "Tell the member"}
+        confirmLabel="Done"
+        hideCancel
+        onCancel={() => setTell(null)}
+        onConfirm={() => setTell(null)}
+      >
+        {tell && contact ? (
+          <SuspensionNoticeTools
+            userId={userId}
+            firstName={firstName}
+            contact={contact}
+            reason={tell.reason}
+            until={tell.until}
+            notice={tell.notice}
+          />
+        ) : null}
+      </ConfirmDialog>
     </div>
   );
 }

@@ -2,8 +2,8 @@ import { Role, UserStatus, type User } from "@prisma/client";
 import { AuditAction, recordAudit } from "../audit";
 import { db } from "../db";
 import type { RequestContext } from "../request-context";
-import { suspensionHasEnded } from "../suspension";
-import { sendSuspensionNotice } from "../suspension-notice";
+import { suspensionHasEnded, type ManualNoticeChannel } from "../suspension";
+import { sendSuspensionNotice, type SuspensionNoticeResult } from "../suspension-notice";
 import { mirrorRoleToClerk } from "./session";
 
 /**
@@ -112,7 +112,12 @@ export async function revokeVerified(params: {
  * for mobile-number accounts). A null actor is the automatic lift when a timed
  * suspension runs out.
  */
-export async function setUserStatus(params: {
+export async function setUserStatus(params: Parameters<typeof setUserStatusWithNotice>[0]): Promise<User> {
+  return (await setUserStatusWithNotice(params)).user;
+}
+
+/** setUserStatus, plus what happened to the automatic notice (for the admin screen). */
+export async function setUserStatusWithNotice(params: {
   targetUserId: string;
   status: UserStatus;
   reason?: string | null;
@@ -120,7 +125,7 @@ export async function setUserStatus(params: {
   until?: Date | null;
   actor: { userId: string; clerkId: string; role: Role } | null;
   context?: RequestContext | null;
-}): Promise<User> {
+}): Promise<{ user: User; notice: SuspensionNoticeResult | null }> {
   const { targetUserId, status, reason, actor, context } = params;
   const suspended = status !== UserStatus.ACTIVE;
   const until = suspended && status === UserStatus.SUSPENDED ? (params.until ?? null) : null;
@@ -174,6 +179,65 @@ export async function setUserStatus(params: {
     },
   });
 
+  return { user, notice };
+}
+
+type Actor = { userId: string; clerkId: string; role: Role };
+
+/** Tries the automatic suspension email / SMS again for a suspended account. */
+export async function resendSuspensionNotice(params: {
+  user: User;
+  actor: Actor;
+  context?: RequestContext | null;
+}): Promise<{ user: User; notice: SuspensionNoticeResult }> {
+  const { actor, context } = params;
+  const notice = await sendSuspensionNotice(params.user, {
+    kind: "suspended",
+    reason: params.user.suspendedReason ?? "",
+    until: params.user.suspendedUntil,
+  });
+  const user = notice.sent
+    ? await db.user.update({
+        where: { id: params.user.id },
+        data: { suspensionNoticeChannel: notice.channel, suspensionNoticeSentAt: new Date() },
+      })
+    : params.user;
+  await recordAudit({
+    action: AuditAction.SuspensionNoticeSent,
+    actorUserId: actor.userId,
+    actorClerkId: actor.clerkId,
+    actorRole: actor.role,
+    success: notice.sent,
+    targetType: "user",
+    targetId: user.id,
+    context: context ?? null,
+    metadata: { channel: notice.channel, sent: notice.sent, error: notice.error, manual: false },
+  });
+  return { user, notice };
+}
+
+/** The admin told the member themselves (WhatsApp, a call…). Recorded and audited. */
+export async function recordManualSuspensionNotice(params: {
+  user: User;
+  channel: ManualNoticeChannel;
+  actor: Actor;
+  context?: RequestContext | null;
+}): Promise<User> {
+  const { actor, context, channel } = params;
+  const user = await db.user.update({
+    where: { id: params.user.id },
+    data: { suspensionNoticeChannel: channel, suspensionNoticeSentAt: new Date() },
+  });
+  await recordAudit({
+    action: AuditAction.SuspensionNoticeSent,
+    actorUserId: actor.userId,
+    actorClerkId: actor.clerkId,
+    actorRole: actor.role,
+    targetType: "user",
+    targetId: user.id,
+    context: context ?? null,
+    metadata: { channel, sent: true, manual: true },
+  });
   return user;
 }
 

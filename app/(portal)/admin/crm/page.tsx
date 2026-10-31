@@ -11,6 +11,8 @@ import { formatInr } from "@/lib/membership";
 import { expireDueMemberships } from "@/lib/membership-pay";
 import { membershipIsLive } from "@/lib/membership-state";
 import { UserRowActions } from "@/components/portal/AdminActions";
+import { contactLine } from "@/lib/account-contact";
+import { suspensionForAdmin } from "@/lib/suspension";
 import { CrmBars, CrmSpark, CrmStat } from "@/components/portal/CrmCharts";
 import { DashShell } from "@/components/portal/DashShell";
 import { Pagination } from "@/components/portal/Pagination";
@@ -341,7 +343,7 @@ export default async function AdminCrmPage({
                             <div className="pt-crm-name">
                               {[user.firstName, user.lastName].filter(Boolean).join(" ") || "—"}
                             </div>
-                            <div className="pt-crm-email">{user.email}</div>
+                            <div className="pt-crm-email">{contactLine(user)}</div>
                           </Link>
                         </td>
                         <td>
@@ -405,6 +407,8 @@ export default async function AdminCrmPage({
                               status={user.status}
                               isSelf={user.id === viewer.id}
                               contact={{ email: user.email, phone: user.phone }}
+                              firstName={user.firstName}
+                              suspension={suspensionForAdmin(user)}
                             />
                           </div>
                         </td>

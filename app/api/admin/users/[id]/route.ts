@@ -2,10 +2,17 @@ import { Role, UserStatus } from "@prisma/client";
 import { z } from "zod";
 import { AuditAction, recordAudit } from "@/lib/audit";
 import { guardApi } from "@/lib/auth/guard";
-import { changeRole, countSuperAdmins, setUserStatus } from "@/lib/auth/role-service";
+import {
+  changeRole,
+  countSuperAdmins,
+  recordManualSuspensionNotice,
+  resendSuspensionNotice,
+  setUserStatusWithNotice,
+} from "@/lib/auth/role-service";
 import { db } from "@/lib/db";
 import { contextFromRequest } from "@/lib/request-context";
 import {
+  MANUAL_NOTICE_CHANNELS,
   SUSPENSION_PERIOD_VALUES,
   SUSPENSION_REASON_MAX,
   SUSPENSION_REASON_MIN,
@@ -33,6 +40,10 @@ const bodySchema = z.discriminatedUnion("action", [
     reason: z.string().trim().max(SUSPENSION_REASON_MAX).optional(),
     period: z.enum(SUSPENSION_PERIOD_VALUES).optional(),
   }),
+  // Try the automatic email / SMS again.
+  z.object({ action: z.literal("resendNotice") }),
+  // The admin told the member themselves (WhatsApp, a call…).
+  z.object({ action: z.literal("recordNotice"), channel: z.enum(MANUAL_NOTICE_CHANNELS) }),
 ]);
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -105,6 +116,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return Response.json({ ok: true, role: updated.role });
   }
 
+  if (input.action === "resendNotice" || input.action === "recordNotice") {
+    if (target.status === UserStatus.ACTIVE) {
+      return Response.json(
+        { error: "not_suspended", message: "This account is active, so there is nothing to tell them." },
+        { status: 409 }
+      );
+    }
+    if (input.action === "recordNotice") {
+      const told = await recordManualSuspensionNotice({ user: target, channel: input.channel, actor, context });
+      return Response.json({ ok: true, notice: noticeJson(told, null) });
+    }
+    const { user, notice } = await resendSuspensionNotice({ user: target, actor, context });
+    return Response.json({ ok: true, notice: noticeJson(user, notice.sent ? null : notice.error, notice.channel) });
+  }
+
   // The member is told why and for how long, so both are required to suspend.
   const suspending = input.status !== UserStatus.ACTIVE;
   if (suspending && (input.reason ?? "").length < SUSPENSION_REASON_MIN) {
@@ -123,7 +149,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     );
   }
 
-  const updated = await setUserStatus({
+  const { user: updated, notice } = await setUserStatusWithNotice({
     targetUserId: target.id,
     status: input.status,
     reason: suspending ? (input.reason ?? null) : null,
@@ -136,8 +162,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     ok: true,
     status: updated.status,
     suspendedUntil: updated.suspendedUntil ? updated.suspendedUntil.toISOString() : null,
-    notice: suspending
-      ? { channel: updated.suspensionNoticeChannel, sent: Boolean(updated.suspensionNoticeSentAt) }
-      : null,
+    notice: suspending ? noticeJson(updated, notice && !notice.sent ? notice.error : null, notice?.channel ?? null) : null,
   });
+}
+
+/** What the admin screen shows after a notice attempt. */
+function noticeJson(
+  user: { suspensionNoticeChannel: string | null; suspensionNoticeSentAt: Date | null },
+  error: string | null,
+  tried: string | null = null
+) {
+  return {
+    channel: user.suspensionNoticeChannel ?? tried,
+    sent: Boolean(user.suspensionNoticeSentAt),
+    sentAt: user.suspensionNoticeSentAt ? user.suspensionNoticeSentAt.toISOString() : null,
+    error,
+  };
 }

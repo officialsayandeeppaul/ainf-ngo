@@ -8,6 +8,7 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.RoleChanged]: "Role changed",
   [AuditAction.UserSuspended]: "User suspended",
   [AuditAction.UserReinstated]: "User reinstated",
+  [AuditAction.SuspensionNoticeSent]: "Member told about suspension",
   [AuditAction.KycSessionCreated]: "Didit session",
   [AuditAction.KycStatusChanged]: "Didit status",
   [AuditAction.KycManualReview]: "Didit review",

@@ -21,6 +21,9 @@ import {
   summariseUserVerification,
 } from "@/lib/verification-summary";
 import { UserRowActions } from "@/components/portal/AdminActions";
+import { SuspensionNoticeTools } from "@/components/portal/SuspensionNotice";
+import { contactLine } from "@/lib/account-contact";
+import { suspensionForAdmin } from "@/lib/suspension";
 import { DashShell } from "@/components/portal/DashShell";
 import { Pagination } from "@/components/portal/Pagination";
 import { PaymentRef } from "@/components/portal/PaymentRef";
@@ -281,7 +284,7 @@ export default async function AdminCrmDossierPage({
           <Link href="/admin/crm">← All members</Link>
         </p>
         <h1 className="pt-title">{name}</h1>
-        <p className="pt-subtitle">{member.email}</p>
+        <p className="pt-subtitle">{contactLine(member)}</p>
 
         <div className="pt-crm-kpis">
           <CrmStat
@@ -383,12 +386,20 @@ export default async function AdminCrmDossierPage({
                         {formatDayTime(member.suspendedAt)}
                       </p>
                     ) : null}
-                    <p>
+                    <div className="pt-suspension-facts__tell">
                       <span>Member told</span>
-                      {member.suspensionNoticeSentAt && member.suspensionNoticeChannel
-                        ? `By ${member.suspensionNoticeChannel === "sms" ? "SMS" : "email"} on ${formatDayTime(member.suspensionNoticeSentAt)}`
-                        : "Not delivered. They still see the reason when they sign in."}
-                    </p>
+                      <SuspensionNoticeTools
+                        userId={member.id}
+                        firstName={member.firstName}
+                        contact={{ email: member.email, phone: member.phone }}
+                        reason={member.suspendedReason ?? ""}
+                        until={member.suspendedUntil ? member.suspendedUntil.toISOString() : null}
+                        notice={{
+                          channel: member.suspensionNoticeChannel,
+                          sentAt: member.suspensionNoticeSentAt ? member.suspensionNoticeSentAt.toISOString() : null,
+                        }}
+                      />
+                    </div>
                   </div>
                 ) : null}
               </dd>
@@ -410,6 +421,8 @@ export default async function AdminCrmDossierPage({
                 status={member.status}
                 isSelf={member.id === viewer.id}
                 contact={{ email: member.email, phone: member.phone }}
+                firstName={member.firstName}
+                suspension={suspensionForAdmin(member)}
               />
             </div>
           </section>

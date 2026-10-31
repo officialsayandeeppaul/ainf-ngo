@@ -9,6 +9,7 @@ export const AuditAction = {
   RoleChanged: "user.role_changed",
   UserSuspended: "user.suspended",
   UserReinstated: "user.reinstated",
+  SuspensionNoticeSent: "user.suspension_notice",
 
   KycSessionCreated: "kyc.session_created",
   KycStatusChanged: "kyc.status_changed",

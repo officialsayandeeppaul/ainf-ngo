@@ -39,6 +39,12 @@ export async function sendSuspensionNotice(
           : await sendAccountReinstatedEmail({ to: user.email, firstName: user.firstName });
       return { channel, sent: result.sent, error: result.sent ? null : (result.error ?? "not_sent") };
     }
+    // Indian operators drop a text that does not match its registered DLT
+    // template, while the gateway still answers "sent". Without a template
+    // for this notice nothing is sent, so the admin is not told it was.
+    if (!env.APITXT_DLT_SUSPEND_TEMPLATE_ID) {
+      return { channel, sent: false, error: "sms_template_missing" };
+    }
     const result = await sendSms({
       to: user.phone!,
       message: notice.kind === "suspended" ? suspensionSmsText(notice) : reinstatedSmsText(),
