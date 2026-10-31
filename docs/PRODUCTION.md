@@ -14,14 +14,35 @@ deploy secrets below exist). `main` keeps deploying the beta site as before.
 |---|---|
 | Production database (Neon project "All Indian Nevarlands", branch `production`, Singapore) | All 18 migrations applied |
 | Content | 6 field projects, 5 donation missions, payment settings (payments **on**), 3 membership plans, 10% yearly discount, donation minimum ₹200 and suggested amounts copied from beta. No beta users, payments or test data. |
-| Super admin | `contact@theainf.in` is set up as the only super admin. It activates on the first sign-in with that email (see section 5). |
+| Super admin | `contact@theainf.in` is set up as the only super admin. It activates on the first sign-in with that email (see section 6). |
 | Environment file | `.env.production`, kept **outside** the repository, with every production value plus a generated `PAN_HASH_SALT` and `SUPER_ADMIN_BOOTSTRAP_KEY`. |
 | Accounts checked | Clerk, Neon, Upstash, Razorpay, Didit (API key + "Free KYC" workflow) answer correctly. Resend key is send-only and the `theainf.in` domain is verified. |
-| Didit webhook handler | Follows Didit's spec: signature first, freshness from the signed body `timestamp`, data edits keyed on `event_id`, failed deliveries reprocessed on retry. |
+| Didit webhook | Destination `https://theainf.in/api/webhooks/didit` (v3, `status.updated` + `data.updated`) exists and its secret is in `.env.production`. The handler follows Didit's spec: signature first, freshness from the signed body `timestamp`, data edits keyed on `event_id`, failed deliveries reprocessed on retry. |
 
 ---
 
-## 2. Deploy to the client's Vercel account (no code access)
+## 2. Quickest route: a second project in the same Vercel account
+
+Use this when the account that runs beta (Git-connected) should also run
+production. Anyone in that Vercel team can see the source of Git deployments,
+so use section 3 instead when the client must not see the code.
+
+1. Vercel → **Add New → Project** → import this same GitHub repository.
+   Name it `ainf-production`. Leave the build settings as detected
+   (`vercel.json` sets the build command).
+2. On the same screen open **Environment Variables**, click **Import .env**
+   (or paste the whole file) and choose `.env.production`. Click **Deploy**.
+3. **Settings → Git → Production Branch:** `release/v1`. **Settings →
+   General → Node.js Version:** 22.x.
+4. **Settings → Domains:** add `theainf.in` and `www.theainf.in`
+   (redirect to `theainf.in`), then do the DNS step in "Domain" below.
+5. **Deployments → latest → Redeploy** so the build runs from `release/v1`.
+
+From then on `main` → beta.theainf.in and `release/v1` → theainf.in.
+Vercel's free Hobby plan is for non-commercial use only; the site takes
+payments, so move the team to Pro before launch.
+
+## 3. Deploy to the client's Vercel account (no code access)
 
 **How it works:** GitHub Actions builds the site from this repository and uploads
 only the build output to the client's Vercel project (`vercel deploy --prebuilt`).
@@ -95,11 +116,10 @@ cannot be delivered.
 
 ---
 
-## 3. One-time items still open
+## 4. One-time items still open
 
 | What | Why | How |
 |---|---|---|
-| **Didit webhook destination** | Pushes verification results to the site the moment Didit decides. Without it members' results still arrive when they return from Didit, but not if they close the tab. | Didit console → **Webhooks → Add destination**: URL `https://theainf.in/api/webhooks/didit`, version **v3**, events `status.updated` and `data.updated`. Copy its secret into `DIDIT_WEBHOOK_SECRET` in Vercel and redeploy. |
 | **Clerk production instance** | The current keys are a development instance: Clerk shows a "Development mode" badge and applies development limits. | Clerk → create a Production instance for `theainf.in`, add its DNS records in Hostinger, replace both Clerk keys in Vercel, redeploy. The super admin row links on first sign-in in the new instance as well. |
 | **Razorpay live mode** | Current keys are `rzp_test_`: checkout works but no real money moves. | Complete Razorpay KYC → Live mode → create live API keys and the same webhook (`https://theainf.in/api/webhooks/razorpay`) with its **own** random secret → replace the three Razorpay values → redeploy. |
 | Clerk webhook (optional) | Keeps profile edits and deletions in sync. | Clerk → Webhooks → `https://theainf.in/api/webhooks/clerk`, events `user.created`, `user.updated`, `user.deleted` → secret into `CLERK_WEBHOOK_SIGNING_SECRET`. |
@@ -110,7 +130,7 @@ Redeploy, or re-run the workflow): running deployments keep their old values.
 
 ---
 
-## 4. Check after the first deploy
+## 5. Check after the first deploy
 
 1. `https://theainf.in` loads with a padlock; `www` redirects to it.
 2. `/donate-now`: the donation window opens and the Razorpay test checkout appears.
@@ -119,7 +139,7 @@ Redeploy, or re-run the workflow): running deployments keep their old values.
 5. Sign in as `contact@theainf.in` and open `/admin`.
 6. Razorpay dashboard → Webhooks → the theainf.in webhook shows successful deliveries after a test payment.
 
-## 5. Super admin
+## 6. Super admin
 
 `contact@theainf.in` already has super admin rights in the production
 database. To activate them, open `https://theainf.in/sign-up`, sign up with
@@ -130,7 +150,7 @@ admin record automatically, and the setup is in the audit log.
 `/admin/bootstrap` (for example in a new database). A second super admin can be
 created from **Admin → Users** by the first one.
 
-## 6. Everyday releases
+## 7. Everyday releases
 
 ```bash
 git checkout release/v1
