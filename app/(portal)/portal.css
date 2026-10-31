@@ -1033,6 +1033,11 @@ body.ainf-portal b {
   --dash-nav-h: 88px;
 }
 
+/* In-page links (Message AINF) stop below the fixed header, not under it. */
+.pt-app--dash [id] {
+  scroll-margin-top: calc(var(--dash-nav-h) + 16px);
+}
+
 .pt-app--dash .pt-header {
   background: transparent;
   border-bottom: none;
@@ -3383,6 +3388,13 @@ body.ainf-portal b {
   .pt-app--dash {
     --dash-gutter: 12px;
     --dash-nav-h: 72px;
+  }
+
+  /* The whole page scrolls under the floating header here: back the strip around
+     the pill with the page colour so scrolled text never shows above or beside it. */
+  .pt-app--dash .pt-header {
+    background: var(--surface-alt);
+    padding-bottom: 8px;
   }
 
   .pt-menu-btn {

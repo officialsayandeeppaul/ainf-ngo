@@ -167,3 +167,66 @@ export async function removeIdentityOverride(input: {
 
   return { ok: true, user: { ...updated, role }, stillVerified };
 }
+
+/**
+ * An admin made this account a plain Member again: their identity standing goes
+ * with it, so the verify page offers every step afresh. Their Didit and PAN
+ * history stays on file; an active membership is not ended.
+ */
+export async function clearIdentityForMember(input: {
+  userId: string;
+  actor: Actor;
+  context?: RequestContext | null;
+}): Promise<User | null> {
+  const user = await db.user.findUnique({ where: { id: input.userId } });
+  if (!user) return null;
+  if (user.kycStatus === KycStatus.NOT_STARTED && !user.panVerified && !user.identityVerifiedByAdminAt) return user;
+
+  const updated = await db.user.update({
+    where: { id: user.id },
+    data: {
+      kycStatus: KycStatus.NOT_STARTED,
+      panVerified: false,
+      identityVerifiedByAdminAt: null,
+      identityVerifiedByUserId: null,
+      identityVerifiedNote: null,
+    },
+  });
+  await recordAudit({
+    action: AuditAction.IdentityAdminVerificationRemoved,
+    actorUserId: input.actor.userId,
+    actorClerkId: input.actor.clerkId,
+    actorRole: input.actor.role,
+    targetType: "user",
+    targetId: user.id,
+    context: input.context ?? null,
+    metadata: { source: "made_member", previousKyc: user.kycStatus, previousPan: user.panVerified },
+  });
+  return updated;
+}
+
+/**
+ * Verified members whose identity fields never caught up (an admin gave them the
+ * role before the role change also marked the identity) are treated as verified
+ * by the team, so they are not asked to verify again or blocked from a plan.
+ */
+export async function healVerifiedRole(user: User): Promise<User> {
+  if (user.role !== Role.VERIFIED_USER) return user;
+  if (identityReadyForMembership(user, getVerificationPolicy())) return user;
+  const updated = await db.user.update({
+    where: { id: user.id },
+    data: {
+      kycStatus: KycStatus.APPROVED,
+      panVerified: true,
+      identityVerifiedByAdminAt: user.identityVerifiedByAdminAt ?? new Date(),
+      identityVerifiedNote: user.identityVerifiedNote ?? "Given the verified member role by an admin",
+    },
+  });
+  await recordAudit({
+    action: AuditAction.IdentityVerifiedByAdmin,
+    targetType: "user",
+    targetId: user.id,
+    metadata: { source: "verified_role", previousKyc: user.kycStatus, previousPan: user.panVerified },
+  });
+  return updated;
+}

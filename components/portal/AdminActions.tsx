@@ -193,7 +193,13 @@ export function UserRowActions({
         title="Confirm role change"
         body={
           nextRole
-            ? `Change this account from ${ROLE_LABEL[role]} to ${ROLE_LABEL[nextRole]}? The change is audited and takes effect immediately.`
+            ? `Change this account from ${ROLE_LABEL[role]} to ${ROLE_LABEL[nextRole]}? ${
+                nextRole === Role.VERIFIED_USER
+                  ? "Their identity counts as verified by AINF: no ID, PAN or mobile code is asked, and they can take a plan straight away. "
+                  : nextRole === Role.USER
+                    ? "Their identity verification is cleared, so they must verify again before taking a plan. "
+                    : ""
+              }The change is audited and takes effect immediately.`
             : undefined
         }
         confirmLabel="Yes, change role"

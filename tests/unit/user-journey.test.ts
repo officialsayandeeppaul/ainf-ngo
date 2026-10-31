@@ -82,7 +82,7 @@ describe("buildUserJourney", () => {
     expect(events.some((event) => event.title === "Checkout started")).toBe(false);
   });
 
-  it("keeps redundant audit rows when CRM asks for the full trail", () => {
+  it("never lists an event twice (record and its audit row)", () => {
     const registered = new Date("2026-08-01T08:00:00.000Z");
     const events = buildUserJourney(
       {
@@ -99,15 +99,13 @@ describe("buildUserJourney", () => {
             success: true,
             metadata: { amountPaise: 19900 },
           },
+          { createdAt: registered, action: "pan.verify_succeeded", success: true, metadata: {} },
+          { createdAt: registered, action: "kyc.session_created", success: true, metadata: {} },
+          { createdAt: new Date("2026-09-04T09:00:00.000Z"), action: "user.role_changed", success: true, metadata: {} },
         ],
-      },
-      { includeRedundantAudit: true }
+      }
     );
-    expect(events.map((event) => event.title)).toEqual([
-      "Registered",
-      "User created",
-      "Membership order",
-    ]);
+    expect(events.map((event) => event.title)).toEqual(["Registered", "Role changed"]);
   });
 
   it("classifies audit actions into lifecycle kinds", () => {

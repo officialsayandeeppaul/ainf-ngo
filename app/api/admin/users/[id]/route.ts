@@ -10,6 +10,9 @@ import {
   setUserStatusWithNotice,
 } from "@/lib/auth/role-service";
 import { db } from "@/lib/db";
+import { identityReadyForMembership } from "@/lib/donation-rules";
+import { clearIdentityForMember, verifyIdentityByAdmin } from "@/lib/identity-override";
+import { getVerificationPolicy } from "@/lib/verification-policy";
 import { contextFromRequest } from "@/lib/request-context";
 import {
   MANUAL_NOTICE_CHANNELS,
@@ -112,6 +115,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       actor,
       context,
     });
+
+    // The role and the identity standing move together: a verified member needs no
+    // further checks and can take a plan; someone made a plain Member verifies again.
+    if (input.role === Role.VERIFIED_USER && !identityReadyForMembership(updated, getVerificationPolicy())) {
+      await verifyIdentityByAdmin({
+        userId: target.id,
+        note: "Made a verified member",
+        notify: true,
+        actor,
+        context,
+      });
+    } else if (input.role === Role.USER && target.role !== Role.USER) {
+      await clearIdentityForMember({ userId: target.id, actor, context });
+    }
 
     return Response.json({ ok: true, role: updated.role });
   }

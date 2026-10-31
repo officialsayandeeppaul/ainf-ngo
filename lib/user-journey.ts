@@ -11,10 +11,16 @@ export type JourneyEvent = {
   kind: JourneyKind;
 };
 
+// Audit rows that repeat an event the timeline already shows from its own record
+// (sign-up, checkout, payment, Didit session, PAN check). The raw audit table keeps them.
 const SKIP_AUDIT = new Set([
   "user.created",
   "membership.order_created",
   "membership.payment_captured",
+  "kyc.session_created",
+  "pan.verify_attempted",
+  "pan.verify_succeeded",
+  "pan.verify_failed",
 ]);
 
 function orderLine(
@@ -99,8 +105,7 @@ export function buildUserJourney(
       creditLabel?: string | null;
     }>;
     audit: Array<{ createdAt: Date; action: string; success: boolean; metadata: unknown }>;
-  },
-  options?: { includeRedundantAudit?: boolean }
+  }
 ): JourneyEvent[] {
   const events: JourneyEvent[] = [
     {
@@ -189,7 +194,7 @@ export function buildUserJourney(
   }
 
   for (const entry of input.audit) {
-    if (!options?.includeRedundantAudit && SKIP_AUDIT.has(entry.action)) continue;
+    if (SKIP_AUDIT.has(entry.action)) continue;
     events.push({
       at: iso(entry.createdAt),
       title: auditActionLabel(entry.action),

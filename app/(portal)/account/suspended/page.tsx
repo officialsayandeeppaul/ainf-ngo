@@ -95,7 +95,7 @@ export default async function SuspendedPage() {
             and quote {contactLine}.
           </p>
           <div className="pt-btn-row" style={{ marginTop: 18 }}>
-            <a href="#ainf-messages" className="pt-btn pt-btn--primary">
+            <a href="#ainf-write" className="pt-btn pt-btn--primary">
               Message AINF
             </a>
             <a href="/" className="pt-btn pt-btn--ghost">
@@ -114,7 +114,7 @@ export default async function SuspendedPage() {
           />
         </section>
 
-        <section className="pt-card" style={{ marginTop: 18 }}>
+        <section className="pt-card" id="ainf-write" style={{ marginTop: 18 }}>
           <h2 className="pt-section-title">Write to AINF</h2>
           <MemberMessageForm
             name={memberName}

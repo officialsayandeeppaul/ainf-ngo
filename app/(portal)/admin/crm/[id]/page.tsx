@@ -283,8 +283,7 @@ export default async function AdminCrmDossierPage({
         creditLabel: order.creditPaise > 0 ? formatInr(order.creditPaise) : null,
       })),
       audit: [...journeyAudit].reverse(),
-    },
-    { includeRedundantAudit: true }
+    }
   );
 
   return (

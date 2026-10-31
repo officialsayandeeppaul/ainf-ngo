@@ -38,7 +38,14 @@ vi.mock("@/lib/audit", async () => {
   return { AuditAction: actual.AuditAction, recordAudit: h.audit };
 });
 
-import { identityFromOwnRecords, removeIdentityOverride, verifyIdentityByAdmin } from "@/lib/identity-override";
+import {
+  clearIdentityForMember,
+  healVerifiedRole,
+  identityFromOwnRecords,
+  removeIdentityOverride,
+  verifyIdentityByAdmin,
+} from "@/lib/identity-override";
+import type { User } from "@prisma/client";
 
 const actor = { userId: "admin_1", clerkId: "clerk_admin", role: "SUPER_ADMIN" as const };
 
@@ -128,5 +135,31 @@ describe("admin verification", () => {
 
   it("refuses to remove a verification an admin never gave", async () => {
     expect(await removeIdentityOverride({ userId: "user_1", actor })).toMatchObject({ ok: false, status: 409 });
+  });
+});
+
+describe("role and identity move together", () => {
+  it("a verified member whose identity lagged the role is treated as verified by the team", async () => {
+    h.user = { ...h.user, role: "VERIFIED_USER" };
+    const healed = await healVerifiedRole(h.user as unknown as User);
+    expect(healed).toMatchObject({ kycStatus: "APPROVED", panVerified: true });
+    expect(healed.identityVerifiedByAdminAt).toBeInstanceOf(Date);
+    expect(h.audit).toHaveBeenCalledWith(expect.objectContaining({ action: "kyc.admin_verified", targetId: "user_1" }));
+  });
+
+  it("leaves members and already-verified accounts alone", async () => {
+    await healVerifiedRole(h.user as unknown as User);
+    h.user = { ...h.user, role: "VERIFIED_USER", kycStatus: "APPROVED", panVerified: true };
+    await healVerifiedRole(h.user as unknown as User);
+    expect(h.updates).toEqual([]);
+  });
+
+  it("made a plain Member: identity is cleared so they verify again", async () => {
+    h.user = { ...h.user, role: "USER", kycStatus: "APPROVED", panVerified: true, identityVerifiedByAdminAt: new Date() };
+    const cleared = await clearIdentityForMember({ userId: "user_1", actor });
+    expect(cleared).toMatchObject({ kycStatus: "NOT_STARTED", panVerified: false, identityVerifiedByAdminAt: null });
+    expect(h.audit).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "kyc.admin_verification_removed", metadata: expect.objectContaining({ source: "made_member" }) })
+    );
   });
 });

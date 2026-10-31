@@ -101,7 +101,8 @@ export default async function VerifyPage({
 
   const approved = fresh.kycStatus === KycStatus.APPROVED;
   const inReview = fresh.kycStatus === KycStatus.IN_REVIEW;
-  const panDone = Boolean(fresh.panVerified || panRecord);
+  // The account flag, not an old PAN row: an admin can clear it (made a plain Member).
+  const panDone = fresh.panVerified;
   const showPan = policy.pan && (!policy.didit || approved);
   const showOtp = policy.otp && !approved;
   const allDone = approved && (!policy.pan || panDone);
@@ -234,7 +235,7 @@ export default async function VerifyPage({
             {showPan ? (
               <PanFlow
                 title={policy.didit ? "Step 2 — PAN" : "PAN"}
-                initialLast4={panRecord?.panLast4 ?? null}
+                initialLast4={panDone ? (panRecord?.panLast4 ?? null) : null}
               />
             ) : null}
 

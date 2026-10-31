@@ -107,7 +107,13 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     const fresh = expired
       ? ((await db.user.findUnique({ where: { id: existing.id } })) ?? existing)
       : existing;
-    const user = await touchLastSeen(fresh);
+    // A verified member whose identity fields lag the role is fixed on the spot (lazy: that
+    // module imports role-service too).
+    const healed =
+      fresh.role === Role.VERIFIED_USER
+        ? await (await import("../identity-override")).healVerifiedRole(fresh)
+        : fresh;
+    const user = await touchLastSeen(healed);
     return { clerkId, user, role: user.role };
   }
 
