@@ -52,14 +52,32 @@
     else if (type === "text" || type === "search") el.maxLength = /amount/i.test(el.name || "") ? 9 : 80;
   }
 
+  function ainfIsPhone(el) {
+    return Boolean(el && el.tagName === "INPUT" && el.matches(AINF_PHONE_FIELD));
+  }
+
+  // Number keypad: set on the tap itself (before the keyboard opens) and again
+  // on focus and typing, since Framer can swap in a fresh input meanwhile.
+  function ainfPreparePhone(el) {
+    if (el.getAttribute("inputmode") !== "numeric") el.setAttribute("inputmode", "numeric");
+    if (el.getAttribute("autocomplete") !== "tel-national") el.setAttribute("autocomplete", "tel-national");
+  }
+
+  document.addEventListener(
+    "pointerdown",
+    function (event) {
+      if (ainfIsPhone(event.target)) ainfPreparePhone(event.target);
+    },
+    true
+  );
+
   document.addEventListener(
     "focusin",
     function (event) {
       var el = event.target;
       if (!el || !el.tagName) return;
-      if (el.tagName === "INPUT" && el.matches(AINF_PHONE_FIELD)) {
-        if (el.getAttribute("inputmode") !== "numeric") el.setAttribute("inputmode", "numeric");
-        if (el.getAttribute("autocomplete") !== "tel-national") el.setAttribute("autocomplete", "tel-national");
+      if (ainfIsPhone(el)) {
+        ainfPreparePhone(el);
         return;
       }
       ainfCapField(el);
@@ -71,7 +89,8 @@
     "input",
     function (event) {
       var el = event.target;
-      if (!el || el.tagName !== "INPUT" || !el.matches(AINF_PHONE_FIELD)) return;
+      if (!ainfIsPhone(el)) return;
+      ainfPreparePhone(el);
       var clean = ainfMobileDigits(el.value);
       if (clean === el.value) return;
       if (AINF_VALUE_SETTER) AINF_VALUE_SETTER.call(el, clean);
