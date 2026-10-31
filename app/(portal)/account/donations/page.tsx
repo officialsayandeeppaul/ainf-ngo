@@ -40,7 +40,7 @@ export default async function AccountDonationsPage() {
   ]);
 
   return (
-    <DashShell role={role} currentPath="/account/donations">
+    <DashShell role={role} currentPath="/account/donations" verifiedByAdmin={Boolean(user.identityVerifiedByAdminAt)}>
       <main className="pt-main">
         <h1 className="pt-title">Your donations</h1>
         <p className="pt-subtitle">

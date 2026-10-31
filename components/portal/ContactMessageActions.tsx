@@ -29,6 +29,7 @@ export function ContactMessageActions({
   emailConfigured,
   emailHint,
   canEmailRecipient,
+  inboxMember,
   activity,
 }: {
   id: string;
@@ -36,6 +37,8 @@ export function ContactMessageActions({
   emailConfigured: boolean;
   emailHint?: string | null;
   canEmailRecipient?: boolean;
+  /** The member account this thread files under; their dashboard shows the reply. */
+  inboxMember?: { suspended: boolean } | null;
   activity: MessageActivityItem[];
 }) {
   const router = useRouter();
@@ -50,6 +53,11 @@ export function ContactMessageActions({
   const disabled = busy || pending;
   const canReply = reply.trim().length >= 5;
   const emailAllowed = Boolean(emailConfigured && canEmailRecipient !== false);
+  const inboxLine = inboxMember
+    ? inboxMember.suspended
+      ? "No email is sent. They see the reply on their suspended page when they sign in."
+      : "No email is sent. They see the reply under Messages on their dashboard."
+    : "No email is sent. They have no AINF account, so the reply is kept on this thread only.";
 
   async function run(body: unknown) {
     setBusy(true);
@@ -162,7 +170,11 @@ export function ContactMessageActions({
             Save in inbox only
           </button>
         </div>
-        {!emailConfigured ? (
+        {!sendEmail ? (
+          <p className="pt-hint" style={{ marginTop: 8 }}>
+            {inboxLine}
+          </p>
+        ) : !emailConfigured ? (
           <p className="pt-hint" style={{ marginTop: 8 }}>
             Resend is not configured — replies stay in the inbox only.
           </p>
@@ -172,9 +184,9 @@ export function ContactMessageActions({
           </p>
         ) : (
           <p className="pt-hint" style={{ marginTop: 8 }}>
-            {sendEmail
-              ? "Email goes from the AINF address to their inbox, with their message quoted."
-              : "No email is sent. The reply is stored on this thread only."}
+            {inboxMember
+              ? "Email goes from the AINF address to their inbox, with their message quoted. It also shows under Messages on their dashboard."
+              : "Email goes from the AINF address to their inbox, with their message quoted."}
           </p>
         )}
 
@@ -221,7 +233,7 @@ export function ContactMessageActions({
         body={
           sendEmail
             ? "This sends a standard AINF-formatted email to their address, and stores the reply here."
-            : "The reply is stored on this message only. No email will be sent."
+            : inboxLine
         }
         confirmLabel={sendEmail ? "Send email" : "Save reply"}
         busy={disabled}

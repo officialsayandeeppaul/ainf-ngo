@@ -60,6 +60,37 @@ export default async function VerifyPage({
 
   const fresh = await db.user.findUniqueOrThrow({ where: { id: user.id } });
 
+  // Verified by the AINF team: there is nothing to submit, so no steps are offered.
+  if (fresh.identityVerifiedByAdminAt) {
+    return (
+      <DashShell role={role} currentPath="/account/verify" verifiedByAdmin>
+        <main className="pt-main">
+          <h1 className="pt-title">You are verified</h1>
+          <p className="pt-subtitle">The AINF team confirmed your identity directly.</p>
+          <section className="pt-card pt-card--hero">
+            <DoneArt />
+            <div>
+              <p className="pt-alert__title">Verified by the AINF team</p>
+              <p className="pt-hint" style={{ margin: "6px 0 0" }}>
+                Confirmed on {formatDayTime(fresh.identityVerifiedByAdminAt)}. No ID, PAN or mobile code is
+                needed, and nothing more is asked of you.
+              </p>
+            </div>
+          </section>
+          <section className="pt-card" style={{ marginTop: 18 }}>
+            <h2 className="pt-section-title">Next step</h2>
+            <p className="pt-hint">You can take a Field Sevak plan now.</p>
+            <p style={{ marginTop: 14 }}>
+              <Link href="/account/membership" className="pt-btn pt-btn--primary">
+                Continue to your plan
+              </Link>
+            </p>
+          </section>
+        </main>
+      </DashShell>
+    );
+  }
+
   const [latestKyc, panRecord] = await Promise.all([
     db.kycVerification.findFirst({ where: { userId: user.id }, orderBy: { createdAt: "desc" } }),
     db.panVerification.findFirst({

@@ -170,6 +170,17 @@ export default async function AdminMessageDetailPage({
     },
   });
 
+  // The member account this message files under (see lib/member-inbox), if any.
+  const account = await db.user.findFirst({
+    where: {
+      OR: [
+        { email: row.email.trim().toLowerCase() },
+        ...(row.phone ? [{ phone: row.phone, email: { endsWith: "@mobile.theainf.in" } }] : []),
+      ],
+    },
+    select: { id: true, firstName: true, lastName: true, status: true },
+  });
+
   const activity = buildActivity({ row, audits });
   const delivery = describeResendDelivery(row.email);
 
@@ -220,6 +231,17 @@ export default async function AdminMessageDetailPage({
               <dd>
                 {row.phone ? <a href={`tel:${row.phone.replace(/\s+/g, "")}`}>{row.phone}</a> : "—"}
               </dd>
+              <dt>AINF account</dt>
+              <dd>
+                {account ? (
+                  <Link href={`/admin/crm/${account.id}`}>
+                    {[account.firstName, account.lastName].filter(Boolean).join(" ") || "Open member"}
+                    {account.status !== "ACTIVE" ? " (suspended)" : ""}
+                  </Link>
+                ) : (
+                  "None — not a signed-up member"
+                )}
+              </dd>
               <dt>Received</dt>
               <dd>{formatDayTime(row.createdAt)}</dd>
               <dt>Status</dt>
@@ -261,6 +283,7 @@ export default async function AdminMessageDetailPage({
           emailConfigured={isResendConfigured}
           canEmailRecipient={delivery.canEmail}
           emailHint={delivery.hint}
+          inboxMember={account ? { suspended: account.status !== "ACTIVE" } : null}
           activity={activity}
         />
       </main>

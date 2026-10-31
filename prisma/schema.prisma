@@ -108,6 +108,7 @@ model User {
   membershipCard   MembershipCard?
   cardPhoto        CardPhoto?
   paymentInterests PaymentInterest[]
+  memberMessages   MemberMessage[]
 
   @@index([role])
   @@index([kycStatus])
@@ -612,6 +613,20 @@ enum ContactMessageStatus {
   REVIEWED
   REPLIED
   ARCHIVED
+}
+
+/// A message from AINF to one member. Never emailed: it shows under Messages on
+/// their dashboard, and on the suspended page while their account is suspended.
+model MemberMessage {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body         String
+  sentByUserId String?
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }
 
 /// Public contact-us form submissions for the admin inbox.

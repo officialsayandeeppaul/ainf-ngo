@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { AuditAction, recordAudit } from "@/lib/audit";
+import { getClerkUserId } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { sendAdminAlertEmail } from "@/lib/email";
 import { isDatabaseConfigured } from "@/lib/env";
+import { accountContactFor } from "@/lib/member-inbox";
 import { e164India, indianMobile } from "@/lib/mobile-auth";
 import { checkRateLimit, rateLimitResponse } from "@/lib/ratelimit";
 import { contextFromRequest } from "@/lib/request-context";
@@ -68,6 +70,13 @@ export async function POST(request: Request) {
   }
 
   const data = pick(raw);
+  // A signed-in member's message is saved under their account, so it and the
+  // team's reply show under Messages on their dashboard.
+  const clerkId = await getClerkUserId().catch(() => null);
+  const member = clerkId
+    ? await db.user.findUnique({ where: { clerkId }, select: { email: true, phone: true } })
+    : null;
+  if (member) data.email = accountContactFor(member, { email: data.email, phone: null }).email;
   if (data.name.length < 2 || !emailOk.test(data.email) || data.body.length < 5) {
     return Response.json(
       { error: "invalid_input", message: "Name, a valid email, and a short message are required." },
@@ -87,6 +96,7 @@ export async function POST(request: Request) {
     }
     data.phone = e164India(mobile);
   }
+  if (member) data.phone = accountContactFor(member, { email: data.email, phone: data.phone }).phone;
 
   const row = await db.contactMessage.create({
     data: {
@@ -119,5 +129,12 @@ export async function POST(request: Request) {
     ],
   });
 
-  return Response.json({ ok: true, id: row.id, message: "Thank you — your message reached AINF." });
+  return Response.json({
+    ok: true,
+    id: row.id,
+    inbox: Boolean(member),
+    message: member
+      ? "Thank you — your message reached AINF. The reply will appear under Messages in your dashboard."
+      : "Thank you — your message reached AINF.",
+  });
 }

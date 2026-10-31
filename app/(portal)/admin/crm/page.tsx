@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KycStatus, MembershipOrderStatus, Role, UserStatus } from "@prisma/client";
+import { DonationStatus, KycStatus, MembershipOrderStatus, Role, UserStatus } from "@prisma/client";
 import { requirePageSuperAdmin } from "@/lib/auth/guard";
 import { CRM_PAGE_SIZE, crmListHref, crmUserOrder, crmUserWhere, parseCrmQuery } from "@/lib/crm-filters";
 import { paidByMonth, paidByPlan } from "@/lib/crm-metrics";
@@ -13,6 +13,8 @@ import { membershipIsLive } from "@/lib/membership-state";
 import { UserRowActions } from "@/components/portal/AdminActions";
 import { contactLine } from "@/lib/account-contact";
 import { suspensionForAdmin } from "@/lib/suspension";
+import { normalizeDonorEmail } from "@/lib/user-donations";
+import { kycLabel } from "@/lib/plain-labels";
 import { CrmBars, CrmSpark, CrmStat } from "@/components/portal/CrmCharts";
 import { DashShell } from "@/components/portal/DashShell";
 import { Pagination } from "@/components/portal/Pagination";
@@ -103,12 +105,45 @@ export default async function AdminCrmPage({
         });
   const spend = new Map(paidByUser.map((row) => [row.userId, row]));
 
+  // Donations are matched to members by the email they gave under (see lib/user-donations).
+  const listEmails = [...new Set(users.map((user) => normalizeDonorEmail(user.email)).filter(Boolean))];
+  const [giftsByEmail, memberGiftTotals, recentGifts] = await Promise.all([
+    listEmails.length === 0
+      ? Promise.resolve([])
+      : db.donation.groupBy({
+          by: ["donorEmail"],
+          where: { donorEmail: { in: listEmails }, status: DonationStatus.PAID },
+          _sum: { amountPaise: true },
+          _count: { _all: true },
+        }),
+    db.$queryRaw<Array<{ paise: bigint | null; gifts: bigint }>>`
+      SELECT SUM(d."amountPaise") AS paise, COUNT(*) AS gifts
+      FROM "Donation" d JOIN "User" u ON lower(u.email) = d."donorEmail"
+      WHERE d.status = 'PAID'`,
+    db.$queryRaw<Array<{ amountPaise: number; paidAt: Date | null; createdAt: Date }>>`
+      SELECT d."amountPaise", d."paidAt", d."createdAt"
+      FROM "Donation" d JOIN "User" u ON lower(u.email) = d."donorEmail"
+      WHERE d.status = 'PAID'
+      ORDER BY d."paidAt" DESC NULLS LAST
+      LIMIT 400`,
+  ]);
+  const gifts = new Map(giftsByEmail.map((row) => [row.donorEmail, row]));
+  const memberGiftPaise = Number(memberGiftTotals[0]?.paise ?? 0);
+  const memberGiftCount = Number(memberGiftTotals[0]?.gifts ?? 0);
+
   const monthPoints = paidByMonth(
-    recentPaid.map((order) => ({
-      paidAt: order.paidAt,
-      createdAt: order.createdAt,
-      amountPaise: order.amountPaise,
-    })),
+    [
+      ...recentPaid.map((order) => ({
+        paidAt: order.paidAt,
+        createdAt: order.createdAt,
+        amountPaise: order.amountPaise,
+      })),
+      ...recentGifts.map((gift) => ({
+        paidAt: gift.paidAt,
+        createdAt: gift.createdAt,
+        amountPaise: Number(gift.amountPaise),
+      })),
+    ],
     6,
     now
   );
@@ -117,7 +152,7 @@ export default async function AdminCrmPage({
   );
 
   const pages = Math.max(1, Math.ceil(total / CRM_PAGE_SIZE));
-  const paidTotal = paid._sum.amountPaise ?? 0;
+  const paidTotal = (paid._sum.amountPaise ?? 0) + memberGiftPaise;
 
   return (
     <DashShell role={viewerRole} currentPath="/admin/crm">
@@ -212,7 +247,7 @@ export default async function AdminCrmPage({
                   { value: "", label: "All identity states" },
                   ...Object.values(KycStatus).map((status) => ({
                     value: status,
-                    label: status.toLowerCase().replaceAll("_", " "),
+                    label: kycLabel(status),
                   })),
                 ]}
               />
@@ -298,7 +333,7 @@ export default async function AdminCrmPage({
           <CrmStat
             label="Paid to date"
             value={formatInr(paidTotal)}
-            hint={`${paid._count} captured payment${paid._count === 1 ? "" : "s"}`}
+            hint={`${paid._count} membership payment${paid._count === 1 ? "" : "s"} · ${memberGiftCount} donation${memberGiftCount === 1 ? "" : "s"}`}
           />
           <CrmStat label="Verified" value={String(verifiedCount)} hint="Didit approved or verified role" />
         </div>
@@ -336,6 +371,15 @@ export default async function AdminCrmPage({
                   {users.map((user) => {
                     const live = membershipIsLive(user);
                     const money = spend.get(user.id);
+                    const gift = gifts.get(normalizeDonorEmail(user.email));
+                    const membershipPaise = money?._sum.amountPaise ?? 0;
+                    const giftPaise = gift?._sum.amountPaise ?? 0;
+                    const paidLines = [
+                      money?._count._all
+                        ? `${money._count._all} membership payment${money._count._all === 1 ? "" : "s"}`
+                        : null,
+                      gift?._count._all ? `${gift._count._all} donation${gift._count._all === 1 ? "" : "s"}` : null,
+                    ].filter(Boolean);
                     return (
                       <tr key={user.id}>
                         <td>
@@ -364,16 +408,14 @@ export default async function AdminCrmPage({
                               <div className="pt-crm-email">until {formatDay(user.membershipExpiresAt)}</div>
                             </>
                           ) : (
-                            <span className="pt-crm-email">{money ? "Lapsed" : "Never paid"}</span>
+                            <span className="pt-crm-email">{money ? "Lapsed" : "No plan"}</span>
                           )}
                         </td>
                         <td>
-                          {money?._sum.amountPaise ? (
+                          {membershipPaise + giftPaise > 0 ? (
                             <>
-                              <strong>{formatInr(money._sum.amountPaise)}</strong>
-                              <div className="pt-crm-email">
-                                {money._count._all} payment{money._count._all === 1 ? "" : "s"}
-                              </div>
+                              <strong>{formatInr(membershipPaise + giftPaise)}</strong>
+                              <div className="pt-crm-email">{paidLines.join(" · ")}</div>
                             </>
                           ) : (
                             <span className="pt-crm-email">₹0</span>

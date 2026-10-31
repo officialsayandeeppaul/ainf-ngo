@@ -100,6 +100,9 @@
       for (var i = 0; i < state.compactKeys.length; i++) {
         var ck = state.compactKeys[i];
         if (ck.length < 10) continue;
+        // A short key only names a longer text when it covers most of it: "Nari Suraksha"
+        // is not a translation of a whole sentence that starts with those words.
+        if (ck.length * 2 < c.length) continue;
         if (c.indexOf(ck) === 0 && ck.length > best.length) best = ck;
       }
       if (best) return state.compact[best];
@@ -204,15 +207,147 @@
     return leaves;
   }
 
+  // Letters go into one inline-block per word, so a line only ever breaks between
+  // words (as page boot does with [data-ainf-word]); bare letters broke mid-word.
+  function buildLetterWords(wrap, chars, visible) {
+    var word = null;
+    var spans = [];
+    wrap.textContent = "";
+    chars.forEach(function (ch) {
+      if (/^\s+$/.test(ch)) {
+        word = null;
+        wrap.appendChild(document.createTextNode(" "));
+        return;
+      }
+      if (!word) {
+        word = document.createElement("span");
+        word.className = "ainf-letter-word";
+        word.style.display = "inline-block";
+        word.style.whiteSpace = "nowrap";
+        wrap.appendChild(word);
+      }
+      var s = document.createElement("span");
+      s.className = visible ? "ainf-letter is-in" : "ainf-letter is-out";
+      s.style.display = "inline-block";
+      s.style.whiteSpace = "pre";
+      s.style.opacity = visible ? "1" : "0.001";
+      s.style.filter = visible ? "blur(0px)" : "blur(8px)";
+      s.style.transform = visible ? "translate3d(0,0,0)" : "translate3d(0,10px,0)";
+      s.textContent = ch;
+      word.appendChild(s);
+      spans.push(s);
+    });
+    return spans;
+  }
+
+  // The English children of every element we rewrite, kept from just before the
+  // first rewrite. Switching back to English puts those same nodes back, so the
+  // page is exactly what it was (word groups, line breaks, counters, no stray spans).
+  var englishNodes = new WeakMap();
+
+  // Spacing and case only: "Our mission" (the CMS label) is the English for key "Our Mission".
+  function looseText(text) {
+    return normalize(text).replace(/\s+/g, "").toLowerCase();
+  }
+
+  function rememberEnglish(el) {
+    if (!el || state.lang === "en" || englishNodes.has(el)) return;
+    if (INDIC.test(el.textContent || "")) return;
+    englishNodes.set(el, Array.prototype.slice.call(el.childNodes));
+  }
+
+  function restoreEnglish(el, english) {
+    var saved = el && englishNodes.get(el);
+    if (!saved || !saved.length) return false;
+    var kids = el.childNodes;
+    var same = saved.length === kids.length;
+    for (var i = 0; same && i < saved.length; i++) same = saved[i] === kids[i];
+    if (same) return false;
+    var text = "";
+    saved.forEach(function (node) {
+      text += textIgnoringGhost(node);
+    });
+    if (INDIC.test(text)) return false;
+    // Still showing our Hindi/Bengali: its own English is right even when the key was
+    // only a near match. Otherwise put it back only if it is that English.
+    if (!INDIC.test(el.textContent || "") && english && looseText(text) !== looseText(english)) return false;
+    el.textContent = "";
+    saved.forEach(function (node) {
+      el.appendChild(node);
+    });
+    el.removeAttribute("data-ainf-letter-armed");
+    // Letters may have played out (scrolled away) while they were detached.
+    el.querySelectorAll(".ainf-letter").forEach(function (span) {
+      span.classList.add("is-in");
+      span.classList.remove("is-out");
+      span.style.opacity = "1";
+      span.style.filter = "blur(0px)";
+      span.style.transform = "translate3d(0,0,0)";
+    });
+    return true;
+  }
+
+  // English for this element: its own nodes back when we have them, else `write`.
+  function writeLocalized(el, next, write) {
+    if (state.lang === "en") {
+      if (restoreEnglish(el, next)) return;
+      // Already English and only spacing differs (a <br> between words): keep the markup.
+      var now = el.textContent || "";
+      if (!INDIC.test(now) && looseText(now) === looseText(next)) return;
+    } else {
+      rememberEnglish(el);
+    }
+    write();
+  }
+
   function fillLetterSpans(el, text) {
     if (!el || !text) return false;
+    var chars = graphemes(text).filter(function (ch) {
+      return ch !== "\n" && ch !== "\r";
+    });
+    if (state.lang === "en" && restoreEnglish(el, text)) return true;
+    var ownWrap = el.querySelector("[data-ainf-letter-wrap]");
+    if (ownWrap) {
+      buildLetterWords(ownWrap, chars, true);
+      return true;
+    }
     var leaves = letterLeaves(el);
     // Letters we split ourselves can be few (শিক্ষা is two graphemes); back in English
     // they still need refilling, or the word stays in Bengali/Hindi until a reload.
     if (!leaves.length || (leaves.length < 4 && !el.querySelector("[data-ainf-letter-wrap]"))) return false;
-    var chars = graphemes(text).filter(function (ch) {
-      return ch !== "\n" && ch !== "\r";
+    if (state.lang !== "en") {
+      // Framer's spans hold one English letter or word each; pouring another script's
+      // letters into them broke words apart. Show whole words in our own wrap instead;
+      // the English spans are kept aside and come back when switching to English.
+      rememberEnglish(el);
+      var wrap = document.createElement("span");
+      wrap.setAttribute("data-ainf-letter-wrap", "1");
+      wrap.className = "ainf-letter-wrap";
+      wrap.style.whiteSpace = "pre-wrap";
+      el.textContent = "";
+      el.appendChild(wrap);
+      buildLetterWords(wrap, chars, true);
+      return true;
+    }
+    var wordSpans = leaves.some(function (leaf) {
+      return (leaf.textContent || "").replace(/\s+/g, "").length > 1;
     });
+    if (wordSpans) {
+      // Framer's word effect: one word per span, any extra words after the last one.
+      var words = normalize(text).split(" ");
+      leaves.forEach(function (leaf, n) {
+        if (n < words.length) {
+          leaf.textContent = n === leaves.length - 1 ? words.slice(n).join(" ") : words[n];
+          leaf.style.removeProperty("display");
+          leaf.removeAttribute("aria-hidden");
+        } else {
+          leaf.textContent = "";
+          leaf.style.setProperty("display", "none", "important");
+          leaf.setAttribute("aria-hidden", "true");
+        }
+      });
+      return true;
+    }
     var i;
     for (i = 0; i < leaves.length; i++) {
       if (i < chars.length) {
@@ -366,28 +501,11 @@
     }
     el.appendChild(wrap);
     if (!el.style.position || el.style.position === "static") el.style.position = "relative";
-    chars.forEach(function (ch) {
-      var s = document.createElement("span");
-      s.className = "ainf-letter is-out";
-      s.style.display = "inline-block";
-      s.style.whiteSpace = "pre";
-      s.textContent = ch === " " ? "\u00a0" : ch;
-      if (alreadyPlayed) {
-        s.className = "ainf-letter is-in";
-        s.style.opacity = "1";
-        s.style.filter = "blur(0px)";
-        s.style.transform = "translate3d(0,0,0)";
-      } else {
-        s.style.opacity = "0.001";
-        s.style.filter = "blur(8px)";
-        s.style.transform = "translate3d(0,10px,0)";
-      }
-      wrap.appendChild(s);
-    });
+    var letters = buildLetterWords(wrap, chars, alreadyPlayed);
     if (!alreadyPlayed) {
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          runLetterWave(wrap.children, true, false);
+          runLetterWave(letters, true, false);
           if (keepGhost) {
             window.setTimeout(function () {
               keepGhost.classList.add("is-out");
@@ -408,8 +526,8 @@
       var vh = window.innerHeight || 800;
       var show = r.height > 4 && r.bottom > vh * 0.1 && r.top < vh * 0.82;
       letterScrollState.set(el, show);
-      if (!show && wrap.children.length >= 4) {
-        runLetterWave(wrap.children, false, true);
+      if (!show && letters.length >= 4) {
+        runLetterWave(letters, false, true);
       }
     });
     watchLetterOut(el);
@@ -545,6 +663,11 @@
       el.textContent = text;
       return;
     }
+    if (state.lang === "en") {
+      if (restoreEnglish(el, text)) return;
+    } else {
+      rememberEnglish(el);
+    }
     if (
       normalize(textIgnoringGhost(el)) === normalize(text) &&
       hasLetterAnimation(el) &&
@@ -660,7 +783,9 @@
         if (hasLetterAnimation(target) || hasLetterAnimation(container)) {
           replaceAnimatedHeading(target, next);
         } else {
-          target.textContent = next;
+          writeLocalized(target, next, function () {
+            target.textContent = next;
+          });
         }
       });
   }
@@ -720,7 +845,10 @@
       if (!key) return;
       var next = translateKey(key, lang);
       ps.forEach(function (p) {
-        p.textContent = next;
+        if (normalize(p.textContent) === normalize(next)) return;
+        writeLocalized(p, next, function () {
+          p.textContent = next;
+        });
       });
     });
   }
@@ -791,18 +919,30 @@
         containers.forEach(function (container, idx) {
           var textTarget = container.querySelector("p, span") || container;
           if (normalize(textTarget.textContent) !== normalize(next)) {
-            textTarget.textContent = next;
+            writeLocalized(textTarget, next, function () {
+              textTarget.textContent = next;
+            });
           }
-          if (idx > 0) {
-            container.style.setProperty("display", "none", "important");
-            container.setAttribute("aria-hidden", "true");
-          }
+          if (idx > 0) hideButtonCopy(container, lang);
         });
         var ps = anchor.querySelectorAll("p");
-        for (var i = 1; i < ps.length; i++) {
-          ps[i].style.setProperty("display", "none", "important");
-        }
+        for (var i = 1; i < ps.length; i++) hideButtonCopy(ps[i], lang);
       });
+  }
+
+  // Framer buttons carry a second copy of the label for their hover roll. A longer
+  // Hindi/Bengali label peeks out of it, so it is hidden there and shown again in English.
+  function hideButtonCopy(el, lang) {
+    if (lang === "en") {
+      if (el.getAttribute("data-ainf-roll-hidden") !== "1") return;
+      el.style.removeProperty("display");
+      el.removeAttribute("aria-hidden");
+      el.removeAttribute("data-ainf-roll-hidden");
+      return;
+    }
+    el.style.setProperty("display", "none", "important");
+    el.setAttribute("aria-hidden", "true");
+    el.setAttribute("data-ainf-roll-hidden", "1");
   }
 
   function looksLikeGreenPill(el) {
@@ -880,8 +1020,15 @@
       var trimmed = normalize(raw);
       if (!trimmed || trimmed.length < 2) continue;
       if (lang === "en" && !INDIC.test(raw)) continue;
+      // Back in English the node gets its own text, not the dictionary key ("Our mission",
+      // not "Our Mission").
+      if (lang === "en" && typeof node.__ainfEn === "string") {
+        node.textContent = node.__ainfEn;
+        continue;
+      }
       var next = translateText(trimmed, lang);
       if (!next || normalize(raw) === normalize(next)) continue;
+      if (lang !== "en" && typeof node.__ainfEn !== "string" && !INDIC.test(raw)) node.__ainfEn = raw;
       node.textContent = raw.replace(trimmed, next);
     }
   }
@@ -894,8 +1041,17 @@
         var val = el.getAttribute(attr);
         if (!val) return;
         if (lang === "en" && !INDIC.test(val)) return;
+        var own = el.__ainfAttrEn || null;
+        if (lang === "en" && own && typeof own[attr] === "string") {
+          el.setAttribute(attr, own[attr]);
+          return;
+        }
         var next = translateText(val, lang);
         if (next && normalize(val) !== normalize(next)) {
+          if (lang !== "en" && !INDIC.test(val)) {
+            el.__ainfAttrEn = own || {};
+            if (typeof el.__ainfAttrEn[attr] !== "string") el.__ainfAttrEn[attr] = val;
+          }
           el.setAttribute(attr, next);
         }
       });
@@ -921,9 +1077,13 @@
       } else if (el.childElementCount && el.querySelector("p, span.framer-text")) {
         var inner = el.querySelector("p.framer-text, span.framer-text, p, span") || el;
         if (hasLetterAnimation(inner) || inner.closest("h1, h2, h3, h4")) return;
-        inner.textContent = next;
+        writeLocalized(inner, next, function () {
+          inner.textContent = next;
+        });
       } else {
-        el.textContent = next;
+        writeLocalized(el, next, function () {
+          el.textContent = next;
+        });
       }
     });
   }
@@ -973,6 +1133,12 @@
       state.applying = false;
       // Our own text writes are not Framer re-rendering; drop them so they do not re-trigger us.
       if (state.observer) state.observer.takeRecords();
+    }
+    if (switched) {
+      // Page scripts that own CMS text (project cards) re-apply it for the new language.
+      try {
+        document.dispatchEvent(new CustomEvent("ainf:language", { detail: { lang: lang } }));
+      } catch (_) {}
     }
   }
 
@@ -1180,7 +1346,9 @@
       '[data-framer-name="Menu Items"], [data-framer-name="Quick links"]'
     );
     var mobileHost = menus[0] || document.querySelector('[data-framer-name="Menu"]');
-    if (mobileHost && !document.getElementById(SWITCHER_ID + "-mobile")) {
+    // The shared nav has a switcher at every width. A second one in the footer menu
+    // only appeared after the first switch and pushed the footer down by its height.
+    if (mobileHost && !sharedRight && !document.getElementById(SWITCHER_ID + "-mobile")) {
       var mobile = createSwitcherShell("mobile");
       mobileHost.insertBefore(mobile, mobileHost.firstChild);
     }

@@ -13,6 +13,8 @@ import { formatDay } from "@/lib/format-date";
 import { formatInr } from "@/lib/membership";
 import { membershipIsLive } from "@/lib/membership-state";
 import { getUserGiving } from "@/lib/user-donations";
+import { plainCode } from "@/lib/plain-labels";
+import { unreadMemberMessages } from "@/lib/member-inbox";
 
 export const metadata: Metadata = { title: "Your account" };
 export const dynamic = "force-dynamic";
@@ -40,7 +42,7 @@ export default async function AccountPage() {
   const { user, role } = await requirePageAuth("/account");
   const policy = getVerificationPolicy();
 
-  const [latestKyc, panRecord, membershipTier, giving] = await Promise.all([
+  const [latestKyc, panRecord, membershipTier, giving, unread] = await Promise.all([
     db.kycVerification.findFirst({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -53,13 +55,15 @@ export default async function AccountPage() {
       ? db.membershipTier.findUnique({ where: { id: user.membershipTierId } })
       : Promise.resolve(null),
     getUserGiving(user.email),
+    unreadMemberMessages(user.id).catch(() => 0),
   ]);
 
   const verified = role === Role.VERIFIED_USER || role === Role.SUPER_ADMIN;
+  const byTeam = Boolean(user.identityVerifiedByAdminAt);
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
 
   return (
-    <DashShell role={role} currentPath="/account">
+    <DashShell role={role} currentPath="/account" verifiedByAdmin={Boolean(user.identityVerifiedByAdminAt)}>
       <main className="pt-main">
         <h1 className="pt-title">{displayName}</h1>
         <p className="pt-subtitle">
@@ -67,6 +71,19 @@ export default async function AccountPage() {
             ? "Your identity is verified. You have full access to member services."
             : "Complete identity verification to unlock verified member access."}
         </p>
+
+        {unread > 0 ? (
+          <div className="pt-alert pt-alert--info" style={{ marginBottom: 18 }}>
+            <p className="pt-alert__title">
+              {unread === 1 ? "You have a new message from AINF" : `You have ${unread} new messages from AINF`}
+            </p>
+            <p>
+              <Link href="/account/messages" className="pt-link">
+                Open messages
+              </Link>
+            </p>
+          </div>
+        ) : null}
 
         <div className="pt-grid pt-grid--3" style={{ marginBottom: 22 }}>
           <div className="pt-stat">
@@ -146,7 +163,16 @@ export default async function AccountPage() {
           <section className="pt-card">
             <h2 className="pt-section-title">Identity verification</h2>
 
-            {user.kycStatus === KycStatus.APPROVED ? (
+            {byTeam ? (
+              <div className="pt-alert pt-alert--success">
+                <p className="pt-alert__title">Verified by the AINF team</p>
+                <p>
+                  Your identity was confirmed directly by AINF
+                  {user.identityVerifiedByAdminAt ? ` on ${formatDay(user.identityVerifiedByAdminAt)}` : ""}. There is
+                  nothing more to submit: no ID, PAN or mobile code is needed.
+                </p>
+              </div>
+            ) : user.kycStatus === KycStatus.APPROVED ? (
               <div className="pt-alert pt-alert--success">
                 <p className="pt-alert__title">Verified</p>
                 <p>
@@ -179,7 +205,7 @@ export default async function AccountPage() {
               </p>
             )}
 
-            {policy.pan ? (
+            {policy.pan && !byTeam ? (
               <dl className="pt-kv" style={{ marginTop: 16 }}>
                 <dt>PAN</dt>
                 <dd>
@@ -187,7 +213,7 @@ export default async function AccountPage() {
                     <>
                       •••••{panRecord.panLast4}{" "}
                       <span style={{ color: "var(--ink-faint)", fontSize: 12.5 }}>
-                        ({panRecord.status.toLowerCase()})
+                        ({plainCode(panRecord.status).toLowerCase()})
                       </span>
                     </>
                   ) : (
@@ -205,7 +231,7 @@ export default async function AccountPage() {
               <Link href="/account/membership" className="pt-btn pt-btn--secondary">
                 Membership plans
               </Link>
-              {policy.didit || policy.pan || policy.otp ? (
+              {!byTeam && (policy.didit || policy.pan || policy.otp) ? (
                 <Link href="/account/verify" className="pt-btn pt-btn--primary">
                   {user.kycStatus === KycStatus.APPROVED ? "View verification" : "Start verification"}
                 </Link>

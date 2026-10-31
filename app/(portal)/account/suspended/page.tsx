@@ -9,6 +9,10 @@ import { isClerkConfigured, isDatabaseConfigured } from "@/lib/env";
 import { DashShell } from "@/components/portal/DashShell";
 import { SetupNotice } from "@/components/portal/SetupNotice";
 import { formatDayTime } from "@/lib/format-date";
+import { loadMemberInbox, markMemberMessagesRead } from "@/lib/member-inbox";
+import { indianMobile } from "@/lib/mobile-auth";
+import { MemberInbox } from "@/components/portal/MemberInbox";
+import { MemberMessageForm } from "@/components/portal/MemberMessageForm";
 
 export const metadata: Metadata = { title: "Account suspended" };
 export const dynamic = "force-dynamic";
@@ -31,6 +35,11 @@ export default async function SuspendedPage() {
 
   // Lets the admin see "Seen at sign-in" when nobody could message them.
   await recordSuspensionSeen({ user: ctx.user, context: await requestContext() }).catch(() => false);
+
+  // Messages from AINF reach suspended members here, since the rest of the dashboard is closed.
+  const inbox = await loadMemberInbox(ctx.user).catch(() => ({ items: [], unread: 0 }));
+  if (inbox.unread > 0) await markMemberMessagesRead(ctx.user.id).catch(() => undefined);
+  const memberName = [ctx.user.firstName, ctx.user.lastName].filter(Boolean).join(" ");
 
   const banned = ctx.user.status === UserStatus.BANNED;
   const until = banned ? null : ctx.user.suspendedUntil;
@@ -86,14 +95,33 @@ export default async function SuspendedPage() {
             and quote {contactLine}.
           </p>
           <div className="pt-btn-row" style={{ marginTop: 18 }}>
-            <a href="/contact-us" className="pt-btn pt-btn--primary">
-              Contact us
+            <a href="#ainf-messages" className="pt-btn pt-btn--primary">
+              Message AINF
             </a>
             <a href="/" className="pt-btn pt-btn--ghost">
               Back to site
             </a>
           </div>
         </div>
+
+        <section className="pt-card" id="ainf-messages" style={{ marginTop: 18 }}>
+          <h2 className="pt-section-title">
+            Messages from AINF{inbox.unread > 0 ? ` · ${inbox.unread} new` : ""}
+          </h2>
+          <MemberInbox
+            items={inbox.items}
+            emptyHint="No messages yet. When the AINF team writes to you, or replies to you, it shows here."
+          />
+        </section>
+
+        <section className="pt-card" style={{ marginTop: 18 }}>
+          <h2 className="pt-section-title">Write to AINF</h2>
+          <MemberMessageForm
+            name={memberName}
+            email={isMobileAccountEmail(ctx.user.email) ? "" : ctx.user.email}
+            phone={(ctx.user.phone && indianMobile(ctx.user.phone)) || ""}
+          />
+        </section>
       </main>
     </DashShell>
   );

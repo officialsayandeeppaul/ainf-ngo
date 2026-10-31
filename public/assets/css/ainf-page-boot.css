@@ -179,7 +179,8 @@ img[alt="How you can help image"]{
 [data-framer-name="Hero Section"] h1 span[style*="white-space:nowrap"]{
   white-space:normal!important;
 }
-[data-ainf-word]{
+[data-ainf-word],
+.ainf-letter-word{
   display:inline-block;
   white-space:nowrap;
 }

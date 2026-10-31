@@ -455,6 +455,11 @@
     }
   }
 
+  function nonEnglish() {
+    var lang = document.documentElement.lang;
+    return lang === "hi" || lang === "bn";
+  }
+
   function writeCaption(block, label) {
     if (!block) return;
     var caption = null;
@@ -466,7 +471,8 @@
     }
     if (!caption) return;
     var now = (caption.textContent || "").replace(/\s+/g, " ").trim();
-    if (now !== label) caption.textContent = label;
+    // In Hindi/Bengali the translator owns the caption; "Raised :" comes back in English.
+    if (now !== label && !(nonEnglish() && caption.hasAttribute("data-ainf-i18n"))) caption.textContent = label;
     caption.setAttribute("data-ainf-cms", "1");
     caption.style.opacity = "1";
     caption.style.color = "#3d4a44";
@@ -476,7 +482,11 @@
     var titleH4 = card.querySelector('[data-framer-name="Title"] h4');
     if (titleH4) {
       titleH4.setAttribute("data-ainf-cms", "1");
-      if (!titleH4.querySelector(".ainf-letter") && (titleH4.textContent || "").replace(/\s+/g, " ").trim() !== project.title) {
+      if (
+        !titleH4.querySelector(".ainf-letter") &&
+        !(nonEnglish() && titleH4.hasAttribute("data-ainf-i18n")) &&
+        (titleH4.textContent || "").replace(/\s+/g, " ").trim() !== project.title
+      ) {
         titleH4.textContent = project.title;
       }
     }
@@ -763,6 +773,18 @@
   else tick();
   [500, 1400, 2800, 4200, 5600].forEach(function (ms) {
     setTimeout(tick, ms);
+  });
+
+  // A language switch rewrites text inside existing nodes (no new card nodes for the
+  // watcher), and Framer may re-render its sample amounts: put the CMS values back.
+  document.addEventListener("ainf:language", function () {
+    [0, 400, 1200].forEach(function (ms) {
+      setTimeout(function () {
+        if (!fieldProjects) return;
+        applyFieldProjects();
+        applyProjectDetail();
+      }, ms);
+    });
   });
 
   /* ---- Project page interactive buttons ----------------------------------------- */

@@ -80,7 +80,7 @@ export default async function AccountMembershipPage({
       : null;
 
   return (
-    <DashShell role={role} currentPath="/account/membership">
+    <DashShell role={role} currentPath="/account/membership" verifiedByAdmin={Boolean(user.identityVerifiedByAdminAt)}>
       <main className="pt-main">
         <h1 className="pt-title">Your plan</h1>
         <p className="pt-subtitle">

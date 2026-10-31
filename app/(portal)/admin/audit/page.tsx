@@ -10,6 +10,7 @@ import { Pagination } from "@/components/portal/Pagination";
 import { SetupNotice } from "@/components/portal/SetupNotice";
 import { PortalSelect } from "@/components/portal/PortalSelect";
 import { formatClock, formatDay } from "@/lib/format-date";
+import { plainCode } from "@/lib/plain-labels";
 
 export const metadata: Metadata = { title: "Audit log" };
 export const dynamic = "force-dynamic";
@@ -255,12 +256,12 @@ export default async function AdminAuditPage({
                           <span className="pt-audit__meta">{entry.actor.email}</span>
                         ) : null}
                         {entry.actorRole ? (
-                          <span className="pt-audit__meta">{entry.actorRole.replace(/_/g, " ")}</span>
+                          <span className="pt-audit__meta">{plainCode(entry.actorRole)}</span>
                         ) : null}
                       </div>
                       <div className="pt-audit__target">
                         <span className="pt-audit__email">
-                          {entry.targetType ? entry.targetType.replace(/_/g, " ") : "—"}
+                          {entry.targetType ? plainCode(entry.targetType) : "—"}
                         </span>
                         {entry.targetId ? (
                           <span className="pt-audit__meta" title={entry.targetId}>

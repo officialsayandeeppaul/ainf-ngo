@@ -11,6 +11,7 @@ import { SetupNotice } from "@/components/portal/SetupNotice";
 import { KycReviewActions } from "@/components/portal/AdminActions";
 import { PortalSelect } from "@/components/portal/PortalSelect";
 import { formatDay, formatDayTime } from "@/lib/format-date";
+import { kycLabel, plainCode } from "@/lib/plain-labels";
 
 export const metadata: Metadata = { title: "Verification queue" };
 export const dynamic = "force-dynamic";
@@ -91,7 +92,7 @@ export default async function AdminKycPage({
                 defaultValue={filter}
                 options={Object.values(KycStatus).map((value) => ({
                   value,
-                  label: value.replace(/_/g, " ").toLowerCase(),
+                  label: kycLabel(value),
                 }))}
               />
             </div>
@@ -104,7 +105,7 @@ export default async function AdminKycPage({
         <section className="pt-card pt-card--flush">
           {records.length === 0 ? (
             <p className="pt-empty">
-              Nothing with status {filter.replace(/_/g, " ").toLowerCase()}.
+              Nothing with status {kycLabel(filter).toLowerCase()}.
             </p>
           ) : (
             <div className="pt-table-wrap">
@@ -150,7 +151,7 @@ export default async function AdminKycPage({
                                 : "Decision body was cryptographically signed"
                             }
                           >
-                            {record.signatureScheme}
+                            {plainCode(record.signatureScheme)}
                           </span>
                         ) : (
                           <span style={{ color: "var(--ink-faint)", fontSize: 12.5 }}>—</span>

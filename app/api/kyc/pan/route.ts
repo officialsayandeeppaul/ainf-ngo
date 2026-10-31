@@ -47,6 +47,13 @@ export async function POST(request: Request) {
   const { ctx } = guard;
   const context = contextFromRequest(request);
 
+  if (ctx.user.identityVerifiedByAdminAt) {
+    return Response.json(
+      { error: "already_verified", message: "The AINF team has already verified your identity. No PAN is needed." },
+      { status: 409 }
+    );
+  }
+
   if (!isApitxtConfigured) {
     return Response.json(
       { error: "not_configured", keys: ["APITXT_AUTH_KEY"] },

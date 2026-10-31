@@ -2784,6 +2784,56 @@
       };
     }
 
+    // Signed in: name, email and mobile come from the account, so the message files
+    // under it and the reply shows under Messages on the dashboard. The email is
+    // locked, as on the gift form; the server uses the account's email either way.
+    var contactGiver = null;
+    var contactGiverAsked = false;
+
+    function applyContactGiver(form) {
+      if (!form || !contactGiver) return;
+      var pairs = [
+        [form.querySelector('input[name="Name"], input[name="name"]'), contactGiver.name],
+        [form.querySelector('input[name="Email"], input[name="email"], input[type="email"]'), contactGiver.email],
+        [form.querySelector('input[name="Phone Number"], input[name="phone"], input[type="tel"]'), contactGiver.phone],
+      ];
+      pairs.forEach(function (pair) {
+        var el = pair[0];
+        var value = pair[1];
+        if (!el || !value || el.value || el.getAttribute("data-ainf-touched") === "1") return;
+        setNativeValue(el, value);
+      });
+      var emailEl = pairs[1][0];
+      if (emailEl && contactGiver.email) {
+        emailEl.readOnly = true;
+        emailEl.setAttribute("data-ainf-locked", "1");
+        emailEl.setAttribute("title", "Replies go to the email on your AINF account");
+      }
+    }
+
+    function prefillContact(form) {
+      if (!form) return;
+      if (contactGiverAsked) {
+        applyContactGiver(form);
+        return;
+      }
+      contactGiverAsked = true;
+      fetch("/api/session/state", { credentials: "same-origin", headers: { accept: "application/json" } })
+        .then(function (response) {
+          return response.ok ? response.json() : null;
+        })
+        .then(function (state) {
+          if (!state || !state.signedIn || !state.giver) return;
+          contactGiver = state.giver;
+          applyContactGiver(findContactForm() || form);
+        })
+        .catch(function () {});
+    }
+
+    window.__ainfContactPrefill = function () {
+      prefillContact(findContactForm());
+    };
+
     var sending = false;
 
     function handleContactSubmit(form) {
@@ -2831,6 +2881,12 @@
             return;
           }
           clearContactForm(form);
+          // Clearing empties every field; put the account details back for the next message.
+          [80, 400].forEach(function (ms) {
+            window.setTimeout(function () {
+              applyContactGiver(findContactForm() || form);
+            }, ms);
+          });
           show(result.data.message || "Thank you — your message reached AINF.", true);
           // Keep thank-you visible; don't let Framer rewrite the button forever.
           if (submitBtn) {
@@ -2896,13 +2952,19 @@
       form.setAttribute("autocomplete", "off");
       ensureStatus(form);
     }
+    prefillContact(form);
   }
 
   function tryWireContact() {
-    wireContactForm();
-    setTimeout(wireContactForm, 400);
-    setTimeout(wireContactForm, 1200);
-    setTimeout(wireContactForm, 2400);
+    function pass() {
+      wireContactForm();
+      // Framer re-renders the form after load; fill the new one too.
+      if (window.__ainfContactPrefill) window.__ainfContactPrefill();
+    }
+    pass();
+    [400, 1200, 2400, 4500, 8000].forEach(function (ms) {
+      setTimeout(pass, ms);
+    });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tryWireContact);
   else tryWireContact();

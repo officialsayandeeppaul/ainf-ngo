@@ -36,6 +36,8 @@ import { GrantMembershipButton, IdentityAdminControls } from "@/components/porta
 import { identityReadyForMembership } from "@/lib/donation-rules";
 import { interestLabel } from "@/lib/payment-interest";
 import { getVerificationPolicy } from "@/lib/verification-policy";
+import { plainCode } from "@/lib/plain-labels";
+import { MemberMessageTools } from "@/components/portal/MemberMessageTools";
 import { getUserGiving } from "@/lib/user-donations";
 import { PortalDateField } from "@/components/portal/PortalDateField";
 import { VerifyMethodStack } from "@/components/portal/VerifyMethods";
@@ -147,7 +149,7 @@ export default async function AdminCrmDossierPage({
   });
   if (!member) notFound();
 
-  const [grantTiers, interests, verifier, giving] = await Promise.all([
+  const [grantTiers, interests, verifier, giving, sentMessages] = await Promise.all([
     db.membershipTier.findMany({
       orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: { id: true, name: true, badge: true, active: true },
@@ -164,6 +166,14 @@ export default async function AdminCrmDossierPage({
       ? db.user.findUnique({ where: { id: member.identityVerifiedByUserId }, select: { email: true } })
       : Promise.resolve(null),
     getUserGiving(member.email),
+    db.memberMessage
+      .findMany({
+        where: { userId: member.id },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: { id: true, body: true, createdAt: true, readAt: true },
+      })
+      .catch(() => []),
   ]);
 
   const previousTierIds = [
@@ -309,11 +319,16 @@ export default async function AdminCrmDossierPage({
           <h2 className="pt-section-title">Paid by month</h2>
           <CrmSpark
             points={paidByMonth(
-              paidOrders.map((order) => ({
-                paidAt: order.paidAt,
-                createdAt: order.createdAt,
-                amountPaise: order.amountPaise,
-              })),
+              [
+                ...paidOrders.map((order) => ({
+                  paidAt: order.paidAt,
+                  createdAt: order.createdAt,
+                  amountPaise: order.amountPaise,
+                })),
+                ...giving.donations
+                  .filter((gift) => gift.status === "PAID")
+                  .map((gift) => ({ paidAt: gift.at, createdAt: gift.at, amountPaise: gift.amountPaise })),
+              ],
               6
             )}
           />
@@ -499,6 +514,20 @@ export default async function AdminCrmDossierPage({
           </section>
         </div>
 
+        <section className="pt-card" style={{ marginBottom: 18 }}>
+          <h2 className="pt-section-title">Message to their dashboard</h2>
+          <MemberMessageTools
+            userId={member.id}
+            suspended={member.status !== "ACTIVE"}
+            sent={sentMessages.map((row) => ({
+              id: row.id,
+              body: row.body,
+              at: row.createdAt.toISOString(),
+              readAt: row.readAt ? row.readAt.toISOString() : null,
+            }))}
+          />
+        </section>
+
         {cardArt ? (
           <div className="pt-card" style={{ marginBottom: 18 }}>
             <MembershipIdCard
@@ -562,7 +591,7 @@ export default async function AdminCrmDossierPage({
                         <div className="pt-dossier-plan">{interestLabel(row)}</div>
                         {row.links[0] ? (
                           <div className="pt-dossier-meta">
-                            Link {row.links[0].status.toLowerCase()}
+                            Link {plainCode(row.links[0].status).toLowerCase()}
                             {row.links[0].paidAt ? ` · paid ${formatDayTime(row.links[0].paidAt)}` : ""}
                           </div>
                         ) : null}
@@ -602,7 +631,7 @@ export default async function AdminCrmDossierPage({
                         Session {session.sessionNumber ?? shortId(session.diditSessionId)}
                         <div className="pt-log__sub">
                           {formatDayTime(session.createdAt)}
-                          {session.signatureScheme ? ` · ${session.signatureScheme}` : ""}
+                          {session.signatureScheme ? ` · ${plainCode(session.signatureScheme)}` : ""}
                           {session.reviewedAt ? ` · reviewed ${formatDayTime(session.reviewedAt)}` : ""}
                         </div>
                         {session.reviewNote ? <div className="pt-log__sub">{session.reviewNote}</div> : null}
@@ -728,7 +757,7 @@ export default async function AdminCrmDossierPage({
                                   : "pt-badge--neutral"
                           }`}
                         >
-                          {order.status === "PAID" ? "Paid" : order.status.toLowerCase()}
+                          {plainCode(order.status)}
                         </span>
                       </td>
                       <td>

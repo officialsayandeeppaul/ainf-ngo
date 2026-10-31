@@ -38,13 +38,13 @@ export default async function OkrPage({
     return <SetupNotice feature="The account database" keys={["DATABASE_URL", "DIRECT_URL"]} />;
   }
 
-  const { role } = await requirePageAuth("/account/okr");
+  const { user, role } = await requirePageAuth("/account/okr");
   const params = await searchParams;
   const requested = Math.max(1, Number(params.page ?? "1") || 1);
   const { page, pages, total, items } = paginateOkrs(requested, OKR_PAGE_SIZE);
 
   return (
-    <DashShell role={role} currentPath="/account/okr">
+    <DashShell role={role} currentPath="/account/okr" verifiedByAdmin={Boolean(user.identityVerifiedByAdminAt)}>
       <main className="pt-main">
         <h1 className="pt-title">OKRs</h1>
         <p className="pt-subtitle">

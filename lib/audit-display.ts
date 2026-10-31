@@ -1,5 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { AuditAction } from "./audit-actions";
+import { formatDayTime } from "./format-date";
+import { formatInr } from "./membership";
+import { plainCode } from "./plain-labels";
 
 const ACTION_LABEL: Record<string, string> = {
   [AuditAction.UserCreated]: "User created",
@@ -9,6 +12,7 @@ const ACTION_LABEL: Record<string, string> = {
   [AuditAction.UserSuspended]: "User suspended",
   [AuditAction.UserReinstated]: "User reinstated",
   [AuditAction.SuspensionNoticeSent]: "Member told about suspension",
+  [AuditAction.MemberMessageSent]: "Message to their dashboard",
   [AuditAction.KycSessionCreated]: "Didit session",
   [AuditAction.KycStatusChanged]: "Didit status",
   [AuditAction.KycManualReview]: "Didit review",
@@ -85,12 +89,83 @@ const META_LABEL: Record<string, string> = {
   regNo: "Regd. no.",
   tierName: "Plan",
   refreshed: "Refreshed",
+  previousKyc: "Identity before",
+  previousPan: "PAN before",
+  previousStatus: "Status before",
+  previousTier: "Plan before",
+  kycStatus: "Identity",
+  panVerified: "PAN confirmed",
+  stillVerified: "Still verified",
+  note: "Note",
+  source: "Source",
+  channel: "Sent by",
+  until: "Until",
+  expiresAt: "Ends",
+  endsAt: "Ends",
+  status: "Status",
+  sendEmail: "Email chosen",
+  emailed: "Emailed",
+  emailWarning: "Email note",
+  scheme: "Method",
+  eventType: "Event",
+  purpose: "For",
+  attempts: "Attempts",
+  creditPaise: "Credit",
+  duePaise: "Due",
+  nameMatch: "Name matched",
+  dobMatch: "Date of birth matched",
+  automatic: "Automatic",
+  customMessage: "Message",
+  badge: "Badge",
+  enabled: "On",
+  signatureOk: "Signature valid",
+  aadhaarSeedingStatus: "Aadhaar linked",
+  cancelledMandate: "Auto-pay stopped",
+  razorpayPaymentId: "Payment",
+  razorpayOrderId: "Order",
+  razorpaySubscriptionId: "Subscription",
 };
+
+/** Internal ids and signatures mean nothing to an admin reading a timeline. */
+const HIDDEN_META = new Set([
+  "userId",
+  "targetUserId",
+  "actorUserId",
+  "subjectUserId",
+  "membershipTierId",
+  "interestId",
+  "linkId",
+  "emailId",
+  "token",
+  "actorClerkId",
+  "actorRole",
+  "razorpaySignature",
+  "payloadTrusted",
+  "ip",
+  "userAgent",
+]);
+
+const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
+function chipValue(key: string, raw: string | number | boolean): string {
+  if (typeof raw === "boolean") return raw ? "yes" : "no";
+  if (typeof raw === "number") return /Paise$/.test(key) ? formatInr(raw) : String(raw);
+  if (key === "panLast4") return `····${raw}`;
+  if (ISO_TIME.test(raw)) {
+    const at = new Date(raw);
+    if (!Number.isNaN(at.getTime())) return formatDayTime(at);
+  }
+  if (/^c[a-z0-9]{20,}$/.test(raw) || /^(?:pay|order|sub|plan)_[A-Za-z0-9]{8,}$/.test(raw)) return shortId(raw);
+  return plainCode(raw);
+}
 
 export type AuditChip = { label: string; value: string };
 
 export function auditActionLabel(action: string): string {
-  return ACTION_LABEL[action] ?? action.replace(/[._]/g, " ");
+  const known = ACTION_LABEL[action];
+  if (known) return known;
+  const words = action.replace(/[._]/g, " ").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 export function shortId(id: string | null | undefined): string {
@@ -104,10 +179,16 @@ export function auditChips(metadata: Prisma.JsonValue | null, limit = 5): AuditC
   for (const [key, raw] of Object.entries(metadata as Record<string, unknown>)) {
     if (raw === null || raw === undefined || raw === "") continue;
     if (typeof raw === "object") continue;
-    const value = typeof raw === "boolean" ? (raw ? "yes" : "no") : String(raw);
+    if (HIDDEN_META.has(key)) continue;
+    if (typeof raw !== "string" && typeof raw !== "number" && typeof raw !== "boolean") continue;
     chips.push({
-      label: META_LABEL[key] ?? key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()),
-      value: key === "panLast4" ? `····${value}` : value,
+      label:
+        META_LABEL[key] ??
+        key
+          .replace(/([A-Z])/g, " $1")
+          .toLowerCase()
+          .replace(/^./, (c) => c.toUpperCase()),
+      value: chipValue(key, raw),
     });
     if (chips.length >= limit) break;
   }

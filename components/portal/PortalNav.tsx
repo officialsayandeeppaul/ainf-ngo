@@ -19,7 +19,8 @@ const RAIL_KEY = "ainf-dash-rail";
 type DashItem = { href: string; label: string };
 type DashGroup = { label: string; items: DashItem[] };
 
-export type PortalMethods = { didit: boolean; pan: boolean; otp: boolean };
+/** Which checks this instance runs; verifiedByAdmin hides Verification for a member the team verified. */
+export type PortalMethods = { didit: boolean; pan: boolean; otp: boolean; verifiedByAdmin?: boolean };
 
 function verifyLabel(methods?: PortalMethods) {
   if (methods?.otp && !methods.didit && !methods.pan) return "Verify phone";
@@ -27,7 +28,7 @@ function verifyLabel(methods?: PortalMethods) {
 }
 
 function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[] {
-  const showVerify = !methods || methods.didit || methods.pan || methods.otp;
+  const showVerify = (!methods || methods.didit || methods.pan || methods.otp) && !methods?.verifiedByAdmin;
   const verifyHref = { href: "/account/verify", label: verifyLabel(methods) };
 
   if (role === Role.SUPER_ADMIN) {
@@ -78,6 +79,7 @@ function dashboardGroups(role: Role | null, methods?: PortalMethods): DashGroup[
       { href: "/account/membership", label: "Your plan" },
       { href: "/account/donations", label: "Your donations" },
       { href: "/account/okr", label: "OKRs" },
+      { href: "/account/messages", label: "Messages" },
     ];
     if (showVerify) {
       items.push(role === Role.USER ? verifyHref : { href: "/account/verify", label: "Verification" });
