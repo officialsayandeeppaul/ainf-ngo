@@ -67,11 +67,11 @@ export function PortalHeader({
 export function PortalFooter() {
   return (
     <footer className="pt-footer">
-      <Link href="/">Back to theainf.in</Link>
+      <a href="/">Back to theainf.in</a>
       {" · "}
-      <Link href="/legal-pages/terms-conditions">Terms &amp; privacy</Link>
+      <a href="/legal-pages/terms-conditions">Terms &amp; privacy</a>
       {" · "}
-      <Link href="/contact-us">Contact</Link>
+      <a href="/contact-us">Contact</a>
     </footer>
   );
 }

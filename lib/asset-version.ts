@@ -70,5 +70,17 @@ export function runtimeAssetScript(): string {
     const version = assetVersion(rel);
     if (version) map[rel] = version;
   }
-  return `<script id="ainf-asset-v">window.__ainfAssetV=${JSON.stringify(map)};</script>`;
+  return `<script id="ainf-asset-v">window.__ainfAssetV=${JSON.stringify(map)};${EARLY_STRINGS}</script>`;
 }
+
+/**
+ * For a visitor who chose Hindi or Bengali (the head script has set <html lang> and
+ * the `ainf-i18n-wait` class that hides #main), start downloading the strings while
+ * the page is still parsing instead of after the deferred i18n script runs, so the
+ * page can appear already translated. Never keep it hidden longer than 1.5 s.
+ */
+const EARLY_STRINGS =
+  'try{var l=document.documentElement.lang;if(l==="hi"||l==="bn"){var v=window.__ainfAssetV["/i18n/home-strings.json"];' +
+  'window.__ainfStrings=fetch("/i18n/home-strings.json"+(v?"?v="+v:"")).then(function(r){if(!r.ok)throw new Error("Failed to load translations");return r.json()});' +
+  'window.__ainfStrings.catch(function(){});' +
+  'setTimeout(function(){document.documentElement.classList.remove("ainf-i18n-wait")},1500)}}catch(e){}';

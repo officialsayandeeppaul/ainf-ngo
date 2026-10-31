@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { UserStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getAuthContext } from "@/lib/auth/session";
@@ -87,12 +86,12 @@ export default async function SuspendedPage() {
             and quote {contactLine}.
           </p>
           <div className="pt-btn-row" style={{ marginTop: 18 }}>
-            <Link href="/contact-us" className="pt-btn pt-btn--primary">
+            <a href="/contact-us" className="pt-btn pt-btn--primary">
               Contact us
-            </Link>
-            <Link href="/" className="pt-btn pt-btn--ghost">
+            </a>
+            <a href="/" className="pt-btn pt-btn--ghost">
               Back to site
-            </Link>
+            </a>
           </div>
         </div>
       </main>

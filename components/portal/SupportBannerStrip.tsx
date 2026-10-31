@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteLink } from "@/components/portal/SiteLink";
 import { LiveCountdown } from "@/components/portal/LiveCountdown";
 import type { SupportBannerView } from "@/lib/support-banner";
 
@@ -14,9 +14,9 @@ export function SupportBannerStrip({ banner }: { banner: SupportBannerView }) {
           {banner.message ? <p className="pt-support-strip__text">{banner.message}</p> : null}
         </div>
         {banner.endsAt ? <LiveCountdown endsAt={banner.endsAt} compact /> : null}
-        <Link href={banner.ctaHref} className="pt-btn pt-btn--primary pt-btn--sm pt-btn--pop">
+        <SiteLink href={banner.ctaHref} className="pt-btn pt-btn--primary pt-btn--sm pt-btn--pop">
           {banner.ctaLabel}
-        </Link>
+        </SiteLink>
       </div>
     </aside>
   );

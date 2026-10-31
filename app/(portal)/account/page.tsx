@@ -236,9 +236,9 @@ export default async function AccountPage() {
                 <Link href="/account/donations" className="pt-btn pt-btn--secondary">
                   View donation history
                 </Link>
-                <Link href="/donate-now" className="pt-btn pt-btn--primary">
+                <a href="/donate-now" className="pt-btn pt-btn--primary">
                   Give again
-                </Link>
+                </a>
               </div>
             </>
           ) : (
@@ -248,9 +248,9 @@ export default async function AccountPage() {
                 will appear here with a receipt you can open any time.
               </p>
               <div className="pt-btn-row" style={{ marginTop: 14 }}>
-                <Link href="/donate-now" className="pt-btn pt-btn--primary">
+                <a href="/donate-now" className="pt-btn pt-btn--primary">
                   Make a donation
-                </Link>
+                </a>
               </div>
             </>
           )}

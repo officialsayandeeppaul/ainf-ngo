@@ -10,8 +10,9 @@
     reverse: { bn: {}, hi: {} },
     applying: false,
     observer: null,
-    debounceTimer: null,
   };
+
+  var INDIC = /[\u0900-\u097F\u0980-\u09FF]/;
 
   function normalize(text) {
     return (text || "")
@@ -206,7 +207,9 @@
   function fillLetterSpans(el, text) {
     if (!el || !text) return false;
     var leaves = letterLeaves(el);
-    if (leaves.length < 4) return false;
+    // Letters we split ourselves can be few (শিক্ষা is two graphemes); back in English
+    // they still need refilling, or the word stays in Bengali/Hindi until a reload.
+    if (!leaves.length || (leaves.length < 4 && !el.querySelector("[data-ainf-letter-wrap]"))) return false;
     var chars = graphemes(text).filter(function (ch) {
       return ch !== "\n" && ch !== "\r";
     });
@@ -309,11 +312,14 @@
 
   var letterScrollBound = false;
   var letterScrollState = new WeakMap();
+  var requestLetterTick = function () {};
 
   function bootOwnsHeading(el) {
     if (!el) return false;
     if (el.getAttribute && (el.getAttribute("data-ainf-letters") || el.getAttribute("data-ainf-ready"))) return true;
-    if (el.querySelector && el.querySelector("[data-ainf-word], .ainf-letter")) return true;
+    // Page boot's letters sit in [data-ainf-word]. Ours (.ainf-letter in a letter wrap)
+    // must not count: that hid headings we played out below the fold for good.
+    if (el.querySelector && el.querySelector("[data-ainf-word]")) return true;
     if (
       el.tagName === "H1" &&
       el.closest &&
@@ -485,6 +491,7 @@
       if (raf) return;
       raf = requestAnimationFrame(tick);
     }
+    requestLetterTick = onScroll;
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
@@ -512,7 +519,11 @@
       if (tries < 48) window.setTimeout(arm, 90);
       else {
         el.setAttribute("data-ainf-letter-armed", "1");
-        letterScrollState.set(el, true);
+        // Still hidden (they played out while below the fold): record that, so the
+        // scroll check brings them back in. Recording "shown" left Rozgar and
+        // Nari Suraksha blank in Hindi/Bengali.
+        letterScrollState.set(el, spans.length > 0 && shown * 2 >= spans.length);
+        requestLetterTick();
       }
     }
     window.setTimeout(arm, 160);
@@ -868,6 +879,7 @@
       var raw = node.textContent;
       var trimmed = normalize(raw);
       if (!trimmed || trimmed.length < 2) continue;
+      if (lang === "en" && !INDIC.test(raw)) continue;
       var next = translateText(trimmed, lang);
       if (!next || normalize(raw) === normalize(next)) continue;
       node.textContent = raw.replace(trimmed, next);
@@ -881,6 +893,7 @@
       attrs.forEach(function (attr) {
         var val = el.getAttribute(attr);
         if (!val) return;
+        if (lang === "en" && !INDIC.test(val)) return;
         var next = translateText(val, lang);
         if (next && normalize(val) !== normalize(next)) {
           el.setAttribute(attr, next);
@@ -946,10 +959,9 @@
       applyPlainAnchors(lang);
       applyFramerButtons(lang);
       applyDuplicateParagraphs(lang);
-      if (lang !== "en") {
-        applyLeafTextNodes(lang);
-        applyAttributes(lang);
-      }
+      // Back in English these only restore what still shows Hindi/Bengali script.
+      applyLeafTextNodes(lang);
+      applyAttributes(lang);
       if (!fromObserver) forceCtaContrast();
       if (lang === "en" && !fromObserver) {
         window.setTimeout(watchEnglishLetterOut, 2100);
@@ -959,6 +971,8 @@
       } catch (_) {}
     } finally {
       state.applying = false;
+      // Our own text writes are not Framer re-rendering; drop them so they do not re-trigger us.
+      if (state.observer) state.observer.takeRecords();
     }
   }
 
@@ -1068,6 +1082,7 @@
       var willOpen = !root.classList.contains("is-open");
       closeAllMenus();
       if (willOpen) {
+        if (!state.dict) getStrings().catch(function () {});
         root.classList.add("is-open");
         trigger.setAttribute("aria-expanded", "true");
       }
@@ -1079,6 +1094,9 @@
     });
     root.addEventListener("mousedown", function (e) {
       e.stopPropagation();
+    });
+    trigger.addEventListener("pointerenter", function () {
+      if (!state.dict) getStrings().catch(function () {});
     });
 
     root.appendChild(trigger);
@@ -1204,38 +1222,49 @@
     );
   }
 
-  function scheduleApply(fromObserver) {
-    if (menuIsOpen()) return;
-    if (state.debounceTimer) clearTimeout(state.debounceTimer);
-    state.debounceTimer = setTimeout(function () {
-      if (menuIsOpen()) return;
-      mountSwitchers();
-      hideFramerBadge();
-      applyLanguage(state.lang, fromObserver);
-    }, fromObserver ? 160 : 0);
-  }
-
   function attachObserver() {
     if (state.observer) return;
     state.observer = new MutationObserver(function () {
       if (state.applying || menuIsOpen()) return;
       if (!document.getElementById(SWITCHER_ID)) mountSwitchers();
       if (state.lang === "en") return;
-      var heading = document.querySelector("h1, h2");
-      if (heading && looksLatinLetters(heading)) {
-        applyHeadings(state.lang);
+      // Framer swaps sections back to English while it hydrates. Observer callbacks
+      // run before the browser paints, so translating here (not on a timer) means
+      // that English is never shown, not even for one frame.
+      // If another script keeps rewriting what we translate, the two observers would
+      // answer each other forever without yielding; after a few rounds in one task,
+      // step back and try again shortly.
+      if (state.burst >= 4) {
+        if (!state.retryTimer) {
+          state.retryTimer = setTimeout(function () {
+            state.retryTimer = 0;
+            if (!state.applying && !menuIsOpen()) applyLanguage(state.lang, true);
+          }, 120);
+        }
         return;
       }
-      scheduleApply(true);
+      state.burst = (state.burst || 0) + 1;
+      if (!state.burstReset) {
+        state.burstReset = setTimeout(function () {
+          state.burstReset = 0;
+          state.burst = 0;
+        }, 0);
+      }
+      mountSwitchers();
+      hideFramerBadge();
+      applyLanguage(state.lang, true);
     });
+    // characterData too: React restores English by rewriting existing text nodes.
     state.observer.observe(document.documentElement, {
       childList: true,
+      characterData: true,
       subtree: true,
     });
+    // Hydration can take ~14 s on a slow line.
     setTimeout(function () {
       if (state.observer) state.observer.disconnect();
       state.observer = null;
-    }, state.lang === "en" ? 4200 : 9000);
+    }, state.lang === "en" ? 4200 : 16000);
   }
 
   function readQueryLang() {
@@ -1262,14 +1291,25 @@
     return "en";
   }
 
-  function loadTranslations() {
-    // Content version from the server; a stale hand-kept ?v= would now be cached for a year.
-    var version = window.__ainfAssetV && window.__ainfAssetV["/i18n/home-strings.json"];
-    fetch("/i18n/home-strings.json" + (version ? "?v=" + version : ""))
-      .then(function (res) {
+  // One download per page view: started in <head> for Hindi/Bengali visitors
+  // (window.__ainfStrings), or when the language menu opens, so a pick is instant.
+  function getStrings() {
+    if (!window.__ainfStrings) {
+      // Content version from the server; a stale hand-kept ?v= would now be cached for a year.
+      var version = window.__ainfAssetV && window.__ainfAssetV["/i18n/home-strings.json"];
+      window.__ainfStrings = fetch("/i18n/home-strings.json" + (version ? "?v=" + version : "")).then(function (res) {
         if (!res.ok) throw new Error("Failed to load translations");
         return res.json();
-      })
+      });
+      window.__ainfStrings.catch(function () {
+        window.__ainfStrings = null;
+      });
+    }
+    return window.__ainfStrings;
+  }
+
+  function loadTranslations() {
+    getStrings()
       .then(function (json) {
         state.dict = json;
         buildReverseMaps(json.strings || {});
@@ -1305,6 +1345,7 @@
         });
       })
       .catch(function (err) {
+        document.documentElement.classList.remove("ainf-i18n-wait");
         console.warn("[ainf-i18n]", err);
       });
   }
@@ -1318,8 +1359,8 @@
     state.lang = readStoredLang();
     mountSwitchers();
     hideFramerBadge();
-    document.documentElement.classList.remove("ainf-i18n-wait");
     if (state.lang === "en") {
+      document.documentElement.classList.remove("ainf-i18n-wait");
       window.__ainfLettersDone = true;
       watchEnglishLetterOut();
       return;

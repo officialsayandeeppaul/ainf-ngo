@@ -1,9 +1,8 @@
-import Link from "next/link";
 
 /** Official AINF seal + wordmark used in the portal navbar. */
 export function AinfBrand() {
   return (
-    <Link href="/" className="pt-brand" aria-label="AINF home">
+    <a href="/" className="pt-brand" aria-label="AINF home">
       <span className="pt-brand__badge">
         <img
           src="/assets/img/theainf-logo.webp"
@@ -14,6 +13,6 @@ export function AinfBrand() {
         />
       </span>
       <span className="pt-brand__text">AINF</span>
-    </Link>
+    </a>
   );
 }

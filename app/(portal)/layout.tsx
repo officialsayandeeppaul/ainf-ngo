@@ -2,7 +2,12 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { isClerkConfigured } from "@/lib/env";
+import { SITE_PREFETCH_PATHS } from "@/components/portal/SiteLink";
 import "./portal.css";
+
+const SITE_SPECULATION_RULES = JSON.stringify({
+  prefetch: [{ where: { href_matches: SITE_PREFETCH_PATHS }, eagerness: "moderate" }],
+});
 
 /**
  * Root layout for the React portal.
@@ -47,7 +52,14 @@ export const viewport: Viewport = {
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const body = (
     <html lang="en" className={onest.variable}>
-      <body className="ainf-portal">{children}</body>
+      <body className="ainf-portal">
+        {children}
+        {/* Site pages are plain HTML (see SiteLink); prefetch them on hover so the click is instant. */}
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{ __html: SITE_SPECULATION_RULES }}
+        />
+      </body>
     </html>
   );
 

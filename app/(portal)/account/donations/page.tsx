@@ -85,7 +85,7 @@ export default async function AccountDonationsPage() {
           {donations.length === 0 ? (
             <p className="pt-empty">
               No donations yet under this email.{" "}
-              <Link href="/donate-now" className="pt-link">Make your first donation</Link> to support a cause.
+              <a href="/donate-now" className="pt-link">Make your first donation</a> to support a cause.
             </p>
           ) : (
             <div className="pt-table-wrap">

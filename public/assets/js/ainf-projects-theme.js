@@ -649,19 +649,29 @@
       "/assets/img/7fb7552621c79350.webp",
     ].filter(function (url) { return url !== (project.imageUrl || "").split("?")[0]; });
     var card = 0;
+    // The Hindi/Bengali translator marks what it translated with the English text
+    // (data-ainf-i18n). Leave those alone: resetting them to English fought it in a loop.
+    var translated = function (el, english) {
+      return el.getAttribute("data-ainf-i18n") === english;
+    };
     document.querySelectorAll("h1").forEach(function (heading) {
       if (heading.closest && heading.closest("#ainf-global-nav, #ainf-site-footer")) return;
       var text = (heading.textContent || "").replace(/\s+/g, " ").trim();
       heading.setAttribute("data-ainf-cms", "1");
-      if (text !== project.title) heading.textContent = project.title;
+      if (text !== project.title && !translated(heading, project.title)) heading.textContent = project.title;
       var blurb = summaryAfter(heading);
       if (!blurb) return;
       blurb.setAttribute("data-ainf-cms", "1");
-      if ((blurb.textContent || "").replace(/\s+/g, " ").trim() !== project.summary) blurb.textContent = project.summary;
+      if ((blurb.textContent || "").replace(/\s+/g, " ").trim() !== project.summary && !translated(blurb, project.summary)) {
+        blurb.textContent = project.summary;
+      }
     });
     paintAmount("raised", project.raisedLabel);
     paintAmount("goal", project.goalLabel);
-    if (document.title.indexOf(project.title) !== 0) document.title = project.title + " | theainf.in";
+    var lang = document.documentElement.lang;
+    if (lang !== "hi" && lang !== "bn" && document.title.indexOf(project.title) !== 0) {
+      document.title = project.title + " | theainf.in";
+    }
     document.querySelectorAll("img").forEach(function (img) {
       var src = img.getAttribute("src") || "";
       if (/\.svg($|\?)/i.test(src) || /alt="(?:Back Arrow|Next Arrow|Logo)/i.test(img.outerHTML)) return;

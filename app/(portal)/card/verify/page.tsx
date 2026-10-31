@@ -108,7 +108,7 @@ export default async function CardVerifyPage({
         </p>
         <nav className="pt-card-verify__links" aria-label="AINF">
           <Link href="/account/membership">Member portal</Link>
-          <Link href="/">AINF home</Link>
+          <a href="/">AINF home</a>
         </nav>
       </main>
     </div>

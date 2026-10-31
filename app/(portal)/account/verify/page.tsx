@@ -241,7 +241,7 @@ export default async function VerifyPage({
             <li>Every status change is recorded in an append-only audit log.</li>
             <li>
               Read more in our{" "}
-              <Link href="/legal-pages/terms-conditions">terms and privacy notice</Link>.
+              <a href="/legal-pages/terms-conditions">terms and privacy notice</a>.
             </li>
           </ul>
         </section>

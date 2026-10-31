@@ -296,14 +296,9 @@ export function PortalNav({
 
           <nav className="pt-site-links" aria-label="AINF">
             {SITE_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch
-                aria-current={isCurrent(item.href, currentPath) ? "page" : undefined}
-              >
+              <a key={item.href} href={item.href}>
                 {item.label}
-              </Link>
+              </a>
             ))}
           </nav>
 
@@ -324,10 +319,10 @@ export function PortalNav({
                 <span className="pt-account__text">Account</span>
               </Link>
             )}
-            <Link href="/donate-now" className="pt-cta">
+            <a href="/donate-now" className="pt-cta">
               <span className="pt-cta__full">Support AINF</span>
               <span className="pt-cta__short">Support</span>
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -457,19 +452,13 @@ export function PortalNav({
               </button>
               <div className="pt-side-nav__panel" id="side-Site">
                 {SITE_LINKS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    prefetch
-                    className="pt-side-link"
-                    onClick={closeDrawer}
-                  >
+                  <a key={item.href} href={item.href} className="pt-side-link" onClick={closeDrawer}>
                     {item.label}
-                  </Link>
+                  </a>
                 ))}
-                <Link href="/donate-now" className="pt-side-link pt-side-link--cta" onClick={closeDrawer}>
+                <a href="/donate-now" className="pt-side-link pt-side-link--cta" onClick={closeDrawer}>
                   Support AINF
-                </Link>
+                </a>
               </div>
             </nav>
           </div>

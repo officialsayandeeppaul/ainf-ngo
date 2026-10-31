@@ -32,8 +32,37 @@ describe("asset versions", () => {
 
   it("publish the files scripts load themselves", () => {
     const script = runtimeAssetScript();
-    const map = JSON.parse(script.replace(/^<script id="ainf-asset-v">window.__ainfAssetV=/, "").replace(/;<\/script>$/, ""));
+    const map = JSON.parse(/^<script id="ainf-asset-v">window\.__ainfAssetV=(\{[^;]*\});/.exec(script)![1]);
     expect(map["/assets/js/ainf-projects-theme.js"]).toBe(hashOf("/assets/js/ainf-projects-theme.js"));
     expect(map["/i18n/home-strings.json"]).toBe(hashOf("/i18n/home-strings.json"));
+  });
+
+  it("start the strings download early only for Hindi or Bengali visitors", () => {
+    const script = runtimeAssetScript();
+    const start = (lang: string) => {
+      const win: Record<string, unknown> = {};
+      const fetched: string[] = [];
+      const removed: string[] = [];
+      const timers: Array<() => void> = [];
+      const body = script.replace(/^<script id="ainf-asset-v">/, "").replace(/<\/script>$/, "");
+      new Function("window", "document", "fetch", "setTimeout", body)(
+        win,
+        { documentElement: { lang, classList: { remove: (c: string) => removed.push(c) } } },
+        (url: string) => {
+          fetched.push(url);
+          return Promise.resolve({ ok: true, json: () => ({}) });
+        },
+        (fn: () => void) => timers.push(fn)
+      );
+      timers.forEach((fn) => fn());
+      return { fetched, removed, started: Boolean(win.__ainfStrings) };
+    };
+
+    const hi = start("hi");
+    expect(hi.fetched).toEqual([`/i18n/home-strings.json?v=${hashOf("/i18n/home-strings.json")}`]);
+    expect(hi.started).toBe(true);
+    expect(hi.removed).toEqual(["ainf-i18n-wait"]);
+    expect(start("bn").fetched).toHaveLength(1);
+    expect(start("en")).toEqual({ fetched: [], removed: [], started: false });
   });
 });

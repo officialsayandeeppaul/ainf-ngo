@@ -1802,11 +1802,19 @@
     document.querySelectorAll('img[alt="About Hero Image"]').forEach(function (img) {
       swapVillagePhoto(img, ABOUT_HERO);
     });
+    // Hindi/Bengali pages show these in their own digits (१,०००+ / ১,০০০+); fixing
+    // those back to "1,000+" fought the translator in a loop.
+    function asciiDigits(text) {
+      return String(text || "")
+        .replace(/\s+/g, "")
+        .replace(/[\u0966-\u096F]/g, function (d) { return String(d.charCodeAt(0) - 0x0966); })
+        .replace(/[\u09E6-\u09EF]/g, function (d) { return String(d.charCodeAt(0) - 0x09e6); });
+    }
     document.querySelectorAll('[data-framer-name="Youth Supported"] h3').forEach(function (el) {
-      if ((el.textContent || "").replace(/\s+/g, "") !== "1,000+") el.textContent = "1,000+";
+      if (asciiDigits(el.textContent) !== "1,000+") el.textContent = "1,000+";
     });
     document.querySelectorAll('[data-framer-name="Volunteer Worldwide"] h3').forEach(function (el) {
-      if ((el.textContent || "").replace(/\s+/g, "") !== "300+") el.textContent = "300+";
+      if (asciiDigits(el.textContent) !== "300+") el.textContent = "300+";
     });
     var hero = document.querySelector('[data-framer-name="Hero Sectiion"], [data-framer-name="Hero Section"]');
     if (!hero || hero.getAttribute("data-ainf-watch") === "1") return;
