@@ -32,7 +32,8 @@ so use section 3 instead when the client must not see the code.
    (`vercel.json` sets the build command).
 2. On the same screen open **Environment Variables**, click **Import .env**
    (or paste the whole file) and choose `.env.production`. Click **Deploy**.
-3. **Settings → Git → Production Branch:** `release/v1`. **Settings →
+3. **Settings → Environments → Production → Branch Tracking:** `release/v1`,
+   then Save (it is not under Settings → Git). **Settings →
    General → Node.js Version:** 22.x.
 4. **Settings → Domains:** add `theainf.in` and `www.theainf.in`
    (redirect to `theainf.in`), then do the DNS step in "Domain" below.
