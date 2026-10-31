@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { db } from "./db";
-import { deleteMedia, getMedia, mediaStore, putMedia } from "./object-storage";
+import { deleteMedia, getMedia, putMedia, storageEnabled } from "./object-storage";
 
 /**
  * ID card photos. With Neon Object Storage configured the JPEG goes to the
@@ -21,7 +21,7 @@ export function cardPhotoKey(userId: string): string {
 }
 
 export async function saveCardPhoto(userId: string, jpeg: Buffer): Promise<Date> {
-  if (!mediaStore()) {
+  if (!storageEnabled()) {
     const bytes = new Uint8Array(jpeg);
     const row = await db.cardPhoto.upsert({
       where: { userId },

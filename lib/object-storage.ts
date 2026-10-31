@@ -1,16 +1,18 @@
-import { Files, FilesError } from "files-sdk";
-import { neon } from "files-sdk/neon";
+import type { Files } from "files-sdk";
 
 /**
  * Neon Object Storage (S3-compatible, private bucket) for files the site's users
  * produce: ID card photos and admin project photos. Keeping them out of Postgres
- * and out of the deployment keeps both small; `/media/<key>` serves them.
+ * and out of the deployment keeps both small; `/media/<key>` serves project photos.
  *
  * Credentials: Vercel reserves AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY /
  * AWS_REGION for its own runtime, so production sets the NEON_STORAGE_* names.
  * Locally the AWS_* names that `neon env pull` writes are used as a set, never
  * mixed with NEON_STORAGE_* ones. Without either set, storage is off and callers
  * keep their previous behaviour.
+ *
+ * files-sdk is ESM-only, so it is loaded with import(): that also works where this
+ * module runs as CommonJS (the tsx scripts in scripts/).
  */
 
 export const MEDIA_PREFIX = "/media/";
@@ -46,14 +48,22 @@ export function storageConfig(env: Record<string, string | undefined> = process.
   return null;
 }
 
-let client: Files | null | undefined;
+let override: Files | null | undefined;
+let client: Promise<Files> | undefined;
 
-/** The bucket client, or null when storage is not configured. */
-export function mediaStore(): Files | null {
-  if (client !== undefined) return client;
+/** Whether uploads go to the bucket (otherwise callers keep their old behaviour). */
+export function storageEnabled(): boolean {
+  return override !== undefined ? override !== null : storageConfig() !== null;
+}
+
+/** The bucket client. Only call when storageEnabled(). */
+export function mediaStore(): Promise<Files> {
+  if (override) return Promise.resolve(override);
   const config = storageConfig();
-  client = config
-    ? new Files({
+  if (override === null || !config) return Promise.reject(new Error("Object storage is not configured"));
+  client ??= Promise.all([import("files-sdk"), import("files-sdk/neon")]).then(
+    ([{ Files }, { neon }]) =>
+      new Files({
         adapter: neon({
           bucket: config.bucket,
           endpoint: config.endpoint,
@@ -62,13 +72,18 @@ export function mediaStore(): Files | null {
           secretAccessKey: config.secretAccessKey,
         }),
       })
-    : null;
+  );
   return client;
 }
 
-/** Tests swap in an in-memory store (files-sdk/memory), or null for "not configured". */
+/** Tests swap in an in-memory store (files-sdk/memory), null for "not configured", undefined to reset. */
 export function setMediaStoreForTests(store: Files | null | undefined) {
-  client = store;
+  override = store;
+  client = undefined;
+}
+
+function isNotFound(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && (error as { code?: unknown }).code === "NotFound");
 }
 
 /** Keys are ours (prefix/name.ext); anything else is refused before it reaches the bucket. */
@@ -83,31 +98,28 @@ export function mediaUrl(key: string): string {
 }
 
 export async function putMedia(key: string, bytes: Buffer, contentType: string): Promise<void> {
-  const store = mediaStore();
-  if (!store) throw new Error("Object storage is not configured");
+  if (!storageEnabled()) throw new Error("Object storage is not configured");
   if (!isMediaKey(key)) throw new Error(`Refusing media key ${key}`);
-  await store.upload(key, new Uint8Array(bytes), { contentType });
+  await (await mediaStore()).upload(key, new Uint8Array(bytes), { contentType });
 }
 
 export async function getMedia(key: string): Promise<{ bytes: Buffer; contentType: string } | null> {
-  const store = mediaStore();
-  if (!store || !isMediaKey(key)) return null;
+  if (!storageEnabled() || !isMediaKey(key)) return null;
   try {
-    const file = await store.download(key);
+    const file = await (await mediaStore()).download(key);
     return { bytes: Buffer.from(await file.arrayBuffer()), contentType: file.contentType };
   } catch (error) {
-    if (error instanceof FilesError && error.code === "NotFound") return null;
+    if (isNotFound(error)) return null;
     throw error;
   }
 }
 
 export async function deleteMedia(key: string): Promise<void> {
-  const store = mediaStore();
-  if (!store || !isMediaKey(key)) return;
+  if (!storageEnabled() || !isMediaKey(key)) return;
   try {
-    await store.delete(key);
+    await (await mediaStore()).delete(key);
   } catch (error) {
-    if (error instanceof FilesError && error.code === "NotFound") return;
+    if (isNotFound(error)) return;
     throw error;
   }
 }

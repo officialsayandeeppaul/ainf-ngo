@@ -129,6 +129,40 @@ cannot be delivered.
 After changing any variable in Vercel, **redeploy** (Deployments → latest →
 Redeploy, or re-run the workflow): running deployments keep their old values.
 
+### File storage (Neon Object Storage)
+
+ID card photos and admin project photos are stored in the Neon bucket
+`ainf-bucket` (project "All Indian Nevarlands Foundation", branch `production`,
+Singapore, private), not in the database or on the server. Project photos are
+served from `https://theainf.in/media/projects/…` with a one-year cache; card
+photos are never public. Without these variables the site falls back to the old
+behaviour (photos in the database).
+
+| Vercel variable | Value |
+|---|---|
+| `NEON_STORAGE_BUCKET` | `ainf-bucket` |
+| `NEON_STORAGE_ENDPOINT` | Neon's `AWS_ENDPOINT_URL_S3` |
+| `NEON_STORAGE_REGION` | `ap-southeast-1` |
+| `NEON_STORAGE_ACCESS_KEY_ID` | Neon's `AWS_ACCESS_KEY_ID` |
+| `NEON_STORAGE_SECRET_ACCESS_KEY` | Neon's `AWS_SECRET_ACCESS_KEY` (mark Sensitive) |
+
+Neon shows them under `AWS_*` names; Vercel reserves those for itself, so use
+the names above. All five are in `.env.production`. Add them only to the
+production project: beta then keeps its photos in its own database instead of
+mixing them into the production bucket.
+
+After adding them and redeploying, move photos saved before into the bucket
+(each is uploaded and read back before the database copy is cleared; safe to
+re-run):
+
+```bash
+npx tsx --tsconfig tsconfig.json scripts/move-card-photos-to-storage.mts   # with production env
+npx tsx --tsconfig tsconfig.json scripts/storage-smoke.mts                 # live upload / list / read / delete check
+```
+
+Do not run the move before the variables are live: until then the site cannot
+read photos from the bucket.
+
 ---
 
 ## 5. Check after the first deploy

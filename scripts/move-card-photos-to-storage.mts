@@ -2,7 +2,7 @@
  * Moves ID card photos saved in Postgres (CardPhoto.bytes) into Neon Object
  * Storage and clears the bytes, so the database keeps only the key.
  *
- *   npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/move-card-photos-to-storage.ts
+ *   npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/move-card-photos-to-storage.mts
  *
  * Needs DATABASE_URL and the storage env (NEON_STORAGE_* or AWS_*). Each photo
  * is uploaded and read back before its bytes are cleared, so a failure leaves
@@ -10,10 +10,10 @@
  */
 import { cardPhotoKey } from "../lib/card-photo";
 import { db } from "../lib/db";
-import { getMedia, mediaStore, putMedia } from "../lib/object-storage";
+import { getMedia, putMedia, storageEnabled } from "../lib/object-storage";
 
 async function main() {
-  if (!mediaStore()) throw new Error("Object storage is not configured (NEON_STORAGE_* or AWS_* env).");
+  if (!storageEnabled()) throw new Error("Object storage is not configured (NEON_STORAGE_* or AWS_* env).");
   const rows = await db.cardPhoto.findMany({
     where: { bytes: { not: null }, storageKey: null },
     select: { userId: true },

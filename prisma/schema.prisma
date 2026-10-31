@@ -368,7 +368,7 @@ model MembershipCard {
 
 /// The member's ID card photo (passport crop, JPEG). The file lives in Neon
 /// Object Storage (storageKey); older rows still hold the bytes here until
-/// scripts/move-card-photos-to-storage.ts moves them. A separate table so user
+/// scripts/move-card-photos-to-storage.mts moves them. A separate table so user
 /// queries never load either.
 model CardPhoto {
   userId     String   @id

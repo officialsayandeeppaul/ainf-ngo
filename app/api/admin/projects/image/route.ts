@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import { Role } from "@prisma/client";
 import sharp from "sharp";
 import { guardApi } from "@/lib/auth/guard";
-import { mediaStore, mediaUrl, putMedia } from "@/lib/object-storage";
+import { mediaUrl, putMedia, storageEnabled } from "@/lib/object-storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
   // Neon Object Storage, served from /media/. The deployment's filesystem is
   // read-only, so writing into public/ only ever worked on a local dev server.
-  if (mediaStore()) {
+  if (storageEnabled()) {
     const key = `projects/${name}`;
     try {
       await putMedia(key, webp, "image/webp");
