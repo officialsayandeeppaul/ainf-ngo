@@ -50,6 +50,7 @@ export function ConfirmDialog({
 }) {
   const titleId = useId();
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
   const [present, setPresent] = useState(false);
@@ -84,15 +85,30 @@ export function ConfirmDialog({
     return () => unlockScroll();
   }, [present]);
 
+  // Parents pass a new onCancel on every render; reading it through a ref keeps
+  // the effects below from re-running (and stealing focus) on each keystroke.
+  const cancelRef = useRef({ busy, onCancel });
+  useEffect(() => {
+    cancelRef.current = { busy, onCancel };
+  });
+
+  // Focus once per opening: the first field when the window has one, else the confirm button.
   useEffect(() => {
     if (!visible) return;
-    confirmRef.current?.focus({ preventScroll: true });
+    const field = panelRef.current?.querySelector<HTMLElement>(
+      "textarea:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled])"
+    );
+    (field ?? confirmRef.current)?.focus({ preventScroll: true });
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !busy) onCancel();
+      if (event.key === "Escape" && !cancelRef.current.busy) cancelRef.current.onCancel();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [visible, busy, onCancel]);
+  }, [visible]);
 
   useEffect(() => {
     if (present) return;
@@ -110,7 +126,7 @@ export function ConfirmDialog({
         tabIndex={-1}
         onClick={busy ? undefined : onCancel}
       />
-      <div className="pt-modal__panel" role="alertdialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={panelRef} className="pt-modal__panel" role="alertdialog" aria-modal="true" aria-labelledby={titleId}>
         <h2 className={`pt-modal__title${tone === "danger" ? " pt-modal__title--danger" : ""}`} id={titleId}>
           {title}
         </h2>

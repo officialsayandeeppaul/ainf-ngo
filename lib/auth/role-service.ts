@@ -2,7 +2,7 @@ import { Role, UserStatus, type User } from "@prisma/client";
 import { AuditAction, recordAudit } from "../audit";
 import { db } from "../db";
 import type { RequestContext } from "../request-context";
-import { suspensionHasEnded, type ManualNoticeChannel } from "../suspension";
+import { DASHBOARD_NOTICE_CHANNEL, suspensionHasEnded, type ManualNoticeChannel } from "../suspension";
 import { sendSuspensionNotice, type SuspensionNoticeResult } from "../suspension-notice";
 import { mirrorRoleToClerk } from "./session";
 
@@ -239,6 +239,35 @@ export async function recordManualSuspensionNotice(params: {
     metadata: { channel, sent: true, manual: true },
   });
   return user;
+}
+
+/**
+ * The member opened the suspended page, so they have seen the reason and end
+ * date. Recorded once, and only when nobody had told them yet, so the admin
+ * sees "Seen at sign-in" without needing WhatsApp or email.
+ */
+export async function recordSuspensionSeen(params: {
+  user: User;
+  context?: RequestContext | null;
+}): Promise<boolean> {
+  const { user, context } = params;
+  if (user.status === UserStatus.ACTIVE || user.suspensionNoticeSentAt) return false;
+  const { count } = await db.user.updateMany({
+    where: { id: user.id, status: { not: UserStatus.ACTIVE }, suspensionNoticeSentAt: null },
+    data: { suspensionNoticeChannel: DASHBOARD_NOTICE_CHANNEL, suspensionNoticeSentAt: new Date() },
+  });
+  if (count === 0) return false;
+  await recordAudit({
+    action: AuditAction.SuspensionNoticeSent,
+    actorUserId: user.id,
+    actorClerkId: user.clerkId,
+    actorRole: user.role,
+    targetType: "user",
+    targetId: user.id,
+    context: context ?? null,
+    metadata: { channel: DASHBOARD_NOTICE_CHANNEL, sent: true, manual: false },
+  });
+  return true;
 }
 
 /** Lifts a timed suspension whose end has passed. Returns the fresh user, or the same one. */

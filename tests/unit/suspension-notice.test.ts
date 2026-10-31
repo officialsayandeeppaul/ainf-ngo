@@ -16,8 +16,11 @@ vi.mock("@/lib/email", () => ({
 import { contactLine, displayPhone, isMobileAccountEmail, telHref, whatsappHref } from "@/lib/account-contact";
 import { sendSuspensionNotice } from "@/lib/suspension-notice";
 import {
+  DASHBOARD_NOTICE_CHANNEL,
+  manualNoticeOptions,
   noticeChannelLabel,
   noticeErrorLabel,
+  noticeStatusLabel,
   suspensionForAdmin,
   suspensionMessage,
 } from "@/lib/suspension";
@@ -70,6 +73,20 @@ describe("the message an admin sends", () => {
     expect(noticeErrorLabel("Test mode (onboarding@resend.dev): Resend only delivers…")).toMatch(/test mode/);
     expect(noticeErrorLabel("no_contact")).toMatch(/no email or mobile/);
     expect(noticeErrorLabel(null)).toBeNull();
+  });
+
+  it("says when the member saw it on their dashboard", () => {
+    expect(noticeStatusLabel(DASHBOARD_NOTICE_CHANNEL)).toBe("Seen at sign-in");
+    expect(noticeStatusLabel("whatsapp")).toBe("Told by WhatsApp");
+    expect(noticeStatusLabel("email")).toBe("Told by email");
+  });
+
+  it("offers only the ways that can reach this member", () => {
+    // Mobile sign-up: WhatsApp or a call, never email.
+    expect(manualNoticeOptions(mobileUser)).toEqual(["whatsapp", "call", "other"]);
+    // Email account without a mobile: no WhatsApp or call.
+    expect(manualNoticeOptions(emailUser)).toEqual(["email", "other"]);
+    expect(manualNoticeOptions({ ...emailUser, phone: "9876543210" })).toEqual(["whatsapp", "call", "email", "other"]);
   });
 
   it("hands the admin screens the current suspension only", () => {

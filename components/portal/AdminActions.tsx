@@ -11,7 +11,7 @@ import {
   SUSPENSION_PERIODS,
   SUSPENSION_REASON_MAX,
   SUSPENSION_REASON_MIN,
-  noticeChannelLabel,
+  noticeStatusLabel,
   suspensionNoticeChannel,
   type SuspensionPeriod,
 } from "@/lib/suspension";
@@ -93,7 +93,7 @@ export function UserRowActions({
     channel === "email"
       ? `They are emailed at ${contact!.email}. Next you can also send it on WhatsApp or from your own inbox.`
       : channel === "sms"
-        ? `They signed up with a mobile number (${displayPhone(contact!.phone)}). Next you can send the message on WhatsApp or call them.`
+        ? `They signed up with a mobile number (${displayPhone(contact!.phone)}). There is no email, so they see the reason and end date on their dashboard when they sign in, and you will see “Seen at sign-in” here. Next you can also send it on WhatsApp.`
         : contact
           ? "This account has no email or mobile on file, so no notice can be sent. They see the reason when they sign in."
           : "They are emailed, or sent an SMS if they signed up with a mobile number.";
@@ -171,7 +171,7 @@ export function UserRowActions({
       </div>
       {suspended && suspension && contact ? (
         suspension.notice.sentAt ? (
-          <span className="pt-told">Told by {noticeChannelLabel(suspension.notice.channel)}</span>
+          <span className="pt-told">{noticeStatusLabel(suspension.notice.channel)}</span>
         ) : (
           <button
             type="button"
@@ -180,7 +180,7 @@ export function UserRowActions({
               setTell({ reason: suspension.reason ?? "", until: suspension.until, notice: suspension.notice })
             }
           >
-            Not told yet · Tell member
+            {channel === "sms" ? "Not seen yet" : "Not told yet"} · Tell member
           </button>
         )
       ) : null}

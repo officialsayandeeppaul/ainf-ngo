@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { isMobileAccountEmail, telHref, whatsappHref } from "@/lib/account-contact";
 import { formatDayTime } from "@/lib/format-date";
 import {
-  noticeChannelLabel,
+  manualNoticeOptions,
   noticeErrorLabel,
+  noticeStatusLabel,
   suspensionMessage,
   suspensionNoticeChannel,
   type ManualNoticeChannel,
@@ -20,18 +21,20 @@ export type SuspensionNoticeState = {
   error?: string | null;
 };
 
-const MARK_OPTIONS: { value: ManualNoticeChannel; label: string }[] = [
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "call", label: "Phone call" },
-  { value: "email", label: "Email" },
-  { value: "other", label: "Other" },
-];
+const MARK_LABEL: Record<ManualNoticeChannel, string> = {
+  whatsapp: "WhatsApp",
+  call: "Phone call",
+  email: "Email",
+  other: "Other",
+};
 
 /**
  * How the admin makes sure a suspended member knows why and for how long.
  * The automatic email / SMS can fail (email in test mode, no DLT template for
  * SMS), so the same message can go by WhatsApp or the admin's own email,
  * be copied, or be said on a call — then marked as told, which is audited.
+ * Mobile sign-ups have no email: they see the notice on their dashboard at
+ * sign-in, which is recorded as "Seen at sign-in".
  */
 export function SuspensionNoticeTools({
   userId,
@@ -60,13 +63,16 @@ export function SuspensionNoticeTools({
   const message = suspensionMessage({ firstName, reason, until: until ? new Date(until) : null });
   const wa = whatsappHref(contact.phone, message);
   const tel = telHref(contact.phone);
-  const realEmail = isMobileAccountEmail(contact.email) ? null : contact.email;
+  const mobileAccount = isMobileAccountEmail(contact.email);
+  const realEmail = mobileAccount ? null : contact.email;
   const mail = realEmail
     ? `mailto:${realEmail}?subject=${encodeURIComponent("Your AINF account is suspended")}&body=${encodeURIComponent(message)}`
     : null;
   const auto = suspensionNoticeChannel(contact);
   const told = Boolean(state.sentAt);
-  const why = told ? null : noticeErrorLabel(state.error);
+  // Mobile sign-ups rely on the dashboard; the SMS set-up details would only confuse.
+  const why = told || mobileAccount ? null : noticeErrorLabel(state.error);
+  const markOptions = manualNoticeOptions(contact);
   const canRetry = !told && auto === "email";
 
   async function send(body: Record<string, unknown>, key: string) {
@@ -108,13 +114,17 @@ export function SuspensionNoticeTools({
       <p className={`pt-notice-tools__status ${told ? "is-told" : "is-pending"}`}>
         <span className="pt-notice-tools__dot" aria-hidden="true" />
         {told
-          ? `Told by ${noticeChannelLabel(state.channel)} · ${formatDayTime(new Date(state.sentAt!))}`
-          : "Not told yet"}
+          ? `${noticeStatusLabel(state.channel)} · ${formatDayTime(new Date(state.sentAt!))}`
+          : mobileAccount
+            ? "Not seen yet"
+            : "Not told yet"}
       </p>
       {why ? <p className="pt-notice-tools__why">{why}</p> : null}
       {!told ? (
         <p className="pt-notice-tools__why">
-          Send the message below yourself, then mark how you told them. They also see it when they sign in.
+          {mobileAccount
+            ? "They see the reason and end date on their dashboard as soon as they sign in, and this changes to “Seen at sign-in”. To reach them sooner, send it on WhatsApp or call, then mark it below."
+            : "Send the message below yourself, then mark how you told them. They also see it on their dashboard when they sign in."}
         </p>
       ) : null}
 
@@ -144,20 +154,20 @@ export function SuspensionNoticeTools({
         </button>
       </div>
       {!wa && !mail && !tel ? (
-        <p className="pt-notice-tools__why">No usable email or mobile is on file; copy the message for another channel.</p>
+        <p className="pt-notice-tools__why">No usable email or mobile is on file. They see the message when they sign in, or copy it for another channel.</p>
       ) : null}
 
       <div className="pt-notice-tools__mark" role="group" aria-label="Mark as told">
         <span>{told ? "Told them again? Mark it:" : "Mark as told by:"}</span>
-        {MARK_OPTIONS.map((option) => (
+        {markOptions.map((option) => (
           <button
-            key={option.value}
+            key={option}
             type="button"
             className="pt-notice-tools__chip"
             disabled={busy !== null}
-            onClick={() => void send({ action: "recordNotice", channel: option.value }, option.value)}
+            onClick={() => void send({ action: "recordNotice", channel: option }, option)}
           >
-            {busy === option.value ? "Saving…" : option.label}
+            {busy === option ? "Saving…" : MARK_LABEL[option]}
           </button>
         ))}
       </div>

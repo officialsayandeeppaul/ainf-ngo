@@ -3,6 +3,9 @@ import Link from "next/link";
 import { UserStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getAuthContext } from "@/lib/auth/session";
+import { recordSuspensionSeen } from "@/lib/auth/role-service";
+import { displayPhone, isMobileAccountEmail } from "@/lib/account-contact";
+import { requestContext } from "@/lib/request-context";
 import { isClerkConfigured, isDatabaseConfigured } from "@/lib/env";
 import { DashShell } from "@/components/portal/DashShell";
 import { SetupNotice } from "@/components/portal/SetupNotice";
@@ -27,10 +30,13 @@ export default async function SuspendedPage() {
   // Reinstated users should not be able to sit on this page.
   if (ctx.user.status === UserStatus.ACTIVE) redirect("/account");
 
+  // Lets the admin see "Seen at sign-in" when nobody could message them.
+  await recordSuspensionSeen({ user: ctx.user, context: await requestContext() }).catch(() => false);
+
   const banned = ctx.user.status === UserStatus.BANNED;
   const until = banned ? null : ctx.user.suspendedUntil;
-  const contactLine = ctx.user.email.endsWith("@mobile.theainf.in")
-    ? `the mobile number on this account${ctx.user.phone ? ` (${ctx.user.phone})` : ""}`
+  const contactLine = isMobileAccountEmail(ctx.user.email)
+    ? `the mobile number on this account${ctx.user.phone ? ` (${displayPhone(ctx.user.phone)})` : ""}`
     : `the email address on this account (${ctx.user.email})`;
 
   return (

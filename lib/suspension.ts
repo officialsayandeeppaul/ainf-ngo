@@ -77,17 +77,39 @@ export function reinstatedSmsText(): string {
 export const MANUAL_NOTICE_CHANNELS = ["whatsapp", "call", "email", "other"] as const;
 export type ManualNoticeChannel = (typeof MANUAL_NOTICE_CHANNELS)[number];
 
+/** Recorded when the member opens the suspended page after signing in. */
+export const DASHBOARD_NOTICE_CHANNEL = "dashboard";
+
 const CHANNEL_LABEL: Record<string, string> = {
   email: "email",
   sms: "SMS",
   whatsapp: "WhatsApp",
   call: "phone call",
   other: "another way",
+  [DASHBOARD_NOTICE_CHANNEL]: "their dashboard",
 };
 
 /** "WhatsApp", "email", "phone call"… for "Told by …". */
 export function noticeChannelLabel(channel: string | null | undefined): string {
   return (channel && CHANNEL_LABEL[channel]) || "another way";
+}
+
+/** "Seen at sign-in" or "Told by WhatsApp", for the admin's status line. */
+export function noticeStatusLabel(channel: string | null | undefined): string {
+  return channel === DASHBOARD_NOTICE_CHANNEL ? "Seen at sign-in" : `Told by ${noticeChannelLabel(channel)}`;
+}
+
+/**
+ * The "mark as told" choices that make sense for this account: mobile sign-ups
+ * have no real email, and WhatsApp or a call needs a mobile number.
+ */
+export function manualNoticeOptions(contact: { email: string; phone: string | null }): ManualNoticeChannel[] {
+  const hasPhone = Boolean(contact.phone && contact.phone.replace(/\D/g, "").length >= 10);
+  const options: ManualNoticeChannel[] = [];
+  if (hasPhone) options.push("whatsapp", "call");
+  if (!isMobileAccountEmail(contact.email)) options.push("email");
+  options.push("other");
+  return options;
 }
 
 /** Why the automatic notice did not go, in words an admin can act on. */
