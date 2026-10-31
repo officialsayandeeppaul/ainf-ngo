@@ -36,11 +36,15 @@
     "perf:hints": "python scripts/apply-perf-hints.py"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
+    "@aws-sdk/s3-presigned-post": "^3.1161.0",
+    "@aws-sdk/s3-request-presigner": "^3.1161.0",
     "@clerk/nextjs": "^7.8.4",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.3",
+    "files-sdk": "^3.1.2",
     "next": "^16.3.4",
     "pdfkit": "0.20.2",
     "pg": "^8.23.0",

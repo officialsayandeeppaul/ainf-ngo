@@ -366,15 +366,17 @@ model MembershipCard {
   @@index([expiresAt])
 }
 
-/// The member's ID card photo (passport crop, JPEG). Kept in Postgres because
-/// the serverless host's filesystem is read-only; a separate table so user
-/// queries never load the bytes.
+/// The member's ID card photo (passport crop, JPEG). The file lives in Neon
+/// Object Storage (storageKey); older rows still hold the bytes here until
+/// scripts/move-card-photos-to-storage.ts moves them. A separate table so user
+/// queries never load either.
 model CardPhoto {
-  userId    String   @id
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bytes     Bytes
-  mime      String   @default("image/jpeg")
-  updatedAt DateTime @updatedAt
+  userId     String   @id
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bytes      Bytes?
+  storageKey String?
+  mime       String   @default("image/jpeg")
+  updatedAt  DateTime @updatedAt
 }
 
 /// Singleton row (id = "singleton") for defaults used when creating a new tier.

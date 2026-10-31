@@ -8,6 +8,7 @@ import { isClerkConfigured, isDatabaseConfigured, env } from "@/lib/env";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { contextFromRequest } from "@/lib/request-context";
 import { indianMobile, mobileAccountEmail, e164India } from "@/lib/mobile-auth";
+import { deleteMedia } from "@/lib/object-storage";
 
 /**
  * Clerk user lifecycle webhook.
@@ -142,9 +143,16 @@ export async function POST(request: NextRequest) {
       const clerkId: string = data.id;
       const user = await db.user.findUnique({ where: { clerkId } });
       if (user) {
+        const photo = await db.cardPhoto.findUnique({ where: { userId: user.id }, select: { storageKey: true } });
         // Audit rows survive via ON DELETE SET NULL; the trigger installed in
         // migration 20260902000001 forbids deleting them outright.
         await db.user.delete({ where: { clerkId } });
+        // The CardPhoto row went with the user; its file in the bucket goes too.
+        if (photo?.storageKey) {
+          await deleteMedia(photo.storageKey).catch((error) =>
+            console.error("[clerk webhook] could not delete the card photo", error)
+          );
+        }
         await recordAudit({
           action: AuditAction.UserDeleted,
           targetType: "user",

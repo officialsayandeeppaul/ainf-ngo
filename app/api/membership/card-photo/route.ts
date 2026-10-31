@@ -53,8 +53,11 @@ export async function POST(request: Request) {
   }
 
   const form = await request.formData();
-  const fatherName = String(form.get("fatherName") ?? "").trim().replace(/\s+/g, " ").slice(0, CARD_FATHER_NAME_MAX);
-  const address = String(form.get("address") ?? "").trim().replace(/\s+/g, " ").slice(0, CARD_ADDRESS_MAX);
+  // Stored in capitals, as the card prints them, whatever the client sends.
+  const cardText = (value: FormDataEntryValue | null, max: number) =>
+    String(value ?? "").trim().replace(/\s+/g, " ").toUpperCase().slice(0, max);
+  const fatherName = cardText(form.get("fatherName"), CARD_FATHER_NAME_MAX);
+  const address = cardText(form.get("address"), CARD_ADDRESS_MAX);
   const mobileRaw = String(form.get("mobile") ?? "").trim().slice(0, 24);
   const mobile = mobileRaw ? indianMobile(mobileRaw) : null;
   if (mobileRaw && !mobile) {

@@ -5,6 +5,7 @@ import { guardApi } from "@/lib/auth/guard";
 import { contextFromRequest } from "@/lib/request-context";
 import { projectsDelegate, toFieldProjectView } from "@/lib/field-projects";
 import { detailFor } from "@/lib/project-detail";
+import { MEDIA_PREFIX } from "@/lib/object-storage";
 import { revalidateProjectPages } from "@/lib/public-cache";
 
 export const runtime = "nodejs";
@@ -22,7 +23,7 @@ const imageSchema = z
   .trim()
   .min(1)
   .max(300)
-  .refine((value) => value.startsWith("/assets/") || /^https?:\/\//i.test(value), {
+  .refine((value) => value.startsWith("/assets/") || value.startsWith(MEDIA_PREFIX) || /^https?:\/\//i.test(value), {
     message: "Image must be a site path or an http(s) URL.",
   });
 

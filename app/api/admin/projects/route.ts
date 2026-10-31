@@ -7,6 +7,7 @@ import { listFieldProjects, projectsDelegate, toFieldProjectView } from "@/lib/f
 import { detailFor } from "@/lib/project-detail";
 import { revalidateProjectPages } from "@/lib/public-cache";
 import { noStore } from "@/lib/http";
+import { MEDIA_PREFIX } from "@/lib/object-storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ const imageSchema = z
   .trim()
   .min(1)
   .max(300)
-  .refine((value) => value.startsWith("/assets/") || /^https?:\/\//i.test(value), {
+  .refine((value) => value.startsWith("/assets/") || value.startsWith(MEDIA_PREFIX) || /^https?:\/\//i.test(value), {
     message: "Image must be a site path or an http(s) URL.",
   });
 

@@ -342,7 +342,7 @@ function ainfImageGuard(cfg: GuardConfig) {
 
 export function imageGuardScript(): string {
   const config: GuardConfig = {
-    own: `${FIELD_OK.source}|theainf-|ainf-seal|ainf-card|\\/assets\\/img\\/projects\\/|\\/assets\\/img\\/[^"?#]+\\.svg(?:$|[?#])`,
+    own: `${FIELD_OK.source}|theainf-|ainf-seal|ainf-card|\\/assets\\/img\\/projects\\/|\\/media\\/projects\\/|\\/assets\\/img\\/[^"?#]+\\.svg(?:$|[?#])`,
     map: FIELD_PHOTOS,
     pool: FIELD_POOL,
     content: CONTENT_ALTS,

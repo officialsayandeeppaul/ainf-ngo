@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { Role } from "@prisma/client";
 import sharp from "sharp";
 import { guardApi } from "@/lib/auth/guard";
+import { mediaStore, mediaUrl, putMedia } from "@/lib/object-storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,8 +48,25 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_photo", message: "That file is not a usable photo." }, { status: 400 });
   }
 
-  const dir = path.join(process.cwd(), "public", "assets", "img", "projects");
   const name = `${Date.now().toString(36)}-${randomBytes(4).toString("hex")}.webp`;
+
+  // Neon Object Storage, served from /media/. The deployment's filesystem is
+  // read-only, so writing into public/ only ever worked on a local dev server.
+  if (mediaStore()) {
+    const key = `projects/${name}`;
+    try {
+      await putMedia(key, webp, "image/webp");
+    } catch (error) {
+      console.error("[admin/projects/image] upload failed", error);
+      return Response.json(
+        { error: "save_failed", message: "The photo could not be stored. Please try again in a moment." },
+        { status: 503 }
+      );
+    }
+    return Response.json({ ok: true, imageUrl: mediaUrl(key) });
+  }
+
+  const dir = path.join(process.cwd(), "public", "assets", "img", "projects");
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), webp);
 

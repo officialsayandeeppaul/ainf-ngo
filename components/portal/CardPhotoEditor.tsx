@@ -9,6 +9,10 @@ import { PhoneField } from "./PhoneField";
 const UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const SHRINK_ABOVE_BYTES = 1_500_000;
 
+function megabytes(bytes: number) {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 /**
  * Phone photos are often 3–8 MB (or HEIC), over the 2 MB limit and the host's
  * request cap. Big or unusual files are redrawn as a JPEG of at most 1600 px
@@ -48,8 +52,10 @@ export function CardPhotoEditor({
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(savedPhoto);
-  const [father, setFather] = useState(() => fatherName.slice(0, CARD_FATHER_NAME_MAX));
-  const [home, setHome] = useState(() => address.slice(0, CARD_ADDRESS_MAX));
+  // The card prints these in capitals, so the form shows them that way as they are typed.
+  const [father, setFather] = useState(() => fatherName.toUpperCase().slice(0, CARD_FATHER_NAME_MAX));
+  const [home, setHome] = useState(() => address.toUpperCase().slice(0, CARD_ADDRESS_MAX));
+  const [photoNote, setPhotoNote] = useState<string | null>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -94,9 +100,11 @@ export function CardPhotoEditor({
             <input
               name="fatherName"
               value={father}
-              onChange={(event) => setFather(event.target.value)}
+              onChange={(event) => setFather(event.target.value.toUpperCase())}
               maxLength={CARD_FATHER_NAME_MAX}
               autoComplete="off"
+              autoCapitalize="characters"
+              placeholder="AS ON YOUR ID"
             />
             <span className="pt-field-count">
               {father.length}/{CARD_FATHER_NAME_MAX}
@@ -107,10 +115,11 @@ export function CardPhotoEditor({
             <input
               name="address"
               value={home}
-              onChange={(event) => setHome(event.target.value)}
+              onChange={(event) => setHome(event.target.value.toUpperCase())}
               maxLength={CARD_ADDRESS_MAX}
               autoComplete="street-address"
-              placeholder="Village / town, district, PIN"
+              autoCapitalize="characters"
+              placeholder="VILLAGE / TOWN, DISTRICT, PIN"
             />
             <span className="pt-field-count">
               {home.length}/{CARD_ADDRESS_MAX}
@@ -130,12 +139,24 @@ export function CardPhotoEditor({
                 const file = event.target.files?.[0];
                 if (!file) {
                   setPreview(null);
+                  setPhotoNote(null);
                   return;
                 }
+                setPhotoNote(
+                  file.size > SHRINK_ABOVE_BYTES || !UPLOAD_TYPES.includes(file.type)
+                    ? `${megabytes(file.size)} — it will be reduced to under 2 MB before upload.`
+                    : `${megabytes(file.size)} — within the limit.`
+                );
                 const url = URL.createObjectURL(file);
                 setPreview(url);
               }}
             />
+            <span className="pt-field-count pt-field-count--start">
+              JPG, PNG or WebP, up to 2 MB. Larger phone photos (and iPhone HEIC, where the browser can
+              read it) are reduced automatically. Head and shoulders, plain background, face clearly
+              visible; it is cropped to the passport-size slot.
+            </span>
+            {photoNote ? <span className="pt-field-count pt-field-count--start">Selected: {photoNote}</span> : null}
           </label>
         </div>
         <div className="pt-card-editor__preview" aria-hidden={!preview}>
